@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<html lang="pl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Fiszki - Nauka słówek</title>
+
+
+
+<style>
+
+body {
+
+    font-family: Arial, sans-serif;
+
+    background: #f4f4f4;
+
+    padding: 20px;
+
+    text-align: center;
+
+}
+
+
+
+.card {
+
+    background: white;
+
+    padding: 40px;
+
+    margin: 20px 0;
+
+    border-radius: 10px;
+
+    font-size: 24px;
+
+}
+
+
+
+input {
+
+    padding: 10px;
+
+    margin: 5px;
+
+    width: 40%;
+
+}
+
+
+
+button {
+
+    padding: 10px 20px;
+
+    margin: 5px;
+
+    background: black;
+
+    color: white;
+
+    border: none;
+
+    cursor: pointer;
+
+}
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<h1>Fiszki do nauki</h1>
+
+
+
+<div class="card" id="card">Dodaj pierwszą fiszkę</div>
+
+
+
+<button onclick="showAnswer()">Pokaż odpowiedź</button>
+
+<button onclick="nextCard()">Następna</button>
+
+
+
+<h3>Dodaj nową fiszkę</h3>
+
+
+
+<input type="text" id="frontInput" placeholder="Słowo po angielsku">
+
+<input type="text" id="backInput" placeholder="Tłumaczenie">
+
+<br>
+
+<button onclick="addCard()">Dodaj fiszkę</button>
+
+
+
+<script>
+
+
+
+let cards = JSON.parse(localStorage.getItem("cards")) || [];
+
+let currentIndex = 0;
+
+let showingAnswer = false;
+
+
+
+function saveCards() {
+
+    localStorage.setItem("cards", JSON.stringify(cards));
+
+}
+
+
+
+function renderCard() {
+
+    const cardDiv = document.getElementById("card");
+
+
+
+    if (cards.length === 0) {
+
+        cardDiv.innerText = "Dodaj pierwszą fiszkę";
+
+        return;
+
+    }
+
+
+
+    if (showingAnswer) {
+
+        cardDiv.innerText = cards[currentIndex].back;
+
+    } else {
+
+        cardDiv.innerText = cards[currentIndex].front;
+
+    }
+
+}
+
+
+
+function showAnswer() {
+
+    if (cards.length === 0) return;
+
+    showingAnswer = true;
+
+    renderCard();
+
+}
+
+
+
+function nextCard() {
+
+    if (cards.length === 0) return;
+
+    currentIndex = (currentIndex + 1) % cards.length;
+
+    showingAnswer = false;
+
+    renderCard();
+
+}
+
+
+
+function addCard() {
+
+    const front = document.getElementById("frontInput").value;
+
+    const back = document.getElementById("backInput").value;
+
+
+
+    if (front.trim() === "" || back.trim() === "") return;
+
+
+
+    cards.push({ front: front, back: back });
+
+
+
+    document.getElementById("frontInput").value = "";
+
+    document.getElementById("backInput").value = "";
+
+
+
+    saveCards();
+
+    renderCard();
+
+}
+
+
+
+renderCard();
+
+
+
+</script>
+
+
+
+</body>
+
+</html>
