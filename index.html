@@ -134,6 +134,7 @@ button{
 }
 button:active{ transform: translateY(1px); }
 
+
 .primary{
   background: linear-gradient(135deg,#7b5cff,#9f7bff);
   color:white;
@@ -252,6 +253,9 @@ input{
     <div style="display:flex;gap:10px">
       <button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
       <button class="secondary" onclick="goHome()">Powrót</button>
+	<button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
+	<input type="file" id="importFile" accept=".json" style="display:none">
+	<button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
     </div>
   </div>
 
@@ -448,6 +452,51 @@ document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("streak").innerText = streak;
   renderCard();
 });
+
+
+function exportBackup() {
+const data = localStorage.getItem("cards");
+const blob = new Blob([data], { type: "application/json" });
+const url = URL.createObjectURL(blob);
+
+const a = document.createElement("a");
+a.href = url;
+a.download = "fiszki-backup.json";
+a.click();
+
+URL.revokeObjectURL(url);
+}
+
+document.getElementById("importFile").addEventListener("change", function(event){
+
+const file = event.target.files[0];
+if(!file) return;
+
+const reader = new FileReader();
+
+reader.onload = function(e){
+try{
+const importedCards = JSON.parse(e.target.result);
+
+if(Array.isArray(importedCards)){
+cards = importedCards;
+saveCards();
+renderCard();
+renderList();
+alert("Import zakończony ✅");
+}else{
+alert("Nieprawidłowy plik");
+}
+
+}catch(err){
+alert("Błąd odczytu pliku");
+}
+};
+
+reader.readAsText(file);
+});
+
+
 </script>
 
 <script>
