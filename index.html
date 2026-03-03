@@ -1,55 +1,34 @@
 <!DOCTYPE html>
 
 <html lang="pl">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Fiszki - Nauka słówek</title>
-
-
-
+<title>Fiszki</title>
 <style>
 
 body {
-
     font-family: Arial, sans-serif;
-
     background: #f4f4f4;
-
     padding: 20px;
-
     text-align: center;
 
 }
 
-
-
 .card {
 
     background: white;
-
     padding: 40px;
-
     margin: 20px 0;
-
     border-radius: 10px;
-
     font-size: 24px;
 
 }
 
-
-
 input {
 
     padding: 10px;
-
     margin: 5px;
-
     width: 40%;
 
 }
@@ -59,45 +38,31 @@ input {
 button {
 
     padding: 10px 20px;
-
     margin: 5px;
-
     background: black;
-
     color: white;
-
     border: none;
-
     cursor: pointer;
 
 }
 
 </style>
-
 </head>
-
-
-
 <body>
-
-
-
 <h1>Fiszki do nauki</h1>
 
+<div>
+<button onclick="showStudy()">Nauka</button>
+<button onclick="showList()">Lista słówek</button>
+</div>
 
 
+<div id="studyView">
+<p id="counter"></p>
 <div class="card" id="card">Dodaj pierwszą fiszkę</div>
-
-
-
 <button onclick="showAnswer()">Pokaż odpowiedź</button>
-
 <button onclick="nextCard()">Następna</button>
-
-
-
 <h3>Dodaj nową fiszkę</h3>
-
 
 
 <input type="text" id="frontInput" placeholder="Słowo po angielsku">
@@ -107,11 +72,18 @@ button {
 <br>
 
 <button onclick="addCard()">Dodaj fiszkę</button>
+</div>
+
+<div id="listView" style="display:none;">
+<h3>Lista słówek</h3>
+<div id="wordsList"></div>
+</div>
+
+
 
 
 
 <script>
-
 
 
 let cards = JSON.parse(localStorage.getItem("cards")) || [];
@@ -120,28 +92,75 @@ let currentIndex = 0;
 
 let showingAnswer = false;
 
-
-
 function saveCards() {
 
     localStorage.setItem("cards", JSON.stringify(cards));
 
 }
 
+function showStudy() {
+document.getElementById("studyView").style.display = "block";
+document.getElementById("listView").style.display = "none";
+}
 
+function showList() {
+document.getElementById("studyView").style.display = "none";
+document.getElementById("listView").style.display = "block";
+renderList();
+}
 
+function sortCards() {
+cards.sort((a, b) =>
+a.front.localeCompare(b.front)
+);
+}
+
+function renderList() {
+sortCards();
+
+const listDiv = document.getElementById("wordsList");
+listDiv.innerHTML = "";
+
+cards.forEach((card, index) => {
+const div = document.createElement("div");
+
+div.innerHTML = `
+<b>${card.front}</b> - ${card.back}
+<button onclick="editCard(${index})">Edytuj</button>
+<button onclick="deleteCard(${index})">Usuń</button>
+`;
+
+listDiv.appendChild(div);
+});
+}
+
+function editCard(index) {
+const newFront = prompt("Edytuj słowo:", cards[index].front);
+const newBack = prompt("Edytuj tłumaczenie:", cards[index].back);
+
+if (newFront && newBack) {
+cards[index].front = newFront;
+cards[index].back = newBack;
+saveCards();
+renderList();
+renderCard();
+}
+}
+function deleteCard(index){
+cards.splice(index,1);
+saveCards();
+renderList();
+renderCard();
+}
 function renderCard() {
 
     const cardDiv = document.getElementById("card");
-
-
 
     if (cards.length === 0) {
 
         cardDiv.innerText = "Dodaj pierwszą fiszkę";
 
         return;
-
     }
 
 
@@ -155,6 +174,7 @@ function renderCard() {
         cardDiv.innerText = cards[currentIndex].front;
 
     }
+document.getElementById("counter").innerText="Liczba fiszek: " + cards.length;
 
 }
 
@@ -170,8 +190,6 @@ function showAnswer() {
 
 }
 
-
-
 function nextCard() {
 
     if (cards.length === 0) return;
@@ -184,29 +202,19 @@ function nextCard() {
 
 }
 
-
-
 function addCard() {
 
     const front = document.getElementById("frontInput").value;
 
     const back = document.getElementById("backInput").value;
 
-
-
     if (front.trim() === "" || back.trim() === "") return;
 
-
-
     cards.push({ front: front, back: back });
-
-
 
     document.getElementById("frontInput").value = "";
 
     document.getElementById("backInput").value = "";
-
-
 
     saveCards();
 
@@ -215,13 +223,9 @@ function addCard() {
 }
 
 
-
 renderCard();
 
-
-
 </script>
-
 
 
 </body>
