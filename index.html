@@ -1,233 +1,445 @@
 <!DOCTYPE html>
-
 <html lang="pl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fiszki</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fiszki - poprawione UI</title>
 <style>
-
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
-    padding: 20px;
-    text-align: center;
-
+/* ---------- BODY / GRADIENT ---------- */
+:root{
+  --accent1: #8f7bff;
+  --accent2: #a89bff;
+  --accent3: #c9c2ff;
+  --accent4: #e6e3ff;
+  --white: #ffffff;
+  --card-bg: #ffffff;
+  --muted: rgba(0,0,0,0.55);
 }
 
-.card {
-
-    background: white;
-    padding: 40px;
-    margin: 20px 0;
-    border-radius: 10px;
-    font-size: 24px;
-
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #111;
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent1) 0%,
+      var(--accent2) 25%,
+      var(--accent3) 55%,
+      var(--accent4) 80%,
+      var(--white) 100%
+    );
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 
-input {
-
-    padding: 10px;
-    margin: 5px;
-    width: 40%;
-
+/* ---------- APP LAYOUT ---------- */
+.app{
+  max-width:420px;
+  margin:0 auto;
+  padding:22px;
+  min-height:100vh;
 }
 
-
-
-button {
-
-    padding: 10px 20px;
-    margin: 5px;
-    background: black;
-    color: white;
-    border: none;
-    cursor: pointer;
-
+/* ---------- HEADER ---------- */
+.header{
+  font-size:20px;
+  font-weight:600;
+  text-align:center;
+  margin:6px 0 14px;
+  color:#1b1635;
 }
 
+/* ---------- STATS ---------- */
+.stats{
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
+  padding:12px 14px;
+  border-radius:14px;
+  margin-bottom:18px;
+  font-size:14px;
+  color: #14121a;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  justify-content:space-between;
+}
+.stats .left{display:flex;gap:10px;align-items:center}
+.stats .stat{
+  background: rgba(255,255,255,0.25);
+  padding:6px 10px;
+  border-radius:10px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  font-size:13px;
+  color:#0b0720;
+  box-shadow: 0 6px 18px rgba(43,24,120,0.06);
+}
+
+/* ---------- CARD ---------- */
+.card{
+  background: var(--card-bg);
+  color: #222;
+  border-radius:20px;
+  padding:48px 18px;
+  text-align:center;
+  font-size:26px;
+  margin-bottom:18px;
+  box-shadow: 0 18px 40px rgba(51,41,112,0.08);
+  transition: transform .28s cubic-bezier(.2,.9,.25,1), opacity .2s;
+}
+
+/* animation helper (apply when switching card) */
+.card.animate {
+  transform: translateY(-8px);
+  opacity: 0.85;
+}
+
+/* ---------- NAV BUTTONS (Prev/Next) ---------- */
+.navButtons{
+  display:flex;
+  gap:12px;
+  margin-bottom:10px;
+}
+.navButtons button{
+  flex:1;
+  min-height:48px;
+  border-radius:28px;
+  font-size:14px;
+}
+
+/* ---------- BUTTONS ---------- */
+button{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  border-radius:28px;
+  margin-top:10px;
+  font-size:15px;
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 18px rgba(99,58,255,0.08);
+}
+button:active{ transform: translateY(1px); }
+
+.primary{
+  background: linear-gradient(135deg,#7b5cff,#9f7bff);
+  color:white;
+  font-weight:600;
+}
+
+.secondary{
+  background: #ffffff;
+  color: #6a4bff;
+  font-weight:600;
+}
+
+/* ---------- LIST ---------- */
+.listItem{
+  background:#fff;
+  color:#222;
+  border-radius:14px;
+  padding:12px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  box-shadow: 0 8px 22px rgba(31,20,100,0.04);
+}
+.listItem .text { flex:1 }
+.smallBtn{
+  width:auto;
+  padding:8px 12px;
+  font-size:13px;
+  border-radius:10px;
+  margin-left:6px;
+}
+
+/* ---------- INPUT ---------- */
+input{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  margin-bottom:10px;
+  font-size:15px;
+  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
+}
+
+/* ---------- VIEW CONTROL ---------- */
+.view{ display:none; }
+.active{ display:block; }
+
+/* ---------- MODAL (EDIT) ---------- */
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  background:rgba(10,8,20,0.45);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+.modal-backdrop.show{
+  display:flex;
+}
+.modal{
+  width:90%;
+  max-width:420px;
+  background: #fff;
+  color:#111;
+  border-radius:14px;
+  padding:16px;
+  box-shadow: 0 18px 50px rgba(14,9,40,0.4);
+}
+.modal h3{ margin:0 0 8px 0 }
+.modal .row{ margin-bottom:8px }
+
+/* small responsive tweaks */
+@media (max-width:420px){
+  .card{ padding:36px 14px; font-size:22px }
+  .header{ font-size:18px }
+  .stats{ font-size:13px }
+}
 </style>
 </head>
 <body>
-<h1>Fiszki do nauki</h1>
+<div class="app">
+  <div class="header">Fiszki do nauki</div>
 
-<div>
-<button onclick="showStudy()">Nauka</button>
-<button onclick="showList()">Lista słówek</button>
+  <!-- HOME -->
+  <div id="home" class="view active">
+    <div class="stats">
+      <div class="left">
+        <div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
+        <div class="stat">📅 Streak: <strong id="streak">0</strong> dni</div>
+      </div>
+      <div style="font-size:13px;color:rgba(11,8,16,0.6)">Progres: <span id="progress-mini">—</span></div>
+    </div>
+
+    <div class="card" id="card">Dodaj pierwszą fiszkę</div>
+
+    <div class="navButtons">
+      <button class="secondary" onclick="prevCard()">Poprzednia</button>
+      <button class="secondary" onclick="nextCard()">Następna</button>
+    </div>
+
+    <button class="primary" onclick="showAnswer()">Pokaż odpowiedź</button>
+    <button class="secondary" onclick="goToList()">Lista słówek</button>
+    <button class="secondary" onclick="goToAdd()">Dodaj fiszkę</button>
+  </div>
+
+  <!-- LIST -->
+  <div id="list" class="view">
+    <h3>Lista słówek</h3>
+    <div style="margin:8px 0 12px">
+      <input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
+    </div>
+    <div id="wordsList"></div>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
+      <button class="secondary" onclick="goHome()">Powrót</button>
+    </div>
+  </div>
+
+  <!-- ADD -->
+  <div id="add" class="view">
+    <h3>Dodaj fiszkę</h3>
+    <input type="text" id="frontInput" placeholder="Słowo po angielsku">
+    <input type="text" id="backInput" placeholder="Tłumaczenie">
+    <button class="primary" onclick="addCard()">Dodaj fiszkę</button>
+    <button class="secondary" onclick="goHome()">Powrót</button>
+  </div>
 </div>
 
-
-<div id="studyView">
-<p id="counter"></p>
-<div class="card" id="card">Dodaj pierwszą fiszkę</div>
-<button onclick="showAnswer()">Pokaż odpowiedź</button>
-<button onclick="nextCard()">Następna</button>
-<h3>Dodaj nową fiszkę</h3>
-
-
-<input type="text" id="frontInput" placeholder="Słowo po angielsku">
-
-<input type="text" id="backInput" placeholder="Tłumaczenie">
-
-<br>
-
-<button onclick="addCard()">Dodaj fiszkę</button>
+<!-- EDIT MODAL -->
+<div id="modal" class="modal-backdrop" role="dialog" aria-hidden="true">
+  <div class="modal" role="document">
+    <h3>Edytuj słówko</h3>
+    <div class="row"><input id="editFront" placeholder="Słowo po angielsku" /></div>
+    <div class="row"><input id="editBack" placeholder="Tłumaczenie" /></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="secondary" onclick="closeModal()">Anuluj</button>
+      <button class="primary" onclick="saveModal()">Zapisz</button>
+    </div>
+  </div>
 </div>
-
-<div id="listView" style="display:none;">
-<h3>Lista słówek</h3>
-<div id="wordsList"></div>
-</div>
-
-
-
-
 
 <script>
-
-
-let cards = JSON.parse(localStorage.getItem("cards")) || [];
-
+/* ---------- DATA ---------- */
+let cards = JSON.parse(localStorage.getItem("cards")) || [
+  // Możesz mieć przykładowe dane na start:
+  // { front: "apple", back: "jabłko" }
+];
 let currentIndex = 0;
-
 let showingAnswer = false;
+let streak = Number(localStorage.getItem("streak") || 0);
+let sortAZ = true;
 
-function saveCards() {
+/* ---------- NAVIGATION ---------- */
+function goHome(){ setView("home"); }
+function goToList(){ setView("list"); renderList(); }
+function goToAdd(){ setView("add"); }
 
-    localStorage.setItem("cards", JSON.stringify(cards));
-
+function setView(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  document.getElementById(view).classList.add("active");
 }
 
-function showStudy() {
-document.getElementById("studyView").style.display = "block";
-document.getElementById("listView").style.display = "none";
+/* ---------- STORAGE ---------- */
+function saveCards(){ localStorage.setItem("cards", JSON.stringify(cards)); }
+function saveStreak(){ localStorage.setItem("streak", String(streak)); }
+
+/* ---------- RENDER CARD ---------- */
+const cardEl = document.getElementById("card");
+function animateCardOnce(){
+  cardEl.classList.add("animate");
+  setTimeout(()=> cardEl.classList.remove("animate"), 260);
+}
+function renderCard(){
+  if(cards.length === 0){
+    cardEl.innerText = "Dodaj pierwszą fiszkę";
+  } else {
+    cardEl.innerText = showingAnswer ? cards[currentIndex].back : cards[currentIndex].front;
+  }
+  document.getElementById("counter").innerText = cards.length;
+  document.getElementById("streak").innerText = streak;
+  document.getElementById("progress-mini").innerText = (cards.length ? (currentIndex+1)+"/"+cards.length : "—");
 }
 
-function showList() {
-document.getElementById("studyView").style.display = "none";
-document.getElementById("listView").style.display = "block";
-renderList();
+/* ---------- STUDY ACTIONS ---------- */
+function showAnswer(){
+  if(cards.length === 0) return;
+  showingAnswer = true;
+  animateCardOnce();
+  renderCard();
 }
 
-function sortCards() {
-cards.sort((a, b) =>
-a.front.localeCompare(b.front)
-);
+function nextCard(){
+  if(cards.length === 0) return;
+  currentIndex = (currentIndex + 1) % cards.length;
+  showingAnswer = false;
+  animateCardOnce();
+  renderCard();
 }
 
-function renderList() {
-sortCards();
+function prevCard(){
+  if(cards.length === 0) return;
+  currentIndex--;
+  if(currentIndex < 0) currentIndex = cards.length - 1;
+  showingAnswer = false;
+  animateCardOnce();
+  renderCard();
+}
 
-const listDiv = document.getElementById("wordsList");
-listDiv.innerHTML = "";
+/* ---------- ADD ---------- */
+function addCard(){
+  const front = document.getElementById("frontInput").value.trim();
+  const back = document.getElementById("backInput").value.trim();
+  if(!front || !back) return alert("Wypełnij oba pola.");
+  cards.push({front, back});
+  saveCards();
+  document.getElementById("frontInput").value = "";
+  document.getElementById("backInput").value = "";
+  goHome();
+  // nowa karta ostatnia -> ustaw index na nią
+  currentIndex = cards.length - 1;
+  renderCard();
+}
 
-cards.forEach((card, index) => {
-const div = document.createElement("div");
+/* ---------- LIST + SEARCH + SORT ---------- */
+function renderList(){
+  const listEl = document.getElementById("wordsList");
+  listEl.innerHTML = "";
+  // kopia do sortowania/search
+  let arr = cards.slice();
+  const q = document.getElementById("searchBox") ? document.getElementById("searchBox").value.trim().toLowerCase() : "";
+  if(sortAZ) arr.sort((a,b)=> a.front.localeCompare(b.front, "pl"));
+  if(q) arr = arr.filter(it => (it.front + " " + it.back).toLowerCase().includes(q));
+  arr.forEach((card, i) => {
+    // find original index (since arr is sorted/filtered)
+    const origIndex = cards.findIndex(c => c.front === card.front && c.back === card.back);
+    const div = document.createElement("div");
+    div.className = "listItem";
+    div.innerHTML = `
+      <div class="text"><strong>${escapeHtml(card.front)}</strong> &nbsp; - &nbsp; ${escapeHtml(card.back)}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="smallBtn primary" onclick="openEdit(${origIndex})">Edytuj</button>
+        <button class="smallBtn secondary" onclick="deleteCard(${origIndex})">Usuń</button>
+      </div>
+    `;
+    listEl.appendChild(div);
+  });
+}
 
-div.innerHTML = `
-<b>${card.front}</b> - ${card.back}
-<button onclick="editCard(${index})">Edytuj</button>
-<button onclick="deleteCard(${index})">Usuń</button>
-`;
+/* toggle sort mode (A->Z or none) */
+function toggleSort(){
+  sortAZ = !sortAZ;
+  renderList();
+}
 
-listDiv.appendChild(div);
+/* ---------- EDIT MODAL ---------- */
+let editingIndex = null;
+const modal = document.getElementById("modal");
+function openEdit(index){
+  editingIndex = index;
+  document.getElementById("editFront").value = cards[index].front;
+  document.getElementById("editBack").value = cards[index].back;
+  modal.classList.add("show");
+  modal.setAttribute("aria-hidden", "false");
+}
+function closeModal(){
+  modal.classList.remove("show");
+  modal.setAttribute("aria-hidden", "true");
+  editingIndex = null;
+}
+function saveModal(){
+  const newF = document.getElementById("editFront").value.trim();
+  const newB = document.getElementById("editBack").value.trim();
+  if(!newF || !newB){ alert("Wypełnij oba pola."); return; }
+  cards[editingIndex].front = newF;
+  cards[editingIndex].back = newB;
+  saveCards();
+  renderList();
+  renderCard();
+  closeModal();
+}
+
+/* close modal on backdrop click */
+modal.addEventListener("click", (e)=>{
+  if(e.target === modal) closeModal();
 });
-}
 
-function editCard(index) {
-const newFront = prompt("Edytuj słowo:", cards[index].front);
-const newBack = prompt("Edytuj tłumaczenie:", cards[index].back);
-
-if (newFront && newBack) {
-cards[index].front = newFront;
-cards[index].back = newBack;
-saveCards();
-renderList();
-renderCard();
-}
-}
+/* ---------- DELETE ---------- */
 function deleteCard(index){
-cards.splice(index,1);
-saveCards();
-renderList();
-renderCard();
-}
-function renderCard() {
-
-    const cardDiv = document.getElementById("card");
-
-    if (cards.length === 0) {
-
-        cardDiv.innerText = "Dodaj pierwszą fiszkę";
-
-        return;
-    }
-
-
-
-    if (showingAnswer) {
-
-        cardDiv.innerText = cards[currentIndex].back;
-
-    } else {
-
-        cardDiv.innerText = cards[currentIndex].front;
-
-    }
-document.getElementById("counter").innerText="Liczba fiszek: " + cards.length;
-
+  if(!confirm("Na pewno usunąć to słówko?")) return;
+  // jeśli usuwamy element przed currentIndex, zmień currentIndex
+  const wasLength = cards.length;
+  cards.splice(index,1);
+  if(cards.length === 0) currentIndex = 0;
+  else if(index <= currentIndex && currentIndex > 0) currentIndex = currentIndex - 1;
+  saveCards();
+  renderList();
+  renderCard();
 }
 
-
-
-function showAnswer() {
-
-    if (cards.length === 0) return;
-
-    showingAnswer = true;
-
-    renderCard();
-
+/* ---------- UTIL ---------- */
+function escapeHtml(s){
+  return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
-function nextCard() {
-
-    if (cards.length === 0) return;
-
-    currentIndex = (currentIndex + 1) % cards.length;
-
-    showingAnswer = false;
-
-    renderCard();
-
-}
-
-function addCard() {
-
-    const front = document.getElementById("frontInput").value;
-
-    const back = document.getElementById("backInput").value;
-
-    if (front.trim() === "" || back.trim() === "") return;
-
-    cards.push({ front: front, back: back });
-
-    document.getElementById("frontInput").value = "";
-
-    document.getElementById("backInput").value = "";
-
-    saveCards();
-
-    renderCard();
-
-}
-
-
-renderCard();
-
+/* ---------- INIT ---------- */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // load streak
+  streak = Number(localStorage.getItem("streak") || 0);
+  document.getElementById("streak").innerText = streak;
+  renderCard();
+});
 </script>
-
-
 </body>
-
 </html>
+
