@@ -358,7 +358,6 @@ function addCard(){
   saveCards();
   document.getElementById("frontInput").value = "";
   document.getElementById("backInput").value = "";
-  goHome();
   // nowa karta ostatnia -> ustaw index na nią
   currentIndex = cards.length - 1;
   renderCard();
@@ -510,4 +509,5 @@ if ("serviceWorker" in navigator) {
 
 </body>
 </html>
+
 
