@@ -10,67 +10,50 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Fiszki">
 <title>Fiszki - poprawione UI</title>
-/* ---------- VARIABLES ---------- */
+
 <style>
-/* ---------- VARIABLES ---------- */
-
+/* ---------- BODY / GRADIENT ---------- */
 :root{
-  --accent1:#8f7bff;
-  --accent2:#a89bff;
-  --accent3:#c9c2ff;
-  --accent4:#e6e3ff;
-
-  --white:#ffffff;
-  --card-bg:#ffffff;
-
-  --text:#111;
-  --muted:rgba(0,0,0,0.55);
-
-  --radius:20px;
+  --accent1: #8f7bff;
+  --accent2: #a89bff;
+  --accent3: #c9c2ff;
+  --accent4: #e6e3ff;
+  --white: #ffffff;
+  --card-bg: #ffffff;
+  --muted: rgba(0,0,0,0.55);
 }
 
-/* ---------- GLOBAL ---------- */
-
-*{
-  box-sizing:border-box;
-}
-
-html{
-  touch-action:manipulation;
-}
-
+*{box-sizing:border-box}
 body{
   margin:0;
   min-height:100vh;
-
-  font-family:"Segoe UI",Roboto,Arial,sans-serif;
-  color:var(--text);
-
-  background:linear-gradient(
-    180deg,
-    var(--accent1) 0%,
-    var(--accent2) 25%,
-    var(--accent3) 55%,
-    var(--accent4) 80%,
-    var(--white) 100%
-  );
-
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #111;
+  background:
+    linear-gradient(
+      180deg,
+      var(--accent1) 0%,
+      var(--accent2) 25%,
+      var(--accent3) 55%,
+      var(--accent4) 80%,
+      var(--white) 100%
+    );
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
+html {
+    touch-action: manipulation;
+}
 
 /* ---------- APP LAYOUT ---------- */
-
 .app{
   max-width:420px;
   margin:0 auto;
   padding:22px;
-  padding-bottom:120px;
   min-height:100vh;
 }
 
 /* ---------- HEADER ---------- */
-
 .header{
   font-size:20px;
   font-weight:600;
@@ -80,203 +63,136 @@ body{
 }
 
 /* ---------- STATS ---------- */
-
 .stats{
-  background:rgba(255,255,255,0.12);
-  backdrop-filter:blur(6px);
-
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(6px);
   padding:12px 14px;
   border-radius:14px;
-
   margin-bottom:18px;
-
   font-size:14px;
+  color: #14121a;
   display:flex;
-  justify-content:space-between;
-  align-items:center;
   gap:12px;
-}
-
-.stats .left{
-  display:flex;
-  gap:10px;
   align-items:center;
+  justify-content:space-between;
 }
-
-.stat{
-  background:rgba(255,255,255,0.25);
+.stats .left{display:flex;gap:10px;align-items:center}
+.stats .stat{
+  background: rgba(255,255,255,0.25);
   padding:6px 10px;
   border-radius:10px;
-
   display:flex;
-  align-items:center;
   gap:8px;
-
+  align-items:center;
   font-size:13px;
-
-  box-shadow:0 6px 18px rgba(43,24,120,0.06);
+  color:#0b0720;
+  box-shadow: 0 6px 18px rgba(43,24,120,0.06);
 }
 
 /* ---------- CARD ---------- */
-
 .card{
-  background:var(--card-bg);
-
-  border-radius:var(--radius);
-
-  padding:48px 18px;
-  margin-bottom:18px;
-
-  font-size:26px;
+  background: var(--card-bg);
+  color: #222;
+  border-radius:20px;
+  padding:120px 18px;
   text-align:center;
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-
-  box-shadow:0 18px 40px rgba(51,41,112,0.08);
-
-  transition:
-    transform .28s cubic-bezier(.2,.9,.25,1),
-    opacity .2s;
+  font-size:26px;
+  margin-bottom:18px;
+  box-shadow: 0 18px 40px rgba(51,41,112,0.08);
+  transition: transform .28s cubic-bezier(.2,.9,.25,1), opacity .2s;
 }
 
-.card.animate{
-  transform:translateY(-8px);
-  opacity:0.85;
+/* animation helper (apply when switching card) */
+.card.animate {
+  transform: translateY(-8px);
+  opacity: 0.85;
 }
 
-/* ---------- BUTTON SYSTEM ---------- */
-
-button{
-  width:100%;
-
-  padding:12px 14px;
-
-  border:none;
-  border-radius:28px;
-
-  font-size:15px;
-  cursor:pointer;
-
-  margin-top:10px;
-
-  transition:
-    transform .12s ease,
-    box-shadow .12s ease;
-
-  box-shadow:0 6px 18px rgba(99,58,255,0.08);
-}
-
-button:active{
-  transform:translateY(1px);
-}
-
-/* primary button */
-
-.primary{
-  background:linear-gradient(135deg,#7b5cff,#9f7bff);
-  color:white;
-
-  font-weight:600;
-
-  margin-top:40vh;
-  margin-bottom:50px;
-
-  min-height:56px;
-  font-size:16px;
-}
-
-/* secondary */
-
-.secondary{
-  background:#fff;
-  color:#6a4bff;
-  font-weight:600;
-}
-
-/* ---------- NAVIGATION BUTTONS ---------- */
-
+/* ---------- NAV BUTTONS (Prev/Next) ---------- */
 .navButtons{
-  position:fixed;
-
-  bottom:40px;
-  left:20px;
-  right:20px;
-
   display:flex;
   gap:12px;
+  margin-bottom:10px;
 }
-
 .navButtons button{
   flex:1;
   min-height:48px;
+  border-radius:28px;
+  font-size:14px;
+margin-top: 10px;
 }
 
-/* ---------- ICON BUTTONS ---------- */
+/* ---------- BUTTONS ---------- */
+button{
+  width:100%;
+  padding:12px 14px;
+  border:none;
+  border-radius:28px;
+  margin-top:10px;
+  font-size:15px;
+  cursor:pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 18px rgba(99,58,255,0.08);
+}
+button:active{ transform: translateY(1px); }
 
+
+.primary{
+  background: linear-gradient(135deg,#7b5cff,#9f7bff);
+  color:white;
+  font-weight:600;
+margin-top: 10px;
+}
+
+.secondary{
+  background: #ffffff;
+  color: #6a4bff;
+  font-weight:600;
+}
 .topButtons{
-  position:absolute;
-  top:12px;
-  left:0;
-  right:0;
+position:absolute;
+top:12px;
+left:0;
+right:0;
 }
 
 .iconBtn{
-  position:absolute;
-
-  width:10vw;
-  height:10vw;
-
-  max-width:42px;
-  max-height:42px;
-
-  border-radius:12px;
-  border:none;
-
-  font-size:22px;
-
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(6px);
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  cursor:pointer;
+position:absolute;
+width:42px;
+height:42px;
+border-radius:12px;
+border:none;
+font-size:22px;
+background:rgba(255,255,255,0.25);
+backdrop-filter: blur(6px);
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
 }
 
 .iconBtn.left{
-  left:5%;
+left:490px;
 }
 
 .iconBtn.right{
-  right:5%;
+right:490px;
 }
 
 /* ---------- LIST ---------- */
-
 .listItem{
   background:#fff;
-
+  color:#222;
   border-radius:14px;
-
   padding:12px;
   margin-bottom:10px;
-
   display:flex;
-  justify-content:space-between;
   align-items:center;
+  justify-content:space-between;
   gap:10px;
-
-  box-shadow:0 8px 22px rgba(31,20,100,0.04);
+  box-shadow: 0 8px 22px rgba(31,20,100,0.04);
 }
-
-.listItem .text{
-  flex:1;
-}
-
+.listItem .text { flex:1 }
 .smallBtn{
   width:auto;
   padding:8px 12px;
@@ -286,102 +202,70 @@ button:active{
 }
 
 /* ---------- INPUT ---------- */
-
 input{
   width:100%;
-
   padding:12px;
-
-  border:none;
   border-radius:12px;
-
-  font-size:15px;
-
+  border:none;
   margin-bottom:10px;
-
-  box-shadow:0 8px 16px rgba(17,12,30,0.03);
+  font-size:15px;
+  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
 }
 
 /* ---------- VIEW CONTROL ---------- */
+.view{ display:none; }
+.active{ display:block; }
 
-.view{
-  display:none;
-}
-
-.active{
-  display:block;
-}
-
-/* ---------- MODAL ---------- */
-
+/* ---------- MODAL (EDIT) ---------- */
 .modal-backdrop{
   position:fixed;
   inset:0;
-
   background:rgba(10,8,20,0.45);
-
   display:none;
-  justify-content:center;
   align-items:center;
-
+  justify-content:center;
   z-index:50;
 }
-
 .modal-backdrop.show{
   display:flex;
 }
-
 .modal{
   width:90%;
   max-width:420px;
-
-  background:#fff;
+  background: #fff;
   color:#111;
-
   border-radius:14px;
   padding:16px;
+  box-shadow: 0 18px 50px rgba(14,9,40,0.4);
+}
+.modal h3{ margin:0 0 8px 0 }
+.modal .row{ margin-bottom:8px }
 
-  box-shadow:0 18px 50px rgba(14,9,40,0.4);
+/* small responsive tweaks */
+@media (max-width:420px){
+  .card{ padding:36px 14px; font-size:22px }
+  .header{ font-size:18px }
+  .stats{ font-size:13px }
 }
 
-.modal h3{
-  margin:0 0 8px 0;
+.card{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
 }
 
-.modal .row{
-  margin-bottom:8px;
+.speak{
+  cursor:pointer;
+  font-size:26px;
 }
-
-/* ---------- ICONS ---------- */
-
-.speak,
 .record,
 .play{
   cursor:pointer;
+  font-size:24px;
 }
 
-.speak{ font-size:26px; }
-.record,
-.play{ font-size:24px; }
-
-/* ---------- MOBILE ---------- */
-
-@media (max-width:420px){
-
-  .card{
-    padding:36px 14px;
-    font-size:22px;
-  }
-
-  .header{
-    font-size:18px;
-  }
-
-  .stats{
-    font-size:13px;
-  }
-}
-	</style>
+</style>
 </head>
 <body>
 <div class="app">
@@ -1060,6 +944,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
