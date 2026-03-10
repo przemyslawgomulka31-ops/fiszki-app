@@ -93,7 +93,7 @@ html {
   background: var(--card-bg);
   color: #222;
   border-radius:20px;
-  padding:48px 18px;
+  padding:120px 18px;
   text-align:center;
   font-size:26px;
   margin-bottom:18px;
@@ -118,6 +118,7 @@ html {
   min-height:48px;
   border-radius:28px;
   font-size:14px;
+margin-top: 10px;
 }
 
 /* ---------- BUTTONS ---------- */
@@ -139,12 +140,42 @@ button:active{ transform: translateY(1px); }
   background: linear-gradient(135deg,#7b5cff,#9f7bff);
   color:white;
   font-weight:600;
+margin-top: 10px;
 }
 
 .secondary{
   background: #ffffff;
   color: #6a4bff;
   font-weight:600;
+}
+.topButtons{
+position:absolute;
+top:12px;
+left:0;
+right:0;
+}
+
+.iconBtn{
+position:absolute;
+width:42px;
+height:42px;
+border-radius:12px;
+border:none;
+font-size:22px;
+background:rgba(255,255,255,0.25);
+backdrop-filter: blur(6px);
+display:flex;
+align-items:center;
+justify-content:center;
+cursor:pointer;
+}
+
+.iconBtn.left{
+left:490px;
+}
+
+.iconBtn.right{
+right:490px;
 }
 
 /* ---------- LIST ---------- */
@@ -215,33 +246,70 @@ input{
   .header{ font-size:18px }
   .stats{ font-size:13px }
 }
+
+.card{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+}
+
+.speak{
+  cursor:pointer;
+  font-size:26px;
+}
+.record,
+.play{
+  cursor:pointer;
+  font-size:24px;
+}
+
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">Fiszki do nauki</div>
+  <div class="header">FiSZkAAA</div>
+  <div class="topButtons">
+
+	<button class="iconBtn left" onclick="goToList()">📋</button>
+
+	<button class="iconBtn right" onclick="goToAdd()">➕</button>
+
+</div>
 
   <!-- HOME -->
-  <div id="home" class="view active">
-    <div class="stats">
-      <div class="left">
-        <div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
-        <div class="stat">📅 Streak: <strong id="streak">0</strong> dni</div>
-      </div>
-      <div style="font-size:13px;color:rgba(11,8,16,0.6)">Progres: <span id="progress-mini">—</span></div>
-    </div>
+<div id="home" class="view active">
 
-    <div class="card" id="card">Dodaj pierwszą fiszkę</div>
+<div class="stats">
+<div class="left">
+<div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
+</div>
 
-    <div class="navButtons">
-      <button class="secondary" onclick="prevCard()">Poprzednia</button>
-      <button class="secondary" onclick="nextCard()">Następna</button>
-    </div>
+<div style="font-size:13px;color:rgba(11,8,16,0.6)">
+Progres: <span id="progress-mini">—</span>
+</div>
 
-    <button class="primary" onclick="showAnswer()">Pokaż odpowiedź</button>
-    <button class="secondary" onclick="goToList()">Lista słówek</button>
-    <button class="secondary" onclick="goToAdd()">Dodaj fiszkę</button>
-  </div>
+</div>
+
+<div class="card">
+
+<span id="cardText">Dodaj pierwszą fiszkę</span>
+
+<span class="speak" onclick="speakWord(cards[currentIndex].front)">🔊</span>
+
+<span class="play" onclick="playRecording()">▶️</span>
+
+</div>
+
+<button class="primary" onclick="showAnswer()">Pokaż odpowiedź</button>
+
+<div class="navButtons">
+<button class="secondary" onclick="prevCard()">Poprzednia</button>
+<button class="secondary" onclick="nextCard()">Następna</button>
+</div>
+
+</div>
+
 
   <!-- LIST -->
   <div id="list" class="view">
@@ -260,13 +328,33 @@ input{
   </div>
 
   <!-- ADD -->
-  <div id="add" class="view">
-    <h3>Dodaj fiszkę</h3>
-    <input type="text" id="frontInput" placeholder="Słowo po angielsku">
-    <input type="text" id="backInput" placeholder="Tłumaczenie">
-    <button class="primary" onclick="addCard()">Dodaj fiszkę</button>
-    <button class="secondary" onclick="goHome()">Powrót</button>
-  </div>
+ <div id="add" class="view">
+
+<h3>Dodaj fiszkę</h3>
+
+<input type="text" id="frontInput" placeholder="Słowo po angielsku">
+
+<input type="text" id="backInput" placeholder="Tłumaczenie">
+
+<button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
+
+<button class="secondary" onclick="playRecording()">▶️ Odsłuch nagrania</button>
+
+<div id="recordUI" style="display:none;text-align:center;margin-top:10px">
+
+<div style="font-size:22px">🎤 Nagrywanie...</div>
+
+<div style="font-size:28px;color:red">● REC</div>
+
+<div id="recordTimer">0</div>
+
+</div>
+
+<button class="primary" onclick="addCard()">Dodaj fiszkę</button>
+
+<button class="secondary" onclick="goHome()">Powrót</button>
+
+
 </div>
 
 <!-- EDIT MODAL -->
@@ -282,219 +370,551 @@ input{
   </div>
 </div>
 
-<script>
-/* ---------- DATA ---------- */
-let cards = JSON.parse(localStorage.getItem("cards")) || [
-  // Możesz mieć przykładowe dane na start:
-  // { front: "apple", back: "jabłko" }
-];
-let currentIndex = 0;
-let showingAnswer = false;
-let streak = Number(localStorage.getItem("streak") || 0);
-let sortAZ = true;
+<div id="popup" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="popupText"></h3>
+    <button class="primary" onclick="closePopup()">OK</button>
+  </div>
+</div>
 
-/* ---------- NAVIGATION ---------- */
-function goHome(){ setView("home"); }
-function goToList(){ setView("list"); renderList(); }
-function goToAdd(){ setView("add"); }
+
+<script>
+
+
+/* ===============================
+   INDEXED DB
+================================ */
+
+let db
+let cards = []
+let currentIndex = 0
+let showingAnswer = false
+let sortAZ = true
+
+let mediaRecorder
+let audioChunks = []
+let recordedAudioBase64 = null
+
+
+const request = indexedDB.open("FlashcardsDB",1)
+
+
+request.onupgradeneeded = function(event){
+
+db = event.target.result
+
+db.createObjectStore("cards",{keyPath:"id",autoIncrement:true})
+
+}
+
+
+request.onsuccess = function(event){
+
+db = event.target.result
+
+loadCardsFromDB()
+
+}
+
+
+/* ===============================
+   LOAD FROM DB
+================================ */
+
+function loadCardsFromDB(callback){
+
+const transaction = db.transaction("cards","readonly")
+
+const store = transaction.objectStore("cards")
+
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+cards = req.result
+
+renderCard()
+
+if(callback) callback()
+
+}
+
+}
+
+
+/* ===============================
+   NAVIGATION
+================================ */
+
+function goHome(){ setView("home") }
+function goToList(){ setView("list"); renderList() }
+function goToAdd(){ setView("add") }
 
 function setView(view){
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
-  document.getElementById(view).classList.add("active");
+
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+
+document.getElementById(view).classList.add("active")
+
 }
 
-/* ---------- STORAGE ---------- */
-function saveCards(){ localStorage.setItem("cards", JSON.stringify(cards)); }
-function saveStreak(){ localStorage.setItem("streak", String(streak)); }
 
-/* ---------- RENDER CARD ---------- */
-const cardEl = document.getElementById("card");
-function animateCardOnce(){
-  cardEl.classList.add("animate");
-  setTimeout(()=> cardEl.classList.remove("animate"), 260);
-}
+/* ===============================
+   RENDER CARD
+================================ */
+
+const cardEl = document.getElementById("cardText")
+
 function renderCard(){
-  if(cards.length === 0){
-    cardEl.innerText = "Dodaj pierwszą fiszkę";
-  } else {
-    cardEl.innerText = showingAnswer ? cards[currentIndex].back : cards[currentIndex].front;
-  }
-  document.getElementById("counter").innerText = cards.length;
-  document.getElementById("streak").innerText = streak;
-  document.getElementById("progress-mini").innerText = (cards.length ? (currentIndex+1)+"/"+cards.length : "—");
+
+if(cards.length===0){
+
+cardEl.innerText="Dodaj pierwszą fiszkę"
+return
+
 }
 
-/* ---------- STUDY ACTIONS ---------- */
-function showAnswer(){
-  if(cards.length === 0) return;
-  showingAnswer = true;
-  animateCardOnce();
-  renderCard();
+cardEl.innerText = showingAnswer
+? cards[currentIndex].back
+: cards[currentIndex].front
+
+document.getElementById("counter").innerText = cards.length
+
 }
+
+
+/* ===============================
+   STUDY
+================================ */
+
+function showAnswer(){
+
+if(cards.length===0)return
+
+showingAnswer=true
+
+renderCard()
+
+}
+
 
 function nextCard(){
-  if(cards.length === 0) return;
-  currentIndex = (currentIndex + 1) % cards.length;
-  showingAnswer = false;
-  animateCardOnce();
-  renderCard();
+
+if(cards.length===0)return
+
+currentIndex=(currentIndex+1)%cards.length
+
+showingAnswer=false
+
+renderCard()
+
 }
+
 
 function prevCard(){
-  if(cards.length === 0) return;
-  currentIndex--;
-  if(currentIndex < 0) currentIndex = cards.length - 1;
-  showingAnswer = false;
-  animateCardOnce();
-  renderCard();
+
+if(cards.length===0)return
+
+currentIndex--
+
+if(currentIndex<0) currentIndex = cards.length-1
+
+showingAnswer=false
+
+renderCard()
+
 }
 
-/* ---------- ADD ---------- */
+
+/* ===============================
+   ADD CARD
+================================ */
+
 function addCard(){
-  const front = document.getElementById("frontInput").value.trim();
-  const back = document.getElementById("backInput").value.trim();
-  if(!front || !back) return alert("Wypełnij oba pola.");
-  cards.push({front, back});
-  saveCards();
-  document.getElementById("frontInput").value = "";
-  document.getElementById("backInput").value = "";
-  // nowa karta ostatnia -> ustaw index na nią
-  currentIndex = cards.length - 1;
-  renderCard();
+
+const front=document.getElementById("frontInput").value.trim()
+const back=document.getElementById("backInput").value.trim()
+
+if(!front||!back){
+
+alert("Wypełnij pola")
+
+return
+
 }
 
-/* ---------- LIST + SEARCH + SORT ---------- */
+const newCard={
+front:front,
+back:back,
+audio:recordedAudioBase64
+}
+
+const transaction=db.transaction("cards","readwrite")
+
+const store=transaction.objectStore("cards")
+
+store.add(newCard)
+
+transaction.oncomplete=function(){
+
+recordedAudioBase64=null
+
+document.getElementById("frontInput").value=""
+document.getElementById("backInput").value=""
+
+loadCardsFromDB()
+
+}
+
+}
+
+
+/* ===============================
+   DELETE
+================================ */
+function deleteCard(index){
+
+const id = cards[index].id
+
+const transaction = db.transaction("cards","readwrite")
+
+const store = transaction.objectStore("cards")
+
+store.delete(id)
+
+transaction.oncomplete = function(){
+
+loadCardsFromDB(renderList)
+
+}
+
+}
+
+
+/* ===============================
+   LIST
+================================ */
+
 function renderList(){
-  const listEl = document.getElementById("wordsList");
-  listEl.innerHTML = "";
-  // kopia do sortowania/search
-  let arr = cards.slice();
-  const q = document.getElementById("searchBox") ? document.getElementById("searchBox").value.trim().toLowerCase() : "";
-  if(sortAZ) arr.sort((a,b)=> a.front.localeCompare(b.front, "pl"));
-  if(q) arr = arr.filter(it => (it.front + " " + it.back).toLowerCase().includes(q));
-  arr.forEach((card, i) => {
-    // find original index (since arr is sorted/filtered)
-    const origIndex = cards.findIndex(c => c.front === card.front && c.back === card.back);
-    const div = document.createElement("div");
-    div.className = "listItem";
-    div.innerHTML = `
-      <div class="text"><strong>${escapeHtml(card.front)}</strong> &nbsp; - &nbsp; ${escapeHtml(card.back)}</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <button class="smallBtn primary" onclick="openEdit(${origIndex})">Edytuj</button>
-        <button class="smallBtn secondary" onclick="deleteCard(${origIndex})">Usuń</button>
-      </div>
-    `;
-    listEl.appendChild(div);
-  });
+
+const list = document.getElementById("wordsList")
+
+const search = document
+.getElementById("searchBox")
+.value
+.trim()
+.toLowerCase()
+
+list.innerHTML = ""
+
+let arr = [...cards]
+
+/* FILTR WYSZUKIWANIA */
+
+if(search){
+
+arr = arr.filter(card =>
+card.front.toLowerCase().includes(search) ||
+card.back.toLowerCase().includes(search)
+)
+
 }
 
-/* toggle sort mode (A->Z or none) */
+/* SORTOWANIE */
+
+if(sortAZ){
+arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
+}
+
+/* RENDER */
+
+arr.forEach((card,index)=>{
+
+const div=document.createElement("div")
+
+div.className="listItem"
+
+div.innerHTML=`
+
+<div class="text"><b>${card.front}</b> - ${card.back}</div>
+
+<div>
+<button class="smallBtn primary" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">Edytuj</button>
+<button class="smallBtn secondary" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">Usuń</button>
+</div>
+
+`
+
+list.appendChild(div)
+
+})
+
+}
+
+
 function toggleSort(){
-  sortAZ = !sortAZ;
-  renderList();
+
+sortAZ=!sortAZ
+
+renderList()
+
 }
 
-/* ---------- EDIT MODAL ---------- */
-let editingIndex = null;
-const modal = document.getElementById("modal");
-function openEdit(index){
-  editingIndex = index;
-  document.getElementById("editFront").value = cards[index].front;
-  document.getElementById("editBack").value = cards[index].back;
-  modal.classList.add("show");
-  modal.setAttribute("aria-hidden", "false");
+
+/* ===============================
+   EDIT
+================================ */
+
+let editingIndex = null
+
+function editCard(index){
+
+editingIndex = index
+
+document.getElementById("editFront").value = cards[index].front
+document.getElementById("editBack").value = cards[index].back
+
+document.getElementById("modal").classList.add("show")}
+
+function saveModal(){
+
+const newFront = document.getElementById("editFront").value.trim()
+const newBack = document.getElementById("editBack").value.trim()
+
+if(!newFront || !newBack){
+
+alert("Wypełnij pola")
+return
+
+}
+
+const id = cards[editingIndex].id
+
+const transaction = db.transaction("cards","readwrite")
+
+const store = transaction.objectStore("cards")
+
+store.put({
+id:id,
+front:newFront,
+back:newBack,
+audio:cards[editingIndex].audio
+})
+
+transaction.oncomplete = function(){
+
+closeModal()
+loadCardsFromDB()
+
+}
+
 }
 function closeModal(){
-  modal.classList.remove("show");
-  modal.setAttribute("aria-hidden", "true");
-  editingIndex = null;
-}
-function saveModal(){
-  const newF = document.getElementById("editFront").value.trim();
-  const newB = document.getElementById("editBack").value.trim();
-  if(!newF || !newB){ alert("Wypełnij oba pola."); return; }
-  cards[editingIndex].front = newF;
-  cards[editingIndex].back = newB;
-  saveCards();
-  renderList();
-  renderCard();
-  closeModal();
+
+document.getElementById("modal").classList.remove("show")
+
 }
 
-/* close modal on backdrop click */
-modal.addEventListener("click", (e)=>{
-  if(e.target === modal) closeModal();
-});
+/* ===============================
+   SPEECH
+================================ */
 
-/* ---------- DELETE ---------- */
-function deleteCard(index){
-  if(!confirm("Na pewno usunąć to słówko?")) return;
-  // jeśli usuwamy element przed currentIndex, zmień currentIndex
-  const wasLength = cards.length;
-  cards.splice(index,1);
-  if(cards.length === 0) currentIndex = 0;
-  else if(index <= currentIndex && currentIndex > 0) currentIndex = currentIndex - 1;
-  saveCards();
-  renderList();
-  renderCard();
+function speakWord(text){
+
+if(!text)return
+
+const speech=new SpeechSynthesisUtterance(text)
+
+speech.lang="en-US"
+
+speech.rate=0.9
+
+speechSynthesis.speak(speech)
+
 }
 
-/* ---------- UTIL ---------- */
-function escapeHtml(s){
-  return s.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
-}
 
-/* ---------- INIT ---------- */
-document.addEventListener("DOMContentLoaded", ()=>{
-  // load streak
-  streak = Number(localStorage.getItem("streak") || 0);
-  document.getElementById("streak").innerText = streak;
-  renderCard();
-});
+/* ===============================
+   RECORD AUDIO
+================================ */
 
+async function startRecording(){
 
-function exportBackup() {
-const data = localStorage.getItem("cards");
-const blob = new Blob([data], { type: "application/json" });
-const url = URL.createObjectURL(blob);
-
-const a = document.createElement("a");
-a.href = url;
-a.download = "fiszki-backup.json";
-a.click();
-
-URL.revokeObjectURL(url);
-}
-
-document.getElementById("importFile").addEventListener("change", function(event){
-
-const file = event.target.files[0];
-if(!file) return;
-
-const reader = new FileReader();
-
-reader.onload = function(e){
 try{
-const importedCards = JSON.parse(e.target.result);
 
-if(Array.isArray(importedCards)){
-cards = importedCards;
-saveCards();
-renderCard();
-renderList();
-alert("Import zakończony ✅");
-}else{
-alert("Nieprawidłowy plik");
+const stream = await navigator.mediaDevices.getUserMedia({ audio:true })
+
+mediaRecorder = new MediaRecorder(stream)
+
+audioChunks = []
+
+let seconds = 0
+
+document.getElementById("recordUI").style.display = "block"
+
+const timer = setInterval(()=>{
+
+seconds++
+document.getElementById("recordTimer").innerText = seconds + " s"
+
+},1000)
+
+
+mediaRecorder.ondataavailable = event => {
+audioChunks.push(event.data)
 }
 
-}catch(err){
-alert("Błąd odczytu pliku");
+
+mediaRecorder.onstop = ()=>{
+
+clearInterval(timer)
+
+document.getElementById("recordUI").style.display = "none"
+
+const blob = new Blob(audioChunks,{type:"audio/webm"})
+
+const reader = new FileReader()
+
+reader.onloadend = function(){
+
+recordedAudioBase64 = reader.result
+
+showPopup("Nagranie zapisane 🎤")
+
 }
-};
 
-reader.readAsText(file);
-});
+reader.readAsDataURL(blob)
 
+}
+
+
+mediaRecorder.start()
+
+setTimeout(()=>{
+
+mediaRecorder.stop()
+
+},3000)
+
+}
+catch(err){
+
+alert("Brak dostępu do mikrofonu")
+
+}
+
+}
+
+
+/* ===============================
+   PLAY AUDIO
+================================ */
+
+function playRecording(){
+
+/* jeśli jesteśmy w dodawaniu fiszki */
+
+if(recordedAudioBase64){
+
+const audio = new Audio(recordedAudioBase64)
+
+audio.play()
+
+return
+
+}
+
+/* jeśli jesteśmy na zapisanej fiszce */
+
+const card = cards[currentIndex]
+
+if(!card || !card.audio){
+
+alert("Brak nagrania")
+
+return
+
+}
+
+const audio = new Audio(card.audio)
+
+audio.play()
+
+}
+
+
+
+
+/* ===============================
+   EXPORT
+================================ */
+
+function exportBackup(){
+
+const data=JSON.stringify(cards)
+
+const blob=new Blob([data],{type:"application/json"})
+
+const url=URL.createObjectURL(blob)
+
+const a=document.createElement("a")
+
+a.href=url
+
+a.download="fiszki-backup.json"
+
+a.click()
+
+}
+
+
+/* ===============================
+   IMPORT
+================================ */
+
+document.getElementById("importFile").addEventListener("change",function(e){
+
+const file=e.target.files[0]
+
+if(!file)return
+
+const reader=new FileReader()
+
+reader.onload=function(ev){
+
+const imported=JSON.parse(ev.target.result)
+
+const transaction=db.transaction("cards","readwrite")
+
+const store=transaction.objectStore("cards")
+
+imported.forEach(card=>{
+delete card.id
+store.add(card)
+})
+
+transaction.oncomplete=function(){
+
+loadCardsFromDB()
+
+alert("Import OK")
+
+}
+
+}
+
+reader.readAsText(file)
+
+})
+
+transaction.oncomplete = function(){
+
+closeModal()
+loadCardsFromDB()
+renderList()
+renderCard()
+
+}
 
 </script>
 
@@ -504,10 +924,22 @@ if ("serviceWorker" in navigator) {
     .then(() => console.log("Service Worker zarejestrowany"))
     .catch(err => console.log("Błąd SW:", err));
 }
+
+function showPopup(text){
+
+document.getElementById("popupText").innerText=text
+
+document.getElementById("popup").classList.add("show")
+
+}
+
+function closePopup(){
+
+document.getElementById("popup").classList.remove("show")
+
+}
 </script>
 
 
 </body>
 </html>
-
-
