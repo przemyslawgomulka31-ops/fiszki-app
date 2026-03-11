@@ -692,74 +692,31 @@ loadCardsFromDB()
 
 
 
-document.getElementById("frontInput").addEventListener("input", searchImages)
-
-function searchImages(){
-
-const word = document.getElementById("frontInput").value.trim()
-
-if(word.length < 2) return
-
-const container = document.getElementById("imageResults")
-
-container.innerHTML = ""
-
-for(let i = 0; i < 6; i++){
-
-const img = document.createElement("img")
-img.src = "https://images.unsplash.com/photo-" + (Math.floor(Math.random()*1000000000)) + "?w=300&h=300&fit=crop"
-
-img.onclick = ()=>{
-
-imageURL = img.src
-
-document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
-
-img.style.border = "3px solid #7b5cff"
-
-}
-
-container.appendChild(img)
-
-}
-
-}
-
-	async function searchImages(){
-
 let searchTimer
 
 document.getElementById("frontInput").addEventListener("input", () => {
 
 clearTimeout(searchTimer)
-
 searchTimer = setTimeout(searchImages, 500)
 
 })
 
-if(word.length < 2) return
+async function searchImages(){
 
 const word = document.getElementById("frontInput").value.trim().split(" ")[0]
+
+if(word.length < 2) return
+
+const container = document.getElementById("imageResults")
 
 container.innerHTML = "Ładowanie..."
 
 try{
 
-const url = "https://api.unsplash.com/search/photos?query=" + word + "&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
+const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=6&client_id=0Eb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
 
 const res = await fetch(url)
-	
-if(!data.results || data.results.length === 0){
 
-const img = document.createElement("img")
-
-img.src = "https://picsum.photos/300"
-
-container.appendChild(img)
-
-return
-
-}
 if(!res.ok){
 container.innerHTML = "Błąd API Unsplash"
 return
@@ -769,10 +726,19 @@ const data = await res.json()
 
 container.innerHTML = ""
 
+if(!data.results || data.results.length === 0){
+
+const img = document.createElement("img")
+img.src = "https://picsum.photos/300"
+
+container.appendChild(img)
+return
+
+}
+
 data.results.forEach(photo=>{
 
 const img = document.createElement("img")
-
 img.src = photo.urls.small
 
 img.onclick = ()=>{
@@ -1169,6 +1135,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
