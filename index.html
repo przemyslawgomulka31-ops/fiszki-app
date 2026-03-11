@@ -287,10 +287,8 @@ input{
   font-size:24px;
 }
 	#imageResults{
-		dispaly:grid;
-		grid-template-columns:repaet(3,1fr);
-		gap:8px;
-		margin:10px 0 ;}
+display:grid;
+grid-template-columns:repeat(3,1fr);
 #imageResults img {
 width:100%;
 	border-radius:10px;
@@ -300,7 +298,13 @@ width:100%;
 transform:scale(1.05);
 
 }
-	
+	#cardImage{
+max-width:100%;
+max-height:120px;
+display:none;
+border-radius:10px;
+margin-bottom:10px;
+}
 
 </style>
 </head>
@@ -334,7 +338,7 @@ Progres: <span id="progress-mini">—</span>
 
 <span id="cardText">Dodaj pierwszą fiszkę</span>
 
-<span class="speak" onclick="speakWord(cards[currentIndex].front)">🔊</span>
+<span class="speak" onclick="cards.length && speakWord(cards[currentIndex].front)">🔊</span>
 
 <span class="play" onclick="playRecording()">▶️</span>
 
@@ -584,7 +588,7 @@ document.getElementById("counter").innerText = cards.length
 document.getElementById("progress-mini").innerText =
 (currentIndex + 1) + " / " + cards.length
 
-	cconst img = document.getElementById("cardImage")
+	const img = document.getElementById("cardImage")
 
 if(cards[currentIndex].image){
 
@@ -660,7 +664,7 @@ return
 const newCard={
 front:front,
 back:back,
-audio:recordedAudioBase64
+audio:recordedAudioBase64,
 image:imageURL
 }
 
@@ -1098,6 +1102,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
