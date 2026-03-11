@@ -372,6 +372,10 @@ Progres: <span id="progress-mini">—</span>
 <input type="text" id="frontInput" placeholder="Słowo po angielsku">
 
 <input type="text" id="backInput" placeholder="Tłumaczenie">
+	 
+	
+	 <input type="file" id="imageUpload" accept="image/*">
+	<label for="imageUpload">📷 Dodaj własne zdjęcie</label>
 
 	  <div id="imageResults"></div>
 
@@ -764,7 +768,34 @@ container.innerHTML = "Błąd pobierania obrazów"
 }
 
 
+document.getElementById("imageUpload").addEventListener("change", function(e){
 
+const file = e.target.files[0]
+
+if(!file) return
+
+const reader = new FileReader()
+
+reader.onload = function(ev){
+
+imageURL = ev.target.result
+
+const container = document.getElementById("imageResults")
+
+container.innerHTML = ""
+
+const img = document.createElement("img")
+
+img.src = imageURL
+img.style.border = "3px solid #7b5cff"
+
+container.appendChild(img)
+
+}
+
+reader.readAsDataURL(file)
+
+})
 
 
 
@@ -1135,6 +1166,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
