@@ -537,57 +537,7 @@ document.getElementById(view).classList.add("active")
 
 }
 
-/* ===============================
-TOUCH SYSTEM (SWIPE + TAP)
-================================ */
-const card = document.getElementById("flashcard")
 
-let startX = 0,
-startY = 0,
-endX = 0,
-endY = 0
-
-card.addEventListener("touchstart", e => {
-
-startX = e.touches[0].clientX
-startY = e.touches[0].clientY
-
-})
-
-card.addEventListener("touchend", e => {
-
-endX = e.changedTouches[0].clientX
-endY = e.changedTouches[0].clientY
-
-handleGesture()
-
-})
-
-function handleGesture(){
-
-const diffX = endX - startX
-const diffY = endY - startY
-
-if(Math.abs(diffX) < 10 && Math.abs(diffY) < 10){
-showAnswer()
-return
-}
-
-if(Math.abs(diffX) > Math.abs(diffY)){
-
-if(diffX > 80){
-prevCard()
-return
-}
-
-if(diffX < -80){
-nextCard()
-return
-}
-
-}
-
-}
 /* ===============================
    RENDER CARD
 ================================ */
@@ -1036,14 +986,6 @@ reader.readAsText(file)
 
 })
 
-transaction.oncomplete = function(){
-
-closeModal()
-loadCardsFromDB()
-renderList()
-renderCard()
-
-}
 
 </script>
 
@@ -1072,6 +1014,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
