@@ -707,8 +707,7 @@ container.innerHTML = ""
 for(let i = 0; i < 6; i++){
 
 const img = document.createElement("img")
-
-img.src = "https://source.unsplash.com/300x300/?" + word + "&sig=" + i
+img.src = "https://images.unsplash.com/photo-" + (Math.floor(Math.random()*1000000000)) + "?w=300&h=300&fit=crop"
 
 img.onclick = ()=>{
 
@@ -1099,6 +1098,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
