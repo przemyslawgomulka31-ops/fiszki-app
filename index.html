@@ -694,41 +694,35 @@ loadCardsFromDB()
 
 document.getElementById("frontInput").addEventListener("input", searchImages)
 
-async function searchImages(){
+function searchImages(){
 
 const word = document.getElementById("frontInput").value.trim()
 
 if(word.length < 2) return
 
-const url = "https://api.unsplash.com/search/photos?query=" + word + "&per_page=6&client_id=0Eb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
-
-const res = await fetch(url)
-
-const data = await res.json()
-
 const container = document.getElementById("imageResults")
 
 container.innerHTML = ""
 
-data.results.forEach(photo=>{
+for(let i = 0; i < 6; i++){
 
 const img = document.createElement("img")
 
-img.src = photo.urls.small
+img.src = "https://source.unsplash.com/300x300/?" + word + "&sig=" + i
 
 img.onclick = ()=>{
 
-imageURL = photo.urls.small
+imageURL = img.src
 
 document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
 
-img.style.border="3px solid #7b5cff"
+img.style.border = "3px solid #7b5cff"
 
 }
 
 container.appendChild(img)
 
-})
+}
 
 }
 
@@ -1105,6 +1099,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
