@@ -314,7 +314,7 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-<div class="card">
+<div class="card" id="flashcard" onclick ="toggleAnswer()">
 
 <span id="cardText">Dodaj pierwszą fiszkę</span>
 
@@ -445,7 +445,57 @@ loadCardsFromDB()
 
 }
 
+/* ===============================
+SWIPE GESTURE (TINDER STYLE)
+================================ */
 
+const card = document.getElementById("flashcard")
+
+let startX = 0
+let endX = 0
+
+card.addEventListener("touchstart", e => {
+
+startX = e.changedTouches[0].screenX
+
+})
+
+card.addEventListener("touchend", e => {
+
+endX = e.changedTouches[0].screenX
+
+handleSwipe()
+
+})
+
+function handleSwipe(){
+
+const diff = endX - startX
+
+/* swipe right */
+
+if(diff > 80){
+
+prevCard()
+
+}
+
+/* swipe left */
+
+if(diff < -80){
+
+nextCard()
+
+}
+
+}
+
+
+
+
+
+
+	
 /* ===============================
    LOAD FROM DB
 ================================ */
@@ -487,6 +537,11 @@ document.getElementById(view).classList.add("active")
 
 }
 
+	function toggleAnswer() {
+if(cards.length===0)return
+		showingAnswer =!showingAnserw 
+		renderCard ()
+	}
 
 /* ===============================
    RENDER CARD
@@ -972,5 +1027,6 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
