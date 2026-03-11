@@ -286,6 +286,21 @@ input{
   cursor:pointer;
   font-size:24px;
 }
+	#imageResults{
+		dispaly:grid;
+		grid-template-columns:repaet(3,1fr);
+		gap:8px;
+		margin:10px 0 ;}
+#imageResults img {
+width:100%;
+	border-radius:10px;
+	cursor:pointer;
+}
+	#imageResults img:hover {
+transform:scale(1.05);
+
+}
+	
 
 </style>
 </head>
@@ -315,6 +330,7 @@ Progres: <span id="progress-mini">—</span>
 </div>
 
 <div class="card" id="flashcard">
+	<img id="cardImage">
 
 <span id="cardText">Dodaj pierwszą fiszkę</span>
 
@@ -349,6 +365,8 @@ Progres: <span id="progress-mini">—</span>
 <input type="text" id="frontInput" placeholder="Słowo po angielsku">
 
 <input type="text" id="backInput" placeholder="Tłumaczenie">
+
+	  <div id="imageResults"></div>
 
 <button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
 
@@ -408,6 +426,8 @@ let sortAZ = true
 let mediaRecorder
 let audioChunks = []
 let recordedAudioBase64 = null
+
+let imageURL = null
 
 
 const request = indexedDB.open("FlashcardsDB",1)
@@ -564,6 +584,18 @@ document.getElementById("counter").innerText = cards.length
 document.getElementById("progress-mini").innerText =
 (currentIndex + 1) + " / " + cards.length
 
+	cconst img = document.getElementById("cardImage")
+
+if(cards[currentIndex].image){
+
+img.src = cards[currentIndex].image
+img.style.display = "block"
+
+}else{
+
+img.style.display = "none"
+
+}
 }
 
 /* ===============================
@@ -617,7 +649,6 @@ function addCard(){
 
 const front=document.getElementById("frontInput").value.trim()
 const back=document.getElementById("backInput").value.trim()
-
 if(!front||!back){
 
 alert("Wypełnij pola")
@@ -630,6 +661,7 @@ const newCard={
 front:front,
 back:back,
 audio:recordedAudioBase64
+image:imageURL
 }
 
 const transaction=db.transaction("cards","readwrite")
@@ -652,6 +684,54 @@ loadCardsFromDB()
 }
 
 
+
+document.getElementById("frontInput").addEventListener("input", searchImages)
+
+async function searchImages(){
+
+const word = document.getElementById("frontInput").value.trim()
+
+if(word.length < 2) return
+
+const url = "https://api.unsplash.com/search/photos?query=" + word + "&per_page=6&client_id=0Eb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
+
+const res = await fetch(url)
+
+const data = await res.json()
+
+const container = document.getElementById("imageResults")
+
+container.innerHTML = ""
+
+data.results.forEach(photo=>{
+
+const img = document.createElement("img")
+
+img.src = photo.urls.small
+
+img.onclick = ()=>{
+
+imageURL = photo.urls.small
+
+document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
+
+img.style.border="3px solid #7b5cff"
+
+}
+
+container.appendChild(img)
+
+})
+
+}
+
+
+
+
+
+
+
+	
 /* ===============================
    DELETE
 ================================ */
@@ -1018,6 +1098,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
