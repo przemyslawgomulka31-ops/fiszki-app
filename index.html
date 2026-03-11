@@ -347,6 +347,15 @@ Progres: <span id="progress-mini">—</span>
 <span class="play" onclick="playRecording()">▶️</span>
 
 </div>
+	<div class="reviewButtons">
+
+<button onclick="reviewCard(0)">❌ Nie pamiętam</button>
+
+<button onclick="reviewCard(1)">🙂 Średnio</button>
+
+<button onclick="reviewCard(2)">✅ Łatwe</button>
+
+</div>
 </div>
 
   <!-- LIST -->
@@ -576,6 +585,13 @@ const cardEl = document.getElementById("cardText")
 
 function renderCard(){
 
+	const dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
+
+if(dueCards.length === 0){
+cardEl.innerText = "Brak fiszek do powtórki 🎉"
+return
+}
+	
 if(cards.length === 0){
 
 cardEl.innerText = "Dodaj pierwszą fiszkę"
@@ -673,7 +689,10 @@ const newCard={
 front:front,
 back:back,
 audio:recordedAudioBase64,
-image:imageURL
+image:imageURL,
+
+level:0,
+nextReview:Date.now()
 }
 
 const transaction=db.transaction("cards","readwrite")
@@ -951,6 +970,45 @@ document.getElementById("modal").classList.remove("show")
 }
 
 /* ===============================
+   REPEAT
+================================ */
+function reviewCard(score){
+
+const card = cards[currentIndex]
+
+const intervals = [
+1,    // 1 dzień
+3,    // 3 dni
+7,    // tydzień
+14,   // 2 tygodnie
+30    // miesiąc
+]
+
+if(score === 0){
+card.level = 0
+}else{
+card.level = Math.min(card.level + 1, intervals.length - 1)
+}
+
+const days = intervals[card.level]
+
+card.nextReview = Date.now() + days*24*60*60*1000
+
+const transaction = db.transaction("cards","readwrite")
+
+const store = transaction.objectStore("cards")
+
+store.put(card)
+
+transaction.oncomplete = function(){
+
+nextCard()
+
+}
+
+}
+
+/* ===============================
    SPEECH
 ================================ */
 
@@ -1170,6 +1228,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
