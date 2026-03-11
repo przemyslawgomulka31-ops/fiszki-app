@@ -82,7 +82,7 @@ backdrop-filter:blur(10px);
   font-size:20px;
   font-weight:600;
   text-align:center;
-  margin:20px 0 14px;
+  margin:15px 0 14px;
   color:#1b1635;
 }
 
@@ -544,10 +544,25 @@ const cardEl = document.getElementById("cardText")
 
 function renderCard(){
 
-if(cards.length===0){
+if(cards.length === 0){
 
-cardEl.innerText="Dodaj pierwszą fiszkę"
+cardEl.innerText = "Dodaj pierwszą fiszkę"
+
+document.getElementById("counter").innerText = 0
+document.getElementById("progress-mini").innerText = "—"
+
 return
+
+}
+
+cardEl.innerText = showingAnswer
+? cards[currentIndex].back
+: cards[currentIndex].front
+
+document.getElementById("counter").innerText = cards.length
+
+document.getElementById("progress-mini").innerText =
+(currentIndex + 1) + " / " + cards.length
 
 }
 
@@ -1012,6 +1027,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
