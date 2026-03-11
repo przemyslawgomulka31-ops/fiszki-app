@@ -540,13 +540,12 @@ document.getElementById(view).classList.add("active")
 /* ===============================
 TOUCH SYSTEM (SWIPE + TAP)
 ================================ */
-
 const card = document.getElementById("flashcard")
 
-let startX = 0
-let startY = 0
-let endX = 0
-let endY = 0
+let startX = 0,
+startY = 0,
+endX = 0,
+endY = 0
 
 card.addEventListener("touchstart", e => {
 
@@ -564,42 +563,31 @@ handleGesture()
 
 })
 
-
 function handleGesture(){
 
 const diffX = endX - startX
 const diffY = endY - startY
 
-/* TAP (mały ruch) */
-
 if(Math.abs(diffX) < 10 && Math.abs(diffY) < 10){
-
 showAnswer()
-
 return
-
 }
 
-/* SWIPE RIGHT */
+if(Math.abs(diffX) > Math.abs(diffY)){
 
 if(diffX > 80){
-
 prevCard()
 return
-
 }
-
-/* SWIPE LEFT */
 
 if(diffX < -80){
-
 nextCard()
 return
-
 }
 
 }
 
+}
 /* ===============================
    RENDER CARD
 ================================ */
@@ -1084,6 +1072,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
