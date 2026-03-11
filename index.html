@@ -476,19 +476,19 @@ handleGesture()
 const diffX = endX - startX
 const diffY = endY - startY
 
-if(Math.abs(diffX) < 30 && Math.abs(diffY) < 30){
+if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
 showAnswer()
 return
 }
 
 if(Math.abs(diffX) > Math.abs(diffY)){
 
-if(diffX > 80){
+if(diffX > 200){
 prevCard()
 return
 }
 
-if(diffX < -80){
+if(diffX < -200){
 nextCard()
 return
 }
@@ -1021,3 +1021,4 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
