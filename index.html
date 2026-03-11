@@ -181,9 +181,10 @@ position:absolute;
 top:12px;
 left:22px;
 right:22px;
-	display:flex;
-	justify-content:space-between;
-	z-index:20;
+display:flex;
+justify-content:space-between;
+gap:12px;
+z-index:20;
 }
 
 .iconBtn{
@@ -303,10 +304,10 @@ transform:scale(1.05);
 }
 	#cardImage{
 max-width:100%;
-max-height:120px;
-display:none;
-border-radius:10px;
-margin-bottom:10px;
+max-height:220px;
+object-fit:cover;
+border-radius:16px;
+margin-bottom:15px;
 }
 
 </style>
@@ -317,7 +318,7 @@ margin-bottom:10px;
   <div class="topButtons">
 
 	<button class="iconBtn left" onclick="goToList()">📋</button>
-
+<button class="iconBtn" onclick="goHome()">🏠</button>
 	<button class="iconBtn right" onclick="goToAdd()">➕</button>
 
 </div>
@@ -683,10 +684,13 @@ store.add(newCard)
 
 transaction.oncomplete=function(){
 
-recordedAudioBase64=null
+recordedAudioBase64 = null
+imageURL = null
 
 document.getElementById("frontInput").value=""
 document.getElementById("backInput").value=""
+
+document.getElementById("imageResults").innerHTML=""
 
 loadCardsFromDB()
 
@@ -1166,6 +1170,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
