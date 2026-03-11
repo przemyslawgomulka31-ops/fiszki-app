@@ -704,7 +704,7 @@ const container = document.getElementById("imageResults")
 
 container.innerHTML = ""
 
-for(let i = 0; i < 10; i++){
+for(let i = 0; i < 6; i++){
 
 const img = document.createElement("img")
 img.src = "https://images.unsplash.com/photo-" + (Math.floor(Math.random()*1000000000)) + "?w=300&h=300&fit=crop"
@@ -727,11 +727,19 @@ container.appendChild(img)
 
 	async function searchImages(){
 
-const word = document.getElementById("frontInput").value.trim()
+let searchTimer
+
+document.getElementById("frontInput").addEventListener("input", () => {
+
+clearTimeout(searchTimer)
+
+searchTimer = setTimeout(searchImages, 500)
+
+})
 
 if(word.length < 2) return
 
-const container = document.getElementById("imageResults")
+const word = document.getElementById("frontInput").value.trim().split(" ")[0]
 
 container.innerHTML = "Ładowanie..."
 
@@ -740,7 +748,18 @@ try{
 const url = "https://api.unsplash.com/search/photos?query=" + word + "&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
 
 const res = await fetch(url)
+	
+if(!data.results || data.results.length === 0){
 
+const img = document.createElement("img")
+
+img.src = "https://picsum.photos/300"
+
+container.appendChild(img)
+
+return
+
+}
 if(!res.ok){
 container.innerHTML = "Błąd API Unsplash"
 return
@@ -1150,6 +1169,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
