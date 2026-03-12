@@ -447,7 +447,6 @@ Progres: <span id="progress-mini">—</span>
 let db
 let cards = []
 let currentIndex = 0
-let dueCards = []
 let showingAnswer = false
 let sortAZ = true
 
@@ -587,52 +586,75 @@ document.getElementById(view).classList.add("active")
 /* ===============================
    RENDER CARD
 ================================ */
-
-const cardEl = document.getElementById("cardText")
-
+let dueCards = [];
 function renderCard(){
+  // filtrujemy fiszki do powtórki
+  dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now());
 
-	dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
+  // jeśli brak fiszek do powtórki
+  if(dueCards.length === 0){
+    currentIndex = 0;
+    cardEl.innerText = "Brak fiszek do powtórki 🎉";
+    return;
+  }
+  // jeśli brak w ogóle fiszek
+  if(cards.length === 0){
+    cardEl.innerText = "Dodaj pierwszą fiszkę";
+    document.getElementById("counter").innerText = 0;
+    document.getElementById("progress-mini").innerText = "—";
+    return;
+  }
 
-if(dueCards.length === 0){
-currentIndex = 0
-cardEl.innerText = "Brak fiszek do powtórki 🎉"
-return
+  // wyświetlamy tekst lub odpowiedź
+  cardEl.innerText = showingAnswer
+    ? dueCards[currentIndex].back
+    : dueCards[currentIndex].front;
+
+  // aktualizujemy licznik całkowitej liczby kart
+  document.getElementById("counter").innerText = cards.length;
+  // postęp wśród kart do powtórki
+  document.getElementById("progress-mini").innerText =
+    (currentIndex + 1) + " / " + dueCards.length;
+
+  // obrazek (jeśli jest)
+  const img = document.getElementById("cardImage");
+  if(dueCards[currentIndex].image){
+    img.src = dueCards[currentIndex].image;
+    img.style.display = "block";
+  } else {
+    img.style.display = "none";
+  }
 }
-	
-if(cards.length === 0){
 
-cardEl.innerText = "Dodaj pierwszą fiszkę"
-
-document.getElementById("counter").innerText = 0
-document.getElementById("progress-mini").innerText = "—"
-
-return
-
+function reviewCard(score){
+  const card = dueCards[currentIndex];
+  const intervals = [1, 3, 7, 14, 30]; // dni
+  if(score === 0){
+    card.level = 0; // reset do nauki
+  } else {
+    card.level = Math.min(card.level + 1, intervals.length - 1);
+  }
+  card.nextReview = Date.now() + intervals[card.level] * 24*60*60*1000;
+  const transaction = db.transaction("cards","readwrite");
+  transaction.objectStore("cards").put(card);
+  transaction.oncomplete = () => {
+    nextCard();
+  };
 }
 
-cardEl.innerText = showingAnswer
-? dueCards[currentIndex].back
-: dueCards[currentIndex].front
-
-document.getElementById("counter").innerText = cards.length
-
-document.getElementById("progress-mini").innerText =
-(currentIndex + 1) + " / " + dueCards.length
-
-	const img = document.getElementById("cardImage")
-
-if(dueCards[currentIndex].image){
-img.src = dueCards[currentIndex].image
-	
-img.style.display = "block"
-
-}else{
-
-img.style.display = "none"
-
+function nextCard(){
+  if(dueCards.length === 0) return;
+  currentIndex = (currentIndex + 1) % dueCards.length;
+  showingAnswer = false;
+  renderCard();
 }
+function prevCard(){
+  if(dueCards.length === 0) return;
+  currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length;
+  showingAnswer = false;
+  renderCard();
 }
+
 
 /* ===============================
    STUDY
@@ -648,32 +670,6 @@ renderCard()
 
 }
 
-function nextCard(){
-
-if(dueCards.length===0)return
-
-currentIndex=(currentIndex+1)%dueCards.length
-
-showingAnswer=false
-
-renderCard()
-
-}
-
-
-function prevCard(){
-
-if(dueCards.length===0)return
-
-currentIndex--
-
-if(currentIndex<0) currentIndex = dueCards.length-1
-
-showingAnswer=false
-
-renderCard()
-
-}
 
 
 /* ===============================
@@ -985,41 +981,7 @@ document.getElementById("modal").classList.remove("show")
 /* ===============================
    REPEAT
 ================================ */
-function reviewCard(score){
 
-const card = dueCards[currentIndex]
-
-const intervals = [
-1,    // 1 dzień
-3,    // 3 dni
-7,    // tydzień
-14,   // 2 tygodnie
-30    // miesiąc
-]
-
-if(score === 0){
-card.level = 0
-}else{
-card.level = Math.min(card.level + 1, intervals.length - 1)
-}
-
-const days = intervals[card.level]
-
-card.nextReview = Date.now() + days*24*60*60*1000
-
-const transaction = db.transaction("cards","readwrite")
-
-const store = transaction.objectStore("cards")
-
-store.put(card)
-
-transaction.oncomplete = function(){
-
-nextCard()
-
-}
-
-}
 
 /* ===============================
    SPEECH
@@ -1248,6 +1210,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
