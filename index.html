@@ -322,9 +322,51 @@ border:none;
 background:rgba(255,255,255,0.3);
 font-weight:600;
 }
+	#startScreen{
+
+position:fixed;
+top:0;
+left:0;
+right:0;
+bottom:0;
+
+display:flex;
+justify-content:center;
+align-items:center;
+
+background:linear-gradient(
+180deg,
+#8f7bff,
+#c9c2ff
+);
+
+z-index:9999;
+
+color:white;
+text-align:center;
+}
+
+.startContent h1{
+font-size:38px;
+margin:0;
+}
+
+.tapText{
+margin-top:20px;
+opacity:0.8;
+font-size:14px;
+}
 </style>
 </head>
 <body>
+<div id="startScreen">
+<div class="startContent">
+<h1>Twoja Nazwa</h1>
+<p>Flashcards</p>
+<div class="tapText">Dotknij aby rozpocząć</div>
+</div>
+</div>
+	
 <div class="app">
   <div class="header"></div>
   <div class="topButtons">
@@ -1297,6 +1339,13 @@ alert("Import OK")
 reader.readAsText(file)
 
 })   // ← TEGO NAWIASU BRAKOWAŁO
+
+document.getElementById("startScreen").addEventListener("click",function(){
+
+this.style.display = "none"
+
+})
+	
 </script>
 
 <script>
@@ -1324,6 +1373,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
