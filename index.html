@@ -1101,7 +1101,7 @@ stream.getTracks().forEach(track => track.stop())
 }
 
 // start nagrywania
-mediaRecorder.start()
+mediaRecorder.start(100);
 
 // zatrzymanie po 3 sekundach
 setTimeout(()=>{
@@ -1287,6 +1287,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
