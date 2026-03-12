@@ -692,7 +692,15 @@ renderCard()
 ================================ */
 
 function addCard(){
+if(mediaRecorder && mediaRecorder.state === "recording"){
+alert("Nagranie jeszcze trwa")
+return
+}
 
+if(audioChunks.length > 0 && !recordedAudioBase64){
+alert("Poczekaj aż nagranie się zapisze")
+return
+}
 const front = document.getElementById("frontInput").value.trim()
 const back = document.getElementById("backInput").value.trim()
 
@@ -1279,6 +1287,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
