@@ -1158,15 +1158,30 @@ reader.onload = function(ev){
   const transaction = db.transaction("cards","readwrite")
   const store = transaction.objectStore("cards")
 
-  imported.forEach(card=>{
-    delete card.id
-    store.add(card)
-  })
+ imported.forEach(card=>{
 
-  transaction.oncomplete = function(){
-    loadCardsFromDB()
-    alert("Import OK")
-  }
+delete card.id
+
+// jeśli brak level
+if(card.level === undefined){
+  card.level = 0
+}
+
+// jeśli brak nextReview
+if(!card.nextReview){
+  card.nextReview = Date.now()
+}
+
+store.add(card)
+
+})
+
+transaction.oncomplete = function(){
+loadCardsFromDB()
+currentIndex = 0
+renderCard()
+alert("Import OK")
+}
 
 }
 
@@ -1200,6 +1215,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
