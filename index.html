@@ -1135,35 +1135,44 @@ a.click()
    IMPORT
 ================================ */
 
-document.getElementById("importFile").addEventListener("change",function(e){
+document.getElementById("importFile").addEventListener("change", function(e){
 
-const file=e.target.files[0]
+const file = e.target.files[0]
 
-if(!file)return
+if(!file) return
 
-const reader=new FileReader()
+const reader = new FileReader()
 
 reader.onload = function(ev){
-  let imported;
-  try {
-    imported = JSON.parse(ev.target.result);
-  } catch(e) {
-    alert("Błędny plik backup");
-    return;
+
+  let imported
+
+  try{
+    imported = JSON.parse(ev.target.result)
   }
-  const transaction = db.transaction("cards","readwrite");
-  const store = transaction.objectStore("cards");
-  imported.forEach(card => {
-    delete card.id;
-    store.add(card);
-  });
+  catch(e){
+    alert("Błędny plik backup")
+    return
+  }
+
+  const transaction = db.transaction("cards","readwrite")
+  const store = transaction.objectStore("cards")
+
+  imported.forEach(card=>{
+    delete card.id
+    store.add(card)
+  })
+
   transaction.oncomplete = function(){
-    loadCardsFromDB();
-    alert("Import OK");
-  };
-	
-};
+    loadCardsFromDB()
+    alert("Import OK")
+  }
+
+}
+
 reader.readAsText(file)
+
+})   // ← TEGO NAWIASU BRAKOWAŁO
 </script>
 
 <script>
@@ -1191,6 +1200,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
