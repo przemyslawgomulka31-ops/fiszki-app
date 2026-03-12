@@ -1052,6 +1052,12 @@ mediaRecorder.onstop = () => {
   stream.getTracks().forEach(track => track.stop())
 
 }
+	  
+catch(err){
+  alert("Brak dostępu do mikrofonu")
+}
+
+}
 /* ===============================
    PLAY AUDIO
 ================================ */
@@ -1128,9 +1134,9 @@ reader.onload = function(ev){
     loadCardsFromDB();
     alert("Import OK");
   };
-	reader.readAsText(file)
+	
 };
-
+reader.readAsText(file)
 </script>
 
 <script>
@@ -1158,6 +1164,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
