@@ -365,7 +365,7 @@ Progres: <span id="progress-mini">—</span>
 <span class="play" onclick="playRecording()">▶️</span>
 
 </div>
-	<div class="reviewButtons">
+	<div id="reviewButtons">
 
 <button onclick="reviewCard(0)">❌ Nie pamiętam</button>
 
@@ -608,7 +608,7 @@ document.getElementById(view).classList.add("active")
 /* ===============================
    RENDER CARD
 ================================ */
-	const cardEl = document.getElementById("cardText")
+const cardEl = document.getElementById("cardText")
 let dueCards = [];
 function renderCard(){
 
@@ -668,7 +668,14 @@ dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
   } else {
     img.style.display = "none";
   }
+const reviewUI = document.getElementById("reviewButtons")
 
+if(studyMode === "ALL"){
+reviewUI.style.display = "none"
+}
+else{
+reviewUI.style.display = "block"
+}
 }
 
 function reviewCard(score){
@@ -1317,6 +1324,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
