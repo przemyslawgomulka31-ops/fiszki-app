@@ -693,45 +693,46 @@ renderCard()
 
 function addCard(){
 
-const front=document.getElementById("frontInput").value.trim()
-const back=document.getElementById("backInput").value.trim()
-if(!front||!back){
+const front = document.getElementById("frontInput").value.trim()
+const back = document.getElementById("backInput").value.trim()
 
+if(!front || !back){
 alert("Wypełnij pola")
-
 return
-
 }
 
-const newCard={
-front:front,
-back:back,
-audio:recordedAudioBase64,
-image:imageURL,
+// debug
+console.log("Audio przed zapisem:", recordedAudioBase64)
 
-level:0,
-nextReview:Date.now()
+const newCard = {
+front: front,
+back: back,
+audio: recordedAudioBase64 ? recordedAudioBase64 : null,
+image: imageURL ? imageURL : null,
+level: 0,
+nextReview: Date.now()
 }
 
-const transaction=db.transaction("cards","readwrite")
-
-const store=transaction.objectStore("cards")
+const transaction = db.transaction("cards","readwrite")
+const store = transaction.objectStore("cards")
 
 store.add(newCard)
 
-transaction.oncomplete=function(){
+transaction.oncomplete = function(){
 
+// reset
 recordedAudioBase64 = null
 imageURL = null
 
 document.getElementById("frontInput").value=""
 document.getElementById("backInput").value=""
-
 document.getElementById("imageResults").innerHTML=""
 
 currentIndex = 0
 
 loadCardsFromDB()
+
+showPopup("Fiszka dodana ✅")
 
 }
 
@@ -1279,6 +1280,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
