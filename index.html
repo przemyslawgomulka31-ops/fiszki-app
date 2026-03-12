@@ -1032,6 +1032,7 @@ speechSynthesis.speak(speech)
 
 async function startRecording(){
 
+// sprawdzenie obsługi
 if(!navigator.mediaDevices || !window.MediaRecorder){
 alert("Twoja przeglądarka nie obsługuje nagrywania audio")
 return
@@ -1047,22 +1048,27 @@ audioChunks = []
 
 let seconds = 0
 
-document.getElementById("recordUI").style.display="block"
+document.getElementById("recordUI").style.display = "block"
 
 const timer = setInterval(()=>{
 seconds++
-document.getElementById("recordTimer").innerText = seconds+" s"
+document.getElementById("recordTimer").innerText = seconds + " s"
 },1000)
 
-mediaRecorder.ondataavailable = e=>{
-audioChunks.push(e.data)
+mediaRecorder.ondataavailable = event=>{
+audioChunks.push(event.data)
 }
 
 mediaRecorder.onstop = ()=>{
 
 clearInterval(timer)
 
-document.getElementById("recordUI").style.display="none"
+document.getElementById("recordUI").style.display = "none"
+
+if(audioChunks.length === 0){
+alert("Nagranie się nie zapisało")
+return
+}
 
 const blob = new Blob(audioChunks,{type:"audio/webm;codecs=opus"})
 
@@ -1070,28 +1076,47 @@ const reader = new FileReader()
 
 reader.onloadend = ()=>{
 recordedAudioBase64 = reader.result
+
+if(!recordedAudioBase64){
+alert("Błąd zapisu nagrania")
+return
+}
+
 showPopup("Nagranie zapisane 🎤")
 }
 
 reader.readAsDataURL(blob)
 
+// zamykamy mikrofon
 stream.getTracks().forEach(track=>track.stop())
 
 }
 
+// start nagrywania
 mediaRecorder.start()
 
+// zatrzymanie po 3 sekundach
 setTimeout(()=>{
+if(mediaRecorder && mediaRecorder.state !== "inactive"){
 mediaRecorder.stop()
+}
 },3000)
 
-}
-catch(err){
-alert("Brak dostępu do mikrofonu")
+}catch(err){
+
 console.error(err)
+
+if(err.name === "NotAllowedError"){
+alert("Nie udzielono dostępu do mikrofonu")
+}
+else{
+alert("Nie można uruchomić nagrywania")
 }
 
 }
+
+}
+
 
 /* ===============================
    PLAY AUDIO
@@ -1099,13 +1124,22 @@ console.error(err)
 
 function playRecording(){
 
-// jeśli jesteśmy w trybie dodawania fiszki
+try{
+
+// tryb dodawania fiszki
 if(recordedAudioBase64){
-new Audio(recordedAudioBase64).play()
+
+const audio = new Audio(recordedAudioBase64)
+
+audio.play().catch(err=>{
+console.error(err)
+alert("Nie można odtworzyć nagrania")
+})
+
 return
 }
 
-// jeśli brak kart
+// brak kart
 if(!dueCards || dueCards.length === 0){
 alert("Brak nagrania")
 return
@@ -1113,12 +1147,30 @@ return
 
 const card = dueCards[currentIndex]
 
-if(!card || !card.audio){
-alert("Brak nagrania")
+if(!card){
+alert("Błąd odczytu fiszki")
 return
 }
 
-new Audio(card.audio).play()
+// karta bez nagrania
+if(!card.audio){
+alert("Ta fiszka nie ma nagrania")
+return
+}
+
+const audio = new Audio(card.audio)
+
+audio.play().catch(err=>{
+console.error(err)
+alert("Nie można odtworzyć nagrania")
+})
+
+}catch(err){
+
+console.error(err)
+alert("Błąd odtwarzania audio")
+
+}
 
 }
 
@@ -1229,6 +1281,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
