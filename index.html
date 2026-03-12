@@ -1031,82 +1031,96 @@ speechSynthesis.speak(speech)
 ================================ */
 
 async function startRecording(){
-  try {
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
-
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-
-    let seconds = 0;
-
-    document.getElementById("recordUI").style.display = "block";
-
-    const timer = setInterval(()=>{
-      seconds++;
-      document.getElementById("recordTimer").innerText = seconds + " s";
-    },1000);
-
-    mediaRecorder.ondataavailable = event => {
-      audioChunks.push(event.data);
-    };
-
-    mediaRecorder.onstop = () => {
-
-      clearInterval(timer);
-
-      document.getElementById("recordUI").style.display = "none";
-
-      const blob = new Blob(audioChunks,{type:"audio/webm"});
-
-      const reader = new FileReader();
-
-      reader.onloadend = function(){
-        recordedAudioBase64 = reader.result;
-        showPopup("Nagranie zapisane 🎤");
-      };
-
-      reader.readAsDataURL(blob);
-
-      // zamykamy mikrofon
-      stream.getTracks().forEach(track => track.stop());
-    };
-
-    // start nagrywania
-    mediaRecorder.start();
-
-    // zatrzymanie po 3 sekundach
-    setTimeout(()=>{
-      mediaRecorder.stop();
-    },3000);
-
-  } catch(err) {
-    alert("Brak dostępu do mikrofonu");
-    console.error(err);
-  }
+if(!navigator.mediaDevices || !window.MediaRecorder){
+alert("Twoja przeglądarka nie obsługuje nagrywania audio")
+return
 }
+
+try{
+
+const stream = await navigator.mediaDevices.getUserMedia({audio:true})
+
+mediaRecorder = new MediaRecorder(stream)
+
+audioChunks = []
+
+let seconds = 0
+
+document.getElementById("recordUI").style.display="block"
+
+const timer = setInterval(()=>{
+seconds++
+document.getElementById("recordTimer").innerText = seconds+" s"
+},1000)
+
+mediaRecorder.ondataavailable = e=>{
+audioChunks.push(e.data)
+}
+
+mediaRecorder.onstop = ()=>{
+
+clearInterval(timer)
+
+document.getElementById("recordUI").style.display="none"
+
+const blob = new Blob(audioChunks,{type:"audio/webm;codecs=opus"})
+
+const reader = new FileReader()
+
+reader.onloadend = ()=>{
+recordedAudioBase64 = reader.result
+showPopup("Nagranie zapisane 🎤")
+}
+
+reader.readAsDataURL(blob)
+
+stream.getTracks().forEach(track=>track.stop())
+
+}
+
+mediaRecorder.start()
+
+setTimeout(()=>{
+mediaRecorder.stop()
+},3000)
+
+}
+catch(err){
+alert("Brak dostępu do mikrofonu")
+console.error(err)
+}
+
+}
+
 /* ===============================
    PLAY AUDIO
 ================================ */
 
 function playRecording(){
-  // jeśli brak kart lub brak kart do powtórki
-if(cards.length === 0) return;
-  // w trybie ADD odtwarzamy bieżące nagranie
-  if(recordedAudioBase64){
-    new Audio(recordedAudioBase64).play();
-    return;
-  }
-  // w widoku powtórek odtwarzamy audio z bieżącej fiszki
-  const card = dueCards[currentIndex];
-  if(!card || !card.audio){
-    alert("Brak nagrania");
-    return;
-  }
-  new Audio(card.audio).play();
+
+// jeśli jesteśmy w trybie dodawania fiszki
+if(recordedAudioBase64){
+new Audio(recordedAudioBase64).play()
+return
 }
 
+// jeśli brak kart
+if(!dueCards || dueCards.length === 0){
+alert("Brak nagrania")
+return
+}
 
+const card = dueCards[currentIndex]
+
+if(!card || !card.audio){
+alert("Brak nagrania")
+return
+}
+
+new Audio(card.audio).play()
+
+}
 
 /* ===============================
    EXPORT
@@ -1215,6 +1229,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
