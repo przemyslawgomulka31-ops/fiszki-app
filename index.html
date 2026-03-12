@@ -30,28 +30,35 @@
 }
 
 *{box-sizing:border-box}
-body{
-	padding-top: env(safe-area-inset-top);
-  margin:0;
-  min-height:100vh;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  color: #111;
-  background:
-    linear-gradient(
-      180deg,
-      var(--accent1) 0%,
-      var(--accent2) 25%,
-      var(--accent3) 55%,
-      var(--accent4) 80%,
-      var(--white) 100%
-    );
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
-html {
-    touch-action: manipulation;
+html, body{
+margin:0;
+padding:0;
+height:100%;
+background:#8f7bff;
 }
 
+body{
+padding-top: env(safe-area-inset-top);
+min-height:100dvh;
+font-family: "Segoe UI", Roboto, Arial, sans-serif;
+color:#111;
+
+background: linear-gradient(
+180deg,
+var(--accent1) 0%,
+var(--accent2) 25%,
+var(--accent3) 55%,
+var(--accent4) 80%,
+var(--white) 100%
+);
+
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
+}
+
+html{
+touch-action: manipulation;
+}
 /* ---------- APP LAYOUT ---------- */
 .app{
   max-width:420px;
@@ -1385,6 +1392,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
