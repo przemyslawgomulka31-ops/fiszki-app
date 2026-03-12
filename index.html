@@ -348,7 +348,7 @@ Progres: <span id="progress-mini">—</span>
 
 <span id="cardText">Dodaj pierwszą fiszkę</span>
 
-<span class="speak" onclick="cards.length && speakWord(cards[currentIndex].front)">🔊</span>
+<span class="speak" onclick="dueCards.length && speakWord(dueCards[currentIndex].front)">🔊</span>
 
 <span class="play" onclick="playRecording()">▶️</span>
 
@@ -586,6 +586,7 @@ document.getElementById(view).classList.add("active")
 /* ===============================
    RENDER CARD
 ================================ */
+	const cardEl = document.getElementById("cardText")
 let dueCards = [];
 function renderCard(){
   // filtrujemy fiszki do powtórki
@@ -1030,22 +1031,30 @@ async function startRecording(){
       document.getElementById("recordUI").style.display = "none";
       const blob = new Blob(audioChunks, {type:"audio/webm"});
       const reader = new FileReader();
-      reader.onloadend = function(){
-        recordedAudioBase64 = reader.result;
-        showPopup("Nagranie zapisane 🎤");
-      };
-      reader.readAsDataURL(blob);
-      // tutaj zatrzymujemy strumień, by zwolnić mikrofon:
-      stream.getTracks().forEach(track => track.stop());
-    };
-    mediaRecorder.start();
-    setTimeout(()=>{ mediaRecorder.stop(); }, 3000);
+      reader.onload = function(ev){
+  let imported;
+  try {
+    imported = JSON.parse(ev.target.result);
+  } catch(e) {
+    alert("Błędny plik backup");
+    return;
   }
-  catch(err){
-    alert("Brak dostępu do mikrofonu");
-  }
-}
 
+  const transaction = db.transaction("cards","readwrite");
+  const store = transaction.objectStore("cards");
+
+  imported.forEach(card => {
+    delete card.id;
+    store.add(card);
+  });
+
+  transaction.oncomplete = function(){
+    loadCardsFromDB();
+    alert("Import OK");
+  };
+};
+
+reader.readAsText(file)
 
 /* ===============================
    PLAY AUDIO
@@ -1152,6 +1161,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
