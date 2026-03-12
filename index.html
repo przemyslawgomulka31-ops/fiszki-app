@@ -1075,7 +1075,7 @@ clearInterval(timer)
 
 document.getElementById("recordUI").style.display = "none"
 
-const blob = new Blob(audioChunks)
+const blob = new Blob(audioChunks,{type:"audio/mp4"});
 
 if(blob.size === 0){
 alert("Nagranie jest puste")
@@ -1101,7 +1101,7 @@ stream.getTracks().forEach(track => track.stop())
 }
 
 // start nagrywania
-mediaRecorder.start(100);
+mediaRecorder.start();
 
 // zatrzymanie po 3 sekundach
 setTimeout(()=>{
@@ -1287,6 +1287,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
