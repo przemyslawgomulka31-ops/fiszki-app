@@ -1346,7 +1346,11 @@ document.getElementById("startScreen").addEventListener("click",function(){
 this.style.display = "none"
 
 })
-	
+	if (window.navigator.standalone) {
+console.log("PWA mode")
+} else {
+console.log("Safari mode")
+}
 </script>
 
 <script>
@@ -1374,6 +1378,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
