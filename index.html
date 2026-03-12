@@ -1059,36 +1059,34 @@ mediaRecorder.ondataavailable = event=>{
 audioChunks.push(event.data)
 }
 
-mediaRecorder.onstop = ()=>{
+mediaRecorder.onstop = () => {
 
 clearInterval(timer)
 
 document.getElementById("recordUI").style.display = "none"
 
-if(audioChunks.length === 0){
-alert("Nagranie się nie zapisało")
+const blob = new Blob(audioChunks)
+
+if(blob.size === 0){
+alert("Nagranie jest puste")
 return
 }
-
-const blob = new Blob(audioChunks,{type:"audio/webm;codecs=opus"})
 
 const reader = new FileReader()
 
-reader.onloadend = ()=>{
+reader.onloadend = function(){
+
 recordedAudioBase64 = reader.result
 
-if(!recordedAudioBase64){
-alert("Błąd zapisu nagrania")
-return
-}
+console.log("Audio zapisane:", recordedAudioBase64)
 
 showPopup("Nagranie zapisane 🎤")
+
 }
 
 reader.readAsDataURL(blob)
 
-// zamykamy mikrofon
-stream.getTracks().forEach(track=>track.stop())
+stream.getTracks().forEach(track => track.stop())
 
 }
 
@@ -1281,6 +1279,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
