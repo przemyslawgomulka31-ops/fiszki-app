@@ -720,6 +720,36 @@ loadCardsFromDB()
 
 }
 
+async function compressImage(file, quality = 0.6){
+  const imageBitmap = await createImageBitmap(file);
+  const canvas = document.createElement('canvas');
+
+  const maxWidth = 800;
+  let width = imageBitmap.width;
+  let height = imageBitmap.height;
+
+  if(width > maxWidth){
+    height = height * (maxWidth / width);
+    width = maxWidth;
+  }
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(imageBitmap, 0, 0, width, height);
+
+  const blob = await new Promise(resolve =>
+    canvas.toBlob(resolve, 'image/jpeg', quality)
+  );
+
+  return new Promise(res => {
+    const reader = new FileReader();
+    reader.onloadend = () => res(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
 
 
 let searchTimer
@@ -794,17 +824,14 @@ container.innerHTML = "Błąd pobierania obrazów"
 }
 
 
-document.getElementById("imageUpload").addEventListener("change", function(e){
+document.getElementById("imageUpload").addEventListener("change", async function(e){
 
 const file = e.target.files[0]
 
 if(!file) return
 
-const reader = new FileReader()
-
-reader.onload = function(ev){
-
-imageURL = ev.target.result
+// kompresujemy obraz
+imageURL = await compressImage(file, 0.6)
 
 const container = document.getElementById("imageResults")
 
@@ -816,10 +843,6 @@ img.src = imageURL
 img.style.border = "3px solid #7b5cff"
 
 container.appendChild(img)
-
-}
-
-reader.readAsDataURL(file)
 
 })
 
@@ -1029,37 +1052,21 @@ async function startRecording(){
 ================================ */
 
 function playRecording(){
-if(cards.length === 0) return
-/* jeśli jesteśmy w dodawaniu fiszki */
-
-if(recordedAudioBase64){
-
-const audio = new Audio(recordedAudioBase64)
-
-audio.play()
-
-return
-
+  // jeśli brak kart lub brak kart do powtórki
+  if(cards.length === 0 || dueCards.length === 0) return;
+  // w trybie ADD odtwarzamy bieżące nagranie
+  if(recordedAudioBase64){
+    new Audio(recordedAudioBase64).play();
+    return;
+  }
+  // w widoku powtórek odtwarzamy audio z bieżącej fiszki
+  const card = dueCards[currentIndex];
+  if(!card || !card.audio){
+    alert("Brak nagrania");
+    return;
+  }
+  new Audio(card.audio).play();
 }
-
-/* jeśli jesteśmy na zapisanej fiszce */
-
-const card = dueCards[currentIndex]
-
-if(!card || !card.audio){
-
-alert("Brak nagrania")
-
-return
-
-}
-
-const audio = new Audio(card.audio)
-
-audio.play()
-
-}
-
 
 
 
@@ -1145,6 +1152,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
