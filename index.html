@@ -983,7 +983,9 @@ function saveModal(){
   };
   closeModal();
 }
-
+function closeModal(){
+  document.getElementById("modal").classList.remove("show")
+}
 /* ===============================
    REPEAT
 ================================ */
@@ -1026,36 +1028,30 @@ async function startRecording(){
     mediaRecorder.ondataavailable = event => {
       audioChunks.push(event.data);
     };
-    mediaRecorder.onstop = () => {
-      clearInterval(timer);
-      document.getElementById("recordUI").style.display = "none";
-      const blob = new Blob(audioChunks, {type:"audio/webm"});
-      const reader = new FileReader();
-      reader.onload = function(ev){
-  let imported;
-  try {
-    imported = JSON.parse(ev.target.result);
-  } catch(e) {
-    alert("Błędny plik backup");
-    return;
+mediaRecorder.onstop = () => {
+
+  clearInterval(timer)
+
+  document.getElementById("recordUI").style.display = "none"
+
+  const blob = new Blob(audioChunks,{type:"audio/webm"})
+
+  const reader = new FileReader()
+
+  reader.onloadend = function(){
+
+    recordedAudioBase64 = reader.result
+
+    showPopup("Nagranie zapisane 🎤")
+
   }
 
-  const transaction = db.transaction("cards","readwrite");
-  const store = transaction.objectStore("cards");
+  reader.readAsDataURL(blob)
 
-  imported.forEach(card => {
-    delete card.id;
-    store.add(card);
-  });
+  // zamykamy mikrofon
+  stream.getTracks().forEach(track => track.stop())
 
-  transaction.oncomplete = function(){
-    loadCardsFromDB();
-    alert("Import OK");
-  };
-};
-
-reader.readAsText(file)
-
+}
 /* ===============================
    PLAY AUDIO
 ================================ */
@@ -1132,6 +1128,7 @@ reader.onload = function(ev){
     loadCardsFromDB();
     alert("Import OK");
   };
+	reader.readAsText(file)
 };
 
 </script>
@@ -1161,6 +1158,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
