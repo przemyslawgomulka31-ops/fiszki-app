@@ -315,7 +315,13 @@ object-fit:cover;
 border-radius:16px;
 margin-bottom:10px;
 }
-
+.modeBtn{
+padding:8px 14px;
+border-radius:12px;
+border:none;
+background:rgba(255,255,255,0.3);
+font-weight:600;
+}
 </style>
 </head>
 <body>
@@ -323,9 +329,15 @@ margin-bottom:10px;
   <div class="header"></div>
   <div class="topButtons">
 
-	<button class="iconBtn left" onclick="goToList()">📋</button>
+<button class="iconBtn left" onclick="goToList()">📋</button>
+
+<button class="modeBtn" onclick="setMode('ALL')">ALL</button>
+
 <button class="iconBtn" onclick="goHome()">🏠</button>
-	<button class="iconBtn right" onclick="goToAdd()">➕</button>
+
+<button class="modeBtn" onclick="setMode('SRS')">SRS</button>
+
+<button class="iconBtn right" onclick="goToAdd()">➕</button>
 
 </div>
 
@@ -449,7 +461,7 @@ let cards = []
 let currentIndex = 0
 let showingAnswer = false
 let sortAZ = true
-
+let study= "SRS"
 let mediaRecorder
 let audioChunks = []
 let recordedAudioBase64 = null
@@ -537,8 +549,18 @@ return
 }
 
 }
+/* ===============================
+   mood
+================================ */
+function setMode(mode){
 
+studyMode = mode
 
+currentIndex = 0
+
+renderCard()
+
+}
 
 	
 /* ===============================
@@ -591,7 +613,15 @@ let dueCards = [];
 function renderCard(){
 
   // filtrujemy fiszki do powtórki
-  dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now());
+ if(studyMode === "ALL"){
+
+dueCards = cards
+
+}else{
+
+dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
+
+}
 
   // jeśli brak wszystkich fiszek
   if(cards.length === 0){
@@ -1287,6 +1317,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
