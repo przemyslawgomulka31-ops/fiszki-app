@@ -704,18 +704,19 @@ return
 // debug
 console.log("Audio przed zapisem:", recordedAudioBase64)
 
-const newCard = {
-front: front,
-back: back,
-audio: recordedAudioBase64 ? recordedAudioBase64 : null,
-image: imageURL ? imageURL : null,
-level: 0,
-nextReview: Date.now()
+const newCard={
+front:front,
+back:back,
+audio: recordedAudioBase64 || null,
+image:imageURL || null,
+level:0,
+nextReview:Date.now()
 }
+	
 
 const transaction = db.transaction("cards","readwrite")
 const store = transaction.objectStore("cards")
-
+console.log("Audio zapisane w fiszce:", recordedAudioBase64)
 store.add(newCard)
 
 transaction.oncomplete = function(){
@@ -1123,10 +1124,10 @@ alert("Nie można uruchomić nagrywania")
 
 function playRecording(){
 
-try{
-
-// tryb dodawania fiszki
+// jeśli nagranie właśnie nagrane (przed zapisem fiszki)
 if(recordedAudioBase64){
+
+console.log("Odtwarzam nagranie tymczasowe")
 
 const audio = new Audio(recordedAudioBase64)
 
@@ -1138,9 +1139,9 @@ alert("Nie można odtworzyć nagrania")
 return
 }
 
-// brak kart
+// jeśli brak kart
 if(!dueCards || dueCards.length === 0){
-alert("Brak nagrania")
+alert("Brak fiszek")
 return
 }
 
@@ -1151,11 +1152,10 @@ alert("Błąd odczytu fiszki")
 return
 }
 
-// karta bez nagrania
-if(!card.audio){
-alert("Ta fiszka nie ma nagrania")
-return
-}
+// jeśli karta ma audio
+if(card.audio){
+
+console.log("Odtwarzam nagranie z fiszki")
 
 const audio = new Audio(card.audio)
 
@@ -1164,12 +1164,11 @@ console.error(err)
 alert("Nie można odtworzyć nagrania")
 })
 
-}catch(err){
-
-console.error(err)
-alert("Błąd odtwarzania audio")
-
+return
 }
+
+// jeśli brak audio
+alert("Ta fiszka nie ma nagrania")
 
 }
 
@@ -1280,6 +1279,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
