@@ -589,42 +589,56 @@ document.getElementById(view).classList.add("active")
 	const cardEl = document.getElementById("cardText")
 let dueCards = [];
 function renderCard(){
+
   // filtrujemy fiszki do powtórki
   dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now());
+
+  // jeśli brak wszystkich fiszek
+  if(cards.length === 0){
+    currentIndex = 0;
+    cardEl.innerText = "Dodaj pierwszą fiszkę";
+    document.getElementById("counter").innerText = 0;
+    document.getElementById("progress-mini").innerText = "—";
+    document.getElementById("cardImage").style.display = "none";
+    return;
+  }
 
   // jeśli brak fiszek do powtórki
   if(dueCards.length === 0){
     currentIndex = 0;
     cardEl.innerText = "Brak fiszek do powtórki 🎉";
-    return;
-  }
-  // jeśli brak w ogóle fiszek
-  if(cards.length === 0){
-    cardEl.innerText = "Dodaj pierwszą fiszkę";
-    document.getElementById("counter").innerText = 0;
-    document.getElementById("progress-mini").innerText = "—";
+    document.getElementById("progress-mini").innerText = "0 / 0";
+    document.getElementById("cardImage").style.display = "none";
     return;
   }
 
-  // wyświetlamy tekst lub odpowiedź
-  cardEl.innerText = showingAnswer
-    ? dueCards[currentIndex].back
-    : dueCards[currentIndex].front;
+  // zabezpieczenie indexu
+  if(currentIndex >= dueCards.length){
+    currentIndex = 0;
+  }
 
-  // aktualizujemy licznik całkowitej liczby kart
+  const card = dueCards[currentIndex];
+
+  // tekst fiszki
+  cardEl.innerText = showingAnswer ? card.back : card.front;
+
+  // licznik
   document.getElementById("counter").innerText = cards.length;
-  // postęp wśród kart do powtórki
+
+  // progres
   document.getElementById("progress-mini").innerText =
     (currentIndex + 1) + " / " + dueCards.length;
 
-  // obrazek (jeśli jest)
+  // obrazek
   const img = document.getElementById("cardImage");
-  if(dueCards[currentIndex].image){
-    img.src = dueCards[currentIndex].image;
+
+  if(card.image){
+    img.src = card.image;
     img.style.display = "block";
   } else {
     img.style.display = "none";
   }
+
 }
 
 function reviewCard(score){
@@ -714,6 +728,8 @@ document.getElementById("frontInput").value=""
 document.getElementById("backInput").value=""
 
 document.getElementById("imageResults").innerHTML=""
+
+currentIndex = 0
 
 loadCardsFromDB()
 
@@ -1016,47 +1032,58 @@ speechSynthesis.speak(speech)
 
 async function startRecording(){
   try {
-    let stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+
     mediaRecorder = new MediaRecorder(stream);
     audioChunks = [];
+
     let seconds = 0;
+
     document.getElementById("recordUI").style.display = "block";
+
     const timer = setInterval(()=>{
       seconds++;
       document.getElementById("recordTimer").innerText = seconds + " s";
-    }, 1000);
+    },1000);
+
     mediaRecorder.ondataavailable = event => {
       audioChunks.push(event.data);
     };
-mediaRecorder.onstop = () => {
 
-  clearInterval(timer)
+    mediaRecorder.onstop = () => {
 
-  document.getElementById("recordUI").style.display = "none"
+      clearInterval(timer);
 
-  const blob = new Blob(audioChunks,{type:"audio/webm"})
+      document.getElementById("recordUI").style.display = "none";
 
-  const reader = new FileReader()
+      const blob = new Blob(audioChunks,{type:"audio/webm"});
 
-  reader.onloadend = function(){
+      const reader = new FileReader();
 
-    recordedAudioBase64 = reader.result
+      reader.onloadend = function(){
+        recordedAudioBase64 = reader.result;
+        showPopup("Nagranie zapisane 🎤");
+      };
 
-    showPopup("Nagranie zapisane 🎤")
+      reader.readAsDataURL(blob);
 
+      // zamykamy mikrofon
+      stream.getTracks().forEach(track => track.stop());
+    };
+
+    // start nagrywania
+    mediaRecorder.start();
+
+    // zatrzymanie po 3 sekundach
+    setTimeout(()=>{
+      mediaRecorder.stop();
+    },3000);
+
+  } catch(err) {
+    alert("Brak dostępu do mikrofonu");
+    console.error(err);
   }
-
-  reader.readAsDataURL(blob)
-
-  // zamykamy mikrofon
-  stream.getTracks().forEach(track => track.stop())
-
-}
-	  
-catch(err){
-  alert("Brak dostępu do mikrofonu")
-}
-
 }
 /* ===============================
    PLAY AUDIO
@@ -1064,7 +1091,7 @@ catch(err){
 
 function playRecording(){
   // jeśli brak kart lub brak kart do powtórki
-  if(cards.length === 0 || dueCards.length === 0) return;
+if(cards.length === 0) return;
   // w trybie ADD odtwarzamy bieżące nagranie
   if(recordedAudioBase64){
     new Audio(recordedAudioBase64).play();
@@ -1164,6 +1191,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
