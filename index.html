@@ -830,22 +830,19 @@ reader.readAsDataURL(file)
    DELETE
 ================================ */
 function deleteCard(index){
-if(!confirm("Usunąć fiszkę?")) return
-const id = cards[index].id
-
-const transaction = db.transaction("cards","readwrite")
-
-const store = transaction.objectStore("cards")
-
-store.delete(id)
-
-transaction.oncomplete = function(){
-
-loadCardsFromDB(renderList)
-
+  if(!confirm("Usunąć fiszkę?")) return;
+  const id = cards[index].id;
+  const transaction = db.transaction("cards","readwrite");
+  transaction.objectStore("cards").delete(id);
+  transaction.oncomplete = function(){
+    // jeśli usunęliśmy ostatnią kartę, resetujemy indeks
+    if(currentIndex >= cards.length){
+      currentIndex = 0;
+    }
+    loadCardsFromDB(renderList);
+  };
 }
 
-}
 
 
 /* ===============================
@@ -934,48 +931,33 @@ document.getElementById("editBack").value = cards[index].back
 document.getElementById("modal").classList.add("show")}
 
 function saveModal(){
-
-const newFront = document.getElementById("editFront").value.trim()
-const newBack = document.getElementById("editBack").value.trim()
-
-if(!newFront || !newBack){
-
-alert("Wypełnij pola")
-return
-
-}
-
-const id = cards[editingIndex].id
-
-const transaction = db.transaction("cards","readwrite")
-
-const store = transaction.objectStore("cards")
-
-store.put({
-id:id,
-front:newFront,
-back:newBack,
-audio:cards[editingIndex].audio,
-image:cards[editingIndex].image,
-level:cards[editingIndex].level,
-nextReview:cards[editingIndex].nextReview
-})
-
-transaction.oncomplete = function(){
-
-if(currentIndex >= cards.length){
-currentIndex = 0
-}
-
-loadCardsFromDB(renderList)
-
-}
-
-}
-function closeModal(){
-
-document.getElementById("modal").classList.remove("show")
-
+  const newFront = document.getElementById("editFront").value.trim();
+  const newBack = document.getElementById("editBack").value.trim();
+  if(!newFront || !newBack){
+    alert("Wypełnij pola");
+    return;
+  }
+  const id = cards[editingIndex].id;
+  // pobieramy oryginalne dane karty
+  const original = cards[editingIndex];
+  // zapisujemy wszystkie pola, nie tracąc audio/obrazów
+  const updatedCard = {
+    id: id,
+    front: newFront,
+    back: newBack,
+    audio: original.audio,
+    image: original.image,
+    level: original.level,
+    nextReview: original.nextReview
+  };
+  const transaction = db.transaction("cards","readwrite");
+  transaction.objectStore("cards").put(updatedCard);
+  transaction.oncomplete = function(){
+    // po zapisie ponownie załaduj listę i zresetuj indeks
+    if(currentIndex >= cards.length) currentIndex = 0;
+    loadCardsFromDB(renderList);
+  };
+  closeModal();
 }
 
 /* ===============================
@@ -1007,70 +989,38 @@ speechSynthesis.speak(speech)
 ================================ */
 
 async function startRecording(){
-
-try{
-
-let stream = await navigator.mediaDevices.getUserMedia({ audio:true })
-
-mediaRecorder = new MediaRecorder(stream)
-
-audioChunks = []
-
-let seconds = 0
-
-document.getElementById("recordUI").style.display = "block"
-
-const timer = setInterval(()=>{
-
-seconds++
-document.getElementById("recordTimer").innerText = seconds + " s"
-
-},1000)
-
-
-mediaRecorder.ondataavailable = event => {
-audioChunks.push(event.data)
-}
-
-
-mediaRecorder.onstop = ()=>{
-
-clearInterval(timer)
-
-document.getElementById("recordUI").style.display = "none"
-
-const blob = new Blob(audioChunks,{type:"audio/webm"})
-
-const reader = new FileReader()
-
-reader.onloadend = function(){
-
-recordedAudioBase64 = reader.result
-
-showPopup("Nagranie zapisane 🎤")
-
-}
-
-reader.readAsDataURL(blob)
-stream.getTracks().forEach(track => track.stop())
-}
-
-
-mediaRecorder.start()
-
-setTimeout(()=>{
-
-mediaRecorder.stop()
-
-},3000)
-
-}
-catch(err){
-
-alert("Brak dostępu do mikrofonu")
-
-}
-
+  try {
+    let stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    let seconds = 0;
+    document.getElementById("recordUI").style.display = "block";
+    const timer = setInterval(()=>{
+      seconds++;
+      document.getElementById("recordTimer").innerText = seconds + " s";
+    }, 1000);
+    mediaRecorder.ondataavailable = event => {
+      audioChunks.push(event.data);
+    };
+    mediaRecorder.onstop = () => {
+      clearInterval(timer);
+      document.getElementById("recordUI").style.display = "none";
+      const blob = new Blob(audioChunks, {type:"audio/webm"});
+      const reader = new FileReader();
+      reader.onloadend = function(){
+        recordedAudioBase64 = reader.result;
+        showPopup("Nagranie zapisane 🎤");
+      };
+      reader.readAsDataURL(blob);
+      // tutaj zatrzymujemy strumień, by zwolnić mikrofon:
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    setTimeout(()=>{ mediaRecorder.stop(); }, 3000);
+  }
+  catch(err){
+    alert("Brak dostępu do mikrofonu");
+  }
 }
 
 
@@ -1148,40 +1098,25 @@ if(!file)return
 
 const reader=new FileReader()
 
-reader.onload=function(ev){
-
-let imported
-
-try{
-imported = JSON.parse(ev.target.result)
-}catch(e){
-alert("Błędny plik backup")
-return
-}
-
-const transaction=db.transaction("cards","readwrite")
-
-const store=transaction.objectStore("cards")
-
-imported.forEach(card=>{
-delete card.id
-store.add(card)
-})
-
-transaction.oncomplete=function(){
-
-loadCardsFromDB()
-
-alert("Import OK")
-
-}
-
-}
-
-reader.readAsText(file)
-
-})
-
+reader.onload = function(ev){
+  let imported;
+  try {
+    imported = JSON.parse(ev.target.result);
+  } catch(e) {
+    alert("Błędny plik backup");
+    return;
+  }
+  const transaction = db.transaction("cards","readwrite");
+  const store = transaction.objectStore("cards");
+  imported.forEach(card => {
+    delete card.id;
+    store.add(card);
+  });
+  transaction.oncomplete = function(){
+    loadCardsFromDB();
+    alert("Import OK");
+  };
+};
 
 </script>
 
@@ -1210,6 +1145,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
