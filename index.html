@@ -34,6 +34,8 @@ html, body{
 margin:0;
 padding:0;
 height:100%;
+	overflow:hidden;
+	overscroll-behavior:none;
 background:#8f7bff;
 }
 
@@ -61,12 +63,17 @@ touch-action: manipulation;
 }
 /* ---------- APP LAYOUT ---------- */
 .app{
-  max-width:420px;
-  margin:0 auto;
-  padding:22px;
-  padding-bottom:160px; /* miejsce na przyciski dolne */
-  min-height:100vh;
-  position:relative;
+max-width:420px;
+margin:0 auto;
+padding:22px;
+padding-bottom:160px;
+
+height:100dvh;
+
+position:relative;
+
+overflow-y:auto;
+-webkit-overflow-scrolling:touch;
 }
 .bottomControls{
 position:fixed;
@@ -1392,6 +1399,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
