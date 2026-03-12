@@ -441,6 +441,7 @@ Progres: <span id="progress-mini">—</span>
 let db
 let cards = []
 let currentIndex = 0
+let dueCards = []
 let showingAnswer = false
 let sortAZ = true
 
@@ -503,7 +504,7 @@ handleGesture()
 })
 
 function handleGesture(){
-
+if(!document.getElementById("home").classList.contains("active")) return
 const diffX = endX - startX
 const diffY = endY - startY
 
@@ -585,7 +586,7 @@ const cardEl = document.getElementById("cardText")
 
 function renderCard(){
 
-	const dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
+	dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
 
 if(dueCards.length === 0){
 cardEl.innerText = "Brak fiszek do powtórki 🎉"
@@ -604,19 +605,19 @@ return
 }
 
 cardEl.innerText = showingAnswer
-? cards[currentIndex].back
-: cards[currentIndex].front
+? dueCards[currentIndex].back
+: dueCards[currentIndex].front
 
 document.getElementById("counter").innerText = cards.length
 
 document.getElementById("progress-mini").innerText =
-(currentIndex + 1) + " / " + cards.length
+(currentIndex + 1) + " / " + dueCards.length
 
 	const img = document.getElementById("cardImage")
 
-if(cards[currentIndex].image){
-
-img.src = cards[currentIndex].image
+if(dueCards[currentIndex].image){
+img.src = dueCards[currentIndex].image
+	
 img.style.display = "block"
 
 }else{
@@ -827,7 +828,7 @@ reader.readAsDataURL(file)
    DELETE
 ================================ */
 function deleteCard(index){
-
+if(!confirm("Usunąć fiszkę?")) return
 const id = cards[index].id
 
 const transaction = db.transaction("cards","readwrite")
@@ -952,13 +953,19 @@ store.put({
 id:id,
 front:newFront,
 back:newBack,
-audio:cards[editingIndex].audio
+audio:cards[editingIndex].audio,
+image:cards[editingIndex].image,
+level:cards[editingIndex].level,
+nextReview:cards[editingIndex].nextReview
 })
 
 transaction.oncomplete = function(){
 
-closeModal()
-loadCardsFromDB()
+if(currentIndex >= cards.length){
+currentIndex = 0
+}
+
+loadCardsFromDB(renderList)
 
 }
 
@@ -974,7 +981,7 @@ document.getElementById("modal").classList.remove("show")
 ================================ */
 function reviewCard(score){
 
-const card = cards[currentIndex]
+const card = dueCards[currentIndex]
 
 const intervals = [
 1,    // 1 dzień
@@ -1035,7 +1042,7 @@ async function startRecording(){
 
 try{
 
-const stream = await navigator.mediaDevices.getUserMedia({ audio:true })
+let stream = await navigator.mediaDevices.getUserMedia({ audio:true })
 
 mediaRecorder = new MediaRecorder(stream)
 
@@ -1077,7 +1084,7 @@ showPopup("Nagranie zapisane 🎤")
 }
 
 reader.readAsDataURL(blob)
-
+stream.getTracks().forEach(track => track.stop())
 }
 
 
@@ -1104,7 +1111,7 @@ alert("Brak dostępu do mikrofonu")
 ================================ */
 
 function playRecording(){
-
+if(cards.length === 0) return
 /* jeśli jesteśmy w dodawaniu fiszki */
 
 if(recordedAudioBase64){
@@ -1175,7 +1182,14 @@ const reader=new FileReader()
 
 reader.onload=function(ev){
 
-const imported=JSON.parse(ev.target.result)
+let imported
+
+try{
+imported = JSON.parse(ev.target.result)
+}catch(e){
+alert("Błędny plik backup")
+return
+}
 
 const transaction=db.transaction("cards","readwrite")
 
@@ -1228,6 +1242,7 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
 
 
 
