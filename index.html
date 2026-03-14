@@ -595,7 +595,7 @@ let cards = []
 let currentIndex = 0
 let showingAnswer = false
 let sortAZ = true
-let study= "SRS"
+let studyMode = "SRS"
 let mediaRecorder
 let audioChunks = []
 let recordedAudioBase64 = null
@@ -628,7 +628,7 @@ loadCardsFromDB()
 TOUCH SYSTEM (SWIPE + TAP)
 ================================ */
 
-const swipeArea = document.querySelector(".app")
+const swipeArea = document.getElementById("flashcard")
 
 let startX = 0
 let startY = 0
@@ -731,13 +731,21 @@ function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 
-function setView(view){
+ffunction setView(view){
 
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-
 document.getElementById(view).classList.add("active")
 
-// pokazuj ALL i SRS tylko w nauce
+// pokaż górny pasek tylko w fiszkach
+const top = document.querySelector(".topButtons")
+
+if(view === "homeStudy"){
+top.style.display = "flex"
+}else{
+top.style.display = "none"
+}
+
+// pokaż ALL / SRS tylko w nauce
 document.querySelectorAll(".studyOnly").forEach(btn=>{
 btn.style.display = (view === "homeStudy") ? "block" : "none"
 })
