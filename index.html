@@ -426,6 +426,19 @@ font-size:14px;
   <!-- HOME -->
 <div id="home" class="view active">
 
+<div class="tiles">
+
+<div class="tile" onclick="openAll()">
+📚
+<span>Fiszki</span>
+</div>
+
+</div>
+
+</div>
+
+<div id="homeStudy" class="view">
+
 <div class="stats">
 <div class="left">
 <div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
@@ -434,11 +447,11 @@ font-size:14px;
 <div style="font-size:13px;color:rgba(11,8,16,0.6)">
 Progres: <span id="progress-mini">—</span>
 </div>
-
 </div>
 
 <div class="card" id="flashcard">
-	<img id="cardImage">
+
+<img id="cardImage">
 
 <span id="cardText">Dodaj pierwszą fiszkę</span>
 
@@ -447,7 +460,8 @@ Progres: <span id="progress-mini">—</span>
 <span class="play" onclick="playRecording()">▶️</span>
 
 </div>
-	<div id="reviewButtons">
+
+<div id="reviewButtons">
 
 <button onclick="reviewCard(0)">❌ Nie pamiętam</button>
 
@@ -456,8 +470,8 @@ Progres: <span id="progress-mini">—</span>
 <button onclick="reviewCard(2)">✅ Łatwe</button>
 
 </div>
-</div>
 
+</div>
   <!-- LIST -->
   <div id="list" class="view">
     <h3>Lista słówek</h3>
@@ -549,7 +563,8 @@ let audioChunks = []
 let recordedAudioBase64 = null
 
 let imageURL = null
-
+let streak = localStorage.getItem("streak") || 0
+let lastStudy = localStorage.getItem("lastStudy") || 0
 
 const request = indexedDB.open("FlashcardsDB",1)
 
@@ -761,6 +776,7 @@ reviewUI.style.display = "block"
 }
 
 function reviewCard(score){
+	updateStreak()
   const card = dueCards[currentIndex];
   const intervals = [1, 3, 7, 14, 30]; // dni
   if(score === 0){
@@ -1085,6 +1101,14 @@ renderList()
 }
 
 
+	function openAll(){
+
+setMode("ALL")
+
+setView("homeStudy")
+
+}
+
 /* ===============================
    EDIT
 ================================ */
@@ -1390,6 +1414,31 @@ this.style.display = "none"
 console.log("PWA mode")
 } else {
 console.log("Safari mode")
+}
+
+
+
+	function updateStreak(){
+
+const today = new Date().toDateString()
+
+if(lastStudy !== today){
+
+const yesterday = new Date(Date.now() - 86400000).toDateString()
+
+if(lastStudy === yesterday){
+streak++
+}else{
+streak = 1
+}
+
+localStorage.setItem("streak",streak)
+localStorage.setItem("lastStudy",today)
+
+}
+
+document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
+
 }
 </script>
 
