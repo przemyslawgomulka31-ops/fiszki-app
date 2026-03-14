@@ -796,9 +796,10 @@ function prevCard(){
 
 function showAnswer(){
 
-if(cards.length===0)return
+if(cards.length===0) return
 
-showingAnswer=true
+// toggle
+showingAnswer = !showingAnswer
 
 renderCard()
 
