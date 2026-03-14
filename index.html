@@ -647,13 +647,12 @@ let startX = 0
 let startY = 0
 let endX = 0
 let endY = 0
+
 window.addEventListener("load", () => {
 
-const swipeArea = document.getElementById("flashcard")
+const swipeArea = document.querySelector(".app")
 
 if(!swipeArea) return
-
-
 
 swipeArea.addEventListener("touchstart", e => {
 
