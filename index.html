@@ -601,8 +601,8 @@ let audioChunks = []
 let recordedAudioBase64 = null
 
 let imageURL = null
-let streak = localStorage.getItem("streak") || 0
-let lastStudy = localStorage.getItem("lastStudy") || 0
+let streak = parseInt(localStorage.getItem("streak")) || 0
+let lastStudy = localStorage.getItem("lastStudy") || ""
 
 const request = indexedDB.open("FlashcardsDB",1)
 
@@ -628,6 +628,7 @@ loadCardsFromDB()
 TOUCH SYSTEM (SWIPE + TAP)
 ================================ */
 
+window.addEventListener("load", () => {
 const swipeArea = document.getElementById("flashcard")
 
 let startX = 0
@@ -731,7 +732,7 @@ function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 
-ffunction setView(view){
+function setView(view){
 
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById(view).classList.add("active")
@@ -1482,6 +1483,8 @@ streak++
 }else{
 streak = 1
 }
+
+lastStudy = today
 
 localStorage.setItem("streak",streak)
 localStorage.setItem("lastStudy",today)
