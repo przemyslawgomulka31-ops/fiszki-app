@@ -643,17 +643,17 @@ loadCardsFromDB()
 /* ===============================
 TOUCH SYSTEM (SWIPE + TAP)
 ================================ */
-
+let startX = 0
+let startY = 0
+let endX = 0
+let endY = 0
 window.addEventListener("load", () => {
 
 const swipeArea = document.getElementById("flashcard")
 
 if(!swipeArea) return
 
-let startX = 0
-let startY = 0
-let endX = 0
-let endY = 0
+
 
 swipeArea.addEventListener("touchstart", e => {
 
