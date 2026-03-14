@@ -393,6 +393,11 @@ margin-top:20px;
 opacity:0.6;
 font-size:14px;
 }
+
+	.studyOnly{
+display:none;
+}
+	
 </style>
 </head>
 <body>
@@ -413,11 +418,11 @@ font-size:14px;
 
 <button class="iconBtn left" onclick="goToList()">📋</button>
 
-<button class="modeBtn" onclick="setMode('ALL')">ALL</button>
+<button class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
 
 <button class="iconBtn" onclick="goHome()">🏠</button>
-
-<button class="modeBtn" onclick="setMode('SRS')">SRS</button>
+	  
+<button class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
 
 <button class="iconBtn right" onclick="goToAdd()">➕</button>
 
@@ -618,7 +623,7 @@ handleGesture()
 })
 
 function handleGesture(){
-if(!document.getElementById("home").classList.contains("active")) return
+if(!document.getElementById("homeStudy").classList.contains("active")) return
 const diffX = endX - startX
 const diffY = endY - startY
 
@@ -699,6 +704,11 @@ document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 
 document.getElementById(view).classList.add("active")
 
+// pokazuj ALL i SRS tylko w nauce
+document.querySelectorAll(".studyOnly").forEach(btn=>{
+btn.style.display = (view === "homeStudy") ? "block" : "none"
+})
+
 }
 
 
@@ -750,7 +760,7 @@ dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
   cardEl.innerText = showingAnswer ? card.back : card.front;
 
   // licznik
-  document.getElementById("counter").innerText = cards.length;
+ updateCounter()
 
   // progres
   document.getElementById("progress-mini").innerText =
@@ -1437,8 +1447,11 @@ localStorage.setItem("lastStudy",today)
 
 }
 
-document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
+updateCounter()
 
+}
+	function updateCounter(){
+document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
 }
 </script>
 
