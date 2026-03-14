@@ -742,18 +742,18 @@ function setView(view){
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById(view).classList.add("active")
 
-// pokaż górny pasek tylko w fiszkach
 const top = document.querySelector(".topButtons")
 
-if(view === "homeStudy"){
-top.style.display = "flex"
-}else{
+// ukryj pasek tylko na ekranie głównym
+if(view === "home"){
 top.style.display = "none"
+}else{
+top.style.display = "flex"
 }
 
-// pokaż ALL / SRS tylko w nauce
+// ALL i SRS widoczne w całej sekcji fiszek
 document.querySelectorAll(".studyOnly").forEach(btn=>{
-btn.style.display = (view === "homeStudy") ? "block" : "none"
+btn.style.display = (view !== "home") ? "block" : "none"
 })
 
 }
@@ -1465,6 +1465,9 @@ reader.readAsText(file)
 document.getElementById("startScreen").addEventListener("click",function(){
 
 this.style.display = "none"
+
+// ukryj górny pasek na starcie
+document.querySelector(".topButtons").style.display = "none"
 
 })
 	if (window.navigator.standalone) {
