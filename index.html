@@ -446,11 +446,15 @@ letter-spacing:2px;
 }
 
 .questionTopButtons{
+
 display:flex;
-justify-content:space-between;
 align-items:center;
-gap:10px;
+
+gap:12px;
+
+margin-top:10px;
 margin-bottom:20px;
+
 }
 
 
@@ -479,7 +483,7 @@ flex-direction:column;
 align-items:center;
 justify-content:center;
 
-min-height:160px;
+min-height:200px;
 
 }
 	
@@ -862,7 +866,16 @@ const diffY = endY - startY
 /* TAP */
 
 if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
+// FISZKI
+if(document.getElementById("homeStudy").classList.contains("active")){
 showAnswer()
+}
+
+// QUESTION
+if(document.getElementById("questionCards").classList.contains("active")){
+questionAnswerVisible = !questionAnswerVisible
+renderQuestionCard()
+}
 return
 }
 
@@ -945,7 +958,11 @@ function setView(view){
 
   const top = document.querySelector(".topButtons");
 
- if(view === "homeStudy"){
+if(
+view === "homeStudy" ||
+view === "list" ||
+view === "add"
+){
 top.style.display = "flex"
 }else{
 top.style.display = "none"
@@ -1814,9 +1831,7 @@ transaction.oncomplete = renderFolders
 
 currentFolderId = id
 
-setView("questionFolder")
-
-renderQuestionList()
+openQuestionCards()
 
 }
 function renderQuestionList(){
