@@ -546,6 +546,23 @@ Progres: <span id="progress-mini">—</span>
 
 
 <!-- QUESTION FOLDER -->
+	<!-- QUESTIONS FOLDERS -->
+
+<div id="questions" class="view">
+
+<div class="questionTopButtons">
+
+<button class="iconBtn" onclick="goHome()">🏠</button>
+
+</div>
+
+<h3>Foldery</h3>
+
+<div id="questionFolders"></div>
+
+<button class="primary" onclick="addFolder()">➕ Nowy folder</button>
+
+</div>
 
 <div id="questionFolder" class="view">
 
@@ -871,24 +888,29 @@ function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 
 function setView(view){
+  // bezpieczna kontrola: element może nie istnieć (np. literówka)
+  const target = document.getElementById(view);
+  if(!target){
+    console.warn("setView: brak elementu widoku o id:", view);
+    return;
+  }
 
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-document.getElementById(view).classList.add("active")
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  target.classList.add("active");
 
-const top = document.querySelector(".topButtons")
+  const top = document.querySelector(".topButtons");
 
-// globalny pasek fiszek tylko dla fiszek
-if(view === "homeStudy" || view === "list" || view === "add"){
-top.style.display = "flex"
-}else{
-top.style.display = "none"
-}
+  // globalny pasek fiszek tylko dla fiszek
+  if(view === "homeStudy" || view === "list" || view === "add"){
+    top.style.display = "flex";
+  } else {
+    top.style.display = "none";
+  }
 
-// przyciski ALL / SRS tylko w nauce fiszek
-document.querySelectorAll(".studyOnly").forEach(btn=>{
-btn.style.display = (view === "homeStudy") ? "block" : "none"
-})
-
+  // przyciski ALL / SRS tylko w nauce fiszek
+  document.querySelectorAll(".studyOnly").forEach(btn=>{
+    btn.style.display = (view === "homeStudy") ? "block" : "none";
+  });
 }
 
 	function goToAddQuestion(){
