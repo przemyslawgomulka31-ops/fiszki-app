@@ -493,16 +493,12 @@ height:20px;
 <div class="header"></div>
 
 <div class="topButtons">
-
-<button class="iconBtn left" onclick="goToList()">📋</button>
-
-<button class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
-
 <button class="iconBtn" onclick="goHome()">🏠</button>
-
-<button class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
-
-<button class="iconBtn right" onclick="goToAdd()">➕</button>
+<button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
+<button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
+<button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
+<button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
+<button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
 
 </div>
 
@@ -910,19 +906,46 @@ document.getElementById(view).classList.add("active")
 
 const top = document.querySelector(".topButtons")
 
+const btnList = document.getElementById("btnList")
+const btnAdd = document.getElementById("btnAdd")
+const btnAll = document.getElementById("btnAll")
+const btnSrs = document.getElementById("btnSrs")
+
+/* HOME */
+
+if(view === "home"){
+top.style.display = "none"
+return
+}
+
 /* FISZKI */
+
 if(view === "homeStudy" || view === "list" || view === "add"){
 
 top.style.display = "flex"
 
-document.getElementById("btnList").style.display = "flex"
-document.getElementById("btnAdd").style.display = "flex"
-
-document.getElementById("btnAll").style.display = "flex"
-document.getElementById("btnSrs").style.display = "flex"
+btnList.style.display = "flex"
+btnAdd.style.display = "flex"
+btnAll.style.display = "flex"
+btnSrs.style.display = "flex"
 
 }
 
+/* QUESTION */
+
+if(view === "questions" || view === "questionFolder" || view === "questionCards" || view === "addQuestion"){
+
+top.style.display = "flex"
+
+btnList.style.display = "flex"
+btnAdd.style.display = "flex"
+btnAll.style.display = "flex"
+
+btnSrs.style.display = "none"
+
+}
+
+}
 /* QUESTION */
 else if(view === "questions" || view === "questionFolder" || view === "questionCards"){
 
