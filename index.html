@@ -445,35 +445,28 @@ color:#1b1635;
 letter-spacing:2px;
 }
 
-.questionTopButtons{
-
-display:flex;
-align-items:center;
-
-gap:12px;
-
-margin-top:10px;
-margin-bottom:20px;
-
-}
 
 
 	.questionCard{
+
+margin-top:80px;
+
 background:#fff;
 border-radius:20px;
 padding:20px;
 
-font-size:clamp(16px,4vw,28px);
-line-height:1.3;
+font-size:clamp(18px,4vw,28px);
+line-height:1.4;
 word-break:break-word;
 
 display:flex;
 align-items:center;
 justify-content:center;
 
-min-height:180px;
+min-height:200px;
 
 box-shadow:0 18px 40px rgba(51,41,112,0.08);
+
 }
 
 .questionSpacer{
@@ -571,17 +564,10 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-
-<!-- QUESTION FOLDER -->
-	<!-- QUESTIONS FOLDERS -->
+📦 Cały blok do wklejenia
+<!-- QUESTIONS FOLDERS -->
 
 <div id="questions" class="view">
-
-<div class="questionTopButtons">
-
-<button class="iconBtn" onclick="goHome()">🏠</button>
-
-</div>
 
 <h3>Foldery</h3>
 
@@ -589,23 +575,27 @@ Progres: <span id="progress-mini">—</span>
 
 <button class="primary" onclick="addFolder()">➕ Nowy folder</button>
 
+<button class="secondary" onclick="goHome()">Powrót</button>
+
 </div>
+
+
+<!-- QUESTION FOLDER -->
 
 <div id="questionFolder" class="view">
 
-<div class="questionTopButtons">
+<h3>Pytania</h3>
 
-<button class="iconBtn" onclick="goHome()">🏠</button>
-
-<button class="iconBtn" onclick="renderQuestionList()">🗒</button>
-
-<button class="iconBtn" onclick="goToAddQuestion()">➕</button>
-
-<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
+<div id="questionList"></div>
 
 </div>
 
-<div id="questionList"></div>
+
+<!-- QUESTION CARDS -->
+
+<div id="questionCards" class="view">
+
+<div class="questionCard" id="questionCardText"></div>
 
 </div>
 
@@ -625,28 +615,6 @@ Progres: <span id="progress-mini">—</span>
 <button class="secondary" onclick="setView('questionFolder')">Powrót</button>
 
 </div>
-
-
-<!-- QUESTION CARDS -->
-
-<div id="questionCards" class="view">
-
-<div class="questionTopButtons">
-
-<button class="iconBtn" onclick="goHome()">🏠</button>
-
-<button class="iconBtn" onclick="renderQuestionList();setView('questionFolder')">🗒</button>
-
-<button class="iconBtn" onclick="goToAddQuestion()">➕</button>
-
-<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
-
-</div>
-
-<div class="questionCard" id="questionCardText"></div>
-
-</div>
-
 <!-- LIST -->
 
 <div id="list" class="view">
@@ -936,36 +904,47 @@ if(callback) callback()
 function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
-
 function setView(view){
-  // bezpieczna kontrola: element może nie istnieć (np. literówka)
-  const target = document.getElementById(view);
-  if(!target){
-    console.warn("setView: brak elementu widoku o id:", view);
-    return;
-  }
 
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  target.classList.add("active");
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+document.getElementById(view).classList.add("active")
 
-  const top = document.querySelector(".topButtons");
+const top = document.querySelector(".topButtons")
 
-if(
-view === "homeStudy" ||
-view === "list" ||
-view === "add"
-){
+/* FISZKI */
+if(view === "homeStudy" || view === "list" || view === "add"){
+
 top.style.display = "flex"
-}else{
+
+document.getElementById("btnList").style.display = "flex"
+document.getElementById("btnAdd").style.display = "flex"
+
+document.getElementById("btnAll").style.display = "flex"
+document.getElementById("btnSrs").style.display = "flex"
+
+}
+
+/* QUESTION */
+else if(view === "questions" || view === "questionFolder" || view === "questionCards"){
+
+top.style.display = "flex"
+
+document.getElementById("btnList").style.display = "none"
+document.getElementById("btnAdd").style.display = "none"
+
+document.getElementById("btnAll").style.display = "none"
+document.getElementById("btnSrs").style.display = "none"
+
+}
+
+/* HOME */
+else if(view === "home"){
+
 top.style.display = "none"
+
 }
 
-  // przyciski ALL / SRS tylko w nauce fiszek
-  document.querySelectorAll(".studyOnly").forEach(btn=>{
-    btn.style.display = (view === "homeStudy") ? "block" : "none";
-  });
 }
-
 	function goToAddQuestion(){
 setView("addQuestion")
 }
