@@ -498,7 +498,6 @@ height:20px;
 <button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
 <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
 <button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
-<button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
 
 </div>
 
@@ -839,18 +838,37 @@ return
 if(Math.abs(diffX) > Math.abs(diffY)){
 
 if(diffX > 80){
+
+if(document.getElementById("homeStudy").classList.contains("active")){
 prevCard()
+}
+
+if(document.getElementById("questionCards").classList.contains("active")){
+questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
+questionAnswerVisible = false
+renderQuestionCard()
+}
+
 return
 }
 
 if(diffX < -80){
+
+if(document.getElementById("homeStudy").classList.contains("active")){
 nextCard()
+}
+
+if(document.getElementById("questionCards").classList.contains("active")){
+questionIndex = (questionIndex + 1) % questionCards.length
+questionAnswerVisible = false
+renderQuestionCard()
+}
+
 return
 }
 
 }
 
-}
 /* ===============================
    mood
 ================================ */
@@ -946,27 +964,7 @@ btnSrs.style.display = "none"
 }
 
 }
-/* QUESTION */
-else if(view === "questions" || view === "questionFolder" || view === "questionCards"){
 
-top.style.display = "flex"
-
-document.getElementById("btnList").style.display = "none"
-document.getElementById("btnAdd").style.display = "none"
-
-document.getElementById("btnAll").style.display = "none"
-document.getElementById("btnSrs").style.display = "none"
-
-}
-
-/* HOME */
-else if(view === "home"){
-
-top.style.display = "none"
-
-}
-
-}
 	function goToAddQuestion(){
 setView("addQuestion")
 }
