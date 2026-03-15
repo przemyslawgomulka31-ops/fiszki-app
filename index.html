@@ -472,6 +472,41 @@ box-shadow:0 18px 40px rgba(51,41,112,0.08);
 .questionSpacer{
 height:20px;
 }
+
+	.questionField,
+.answerField{
+
+width:100%;
+
+font-size:18px;
+
+line-height:1.5;
+
+padding:14px;
+
+border-radius:14px;
+
+border:none;
+
+box-shadow:0 8px 20px rgba(0,0,0,0.05);
+
+resize:none;
+
+}
+
+/* pytanie mniejsze */
+
+.questionField{
+min-height:80px;
+margin-bottom:12px;
+}
+
+/* odpowiedź większa */
+
+.answerField{
+min-height:160px;
+margin-bottom:20px;
+}
 	
 </style>
 </head>
@@ -600,9 +635,11 @@ Progres: <span id="progress-mini">—</span>
 
 <h3>Nowe pytanie</h3>
 
-<textarea id="questionInput" placeholder="Pytanie"></textarea>
+<label>Pytanie</label>
+<textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
 
-<textarea id="answerInput" placeholder="Odpowiedź"></textarea>
+<label>Odpowiedź</label>
+<textarea class="answerField" id="answerInput" placeholder="Twoja odpowiedź (może być nawet 80 słów)"></textarea>
 
 <button class="primary" onclick="saveQuestion()">Zapisz</button>
 
