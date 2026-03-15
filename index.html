@@ -448,9 +448,10 @@ letter-spacing:2px;
 </style>
 </head>
 <body>
+
 <div id="startScreen">
 <div class="startContent">
-	<div class="logo">
+<div class="logo">
 <img src="fishki-logo.png" class="logoFish">
 </div>
 <h1>Fishki</h1>
@@ -458,24 +459,30 @@ letter-spacing:2px;
 <div class="tapText">Dotknij aby rozpocząć</div>
 </div>
 </div>
-	
+
 <div class="app">
-  <div class="header"></div>
-  <div class="topButtons">
+
+<div class="header"></div>
+
+<div class="topButtons">
 
 <button class="iconBtn left" onclick="goToList()">📋</button>
 
 <button class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
 
 <button class="iconBtn" onclick="goHome()">🏠</button>
-	  
+
 <button class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
 
 <button class="iconBtn right" onclick="goToAdd()">➕</button>
 
 </div>
 
-  <!-- HOME -->
+
+<!-- HOME -->
+
+<div id="home" class="view active">
+
 <div class="tiles">
 
 <div class="tile bigTile" onclick="openAll()">
@@ -489,6 +496,11 @@ letter-spacing:2px;
 </div>
 
 </div>
+
+</div>
+
+
+<!-- FLASHCARDS STUDY -->
 
 <div id="homeStudy" class="view">
 
@@ -517,15 +529,16 @@ Progres: <span id="progress-mini">—</span>
 <div id="reviewButtons">
 
 <button onclick="reviewCard(0)">❌ Nie pamiętam</button>
-
 <button onclick="reviewCard(1)">🙂 Średnio</button>
-
 <button onclick="reviewCard(2)">✅ Łatwe</button>
 
 </div>
 
 </div>
-	!-- QUESTION -->
+
+
+<!-- QUESTIONS FOLDERS -->
+
 <div id="questions" class="view">
 
 <h3>Foldery</h3>
@@ -538,11 +551,12 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-	<!-- QUESTION FOLDER -->
+
+<!-- QUESTION FOLDER -->
 
 <div id="questionFolder" class="view">
 
-<div class="topButtons">
+<div class="questionTopButtons">
 
 <button class="iconBtn" onclick="renderQuestionList()">🗒️</button>
 
@@ -558,7 +572,10 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-	<div id="addQuestion" class="view">
+
+<!-- ADD QUESTION -->
+
+<div id="addQuestion" class="view">
 
 <h3>Nowe pytanie</h3>
 
@@ -572,41 +589,60 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-	<div id="questionCards" class="view">
+
+<!-- QUESTION CARDS -->
+
+<div id="questionCards" class="view">
 
 <div class="card" id="questionCardText"></div>
 
 </div>
-  <!-- LIST -->
-  <div id="list" class="view">
-    <h3>Lista słówek</h3>
-    <div style="margin:8px 0 12px">
-      <input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
-    </div>
-    <div id="wordsList"></div>
-    <div style="display:flex;gap:10px">
-      <button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
-      <button class="secondary" onclick="goHome()">Powrót</button>
-	<button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
-	<input type="file" id="importFile" accept=".json" style="display:none">
-	<button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
-    </div>
-  </div>
 
-  <!-- ADD -->
- <div id="add" class="view">
+
+<!-- LIST -->
+
+<div id="list" class="view">
+
+<h3>Lista słówek</h3>
+
+<div style="margin:8px 0 12px">
+<input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
+</div>
+
+<div id="wordsList"></div>
+
+<div style="display:flex;gap:10px">
+
+<button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
+
+<button class="secondary" onclick="goHome()">Powrót</button>
+
+<button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
+
+<input type="file" id="importFile" accept=".json" style="display:none">
+
+<button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
+
+</div>
+
+</div>
+
+
+<!-- ADD FLASHCARD -->
+
+<div id="add" class="view">
 
 <h3>Dodaj fiszkę</h3>
 
 <input type="text" id="frontInput" placeholder="Słowo po angielsku">
 
 <input type="text" id="backInput" placeholder="Tłumaczenie">
-	 
-	
-	 <input type="file" id="imageUpload" accept="image/*">
-	<label for="imageUpload">📷 Dodaj własne zdjęcie</label>
 
-	  <div id="imageResults"></div>
+<input type="file" id="imageUpload" accept="image/*">
+
+<label for="imageUpload">📷 Dodaj własne zdjęcie</label>
+
+<div id="imageResults"></div>
 
 <button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
 
@@ -626,28 +662,54 @@ Progres: <span id="progress-mini">—</span>
 
 <button class="secondary" onclick="goHome()">Powrót</button>
 
-
 </div>
+
 
 <!-- EDIT MODAL -->
-<div id="modal" class="modal-backdrop" role="dialog" aria-hidden="true">
-  <div class="modal" role="document">
-    <h3>Edytuj słówko</h3>
-    <div class="row"><input id="editFront" placeholder="Słowo po angielsku" /></div>
-    <div class="row"><input id="editBack" placeholder="Tłumaczenie" /></div>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
-      <button class="secondary" onclick="closeModal()">Anuluj</button>
-      <button class="primary" onclick="saveModal()">Zapisz</button>
-    </div>
-  </div>
+
+<div id="modal" class="modal-backdrop">
+
+<div class="modal">
+
+<h3>Edytuj słówko</h3>
+
+<div class="row">
+<input id="editFront" placeholder="Słowo po angielsku" />
 </div>
 
-<div id="popup" class="modal-backdrop">
-  <div class="modal">
-    <h3 id="popupText"></h3>
-    <button class="primary" onclick="closePopup()">OK</button>
-  </div>
+<div class="row">
+<input id="editBack" placeholder="Tłumaczenie" />
 </div>
+
+<div style="display:flex;gap:10px;justify-content:flex-end">
+
+<button class="secondary" onclick="closeModal()">Anuluj</button>
+
+<button class="primary" onclick="saveModal()">Zapisz</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- POPUP -->
+
+<div id="popup" class="modal-backdrop">
+
+<div class="modal">
+
+<h3 id="popupText"></h3>
+
+<button class="primary" onclick="closePopup()">OK</button>
+
+</div>
+
+</div>
+
+</div>
+
 
 
 <script>
