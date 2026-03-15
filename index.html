@@ -1755,23 +1755,6 @@ setView("questions")
 
 renderFolders()
 
-// automatyczne wejście do pierwszego folderu jeśli istnieje
-const transaction = db.transaction("questionFolders","readonly")
-const store = transaction.objectStore("questionFolders")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-if(req.result.length > 0){
-
-currentFolderId = req.result[0].id
-
-openQuestionCards()
-
-}
-
-}
-
 }
 
 	function renderFolders(){
