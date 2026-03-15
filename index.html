@@ -444,6 +444,12 @@ margin-bottom:20px;
 color:#1b1635;
 letter-spacing:2px;
 }
+
+	.questionTopButtons{
+display:flex;
+gap:12px;
+margin-bottom:20px;
+}
 	
 </style>
 </head>
@@ -885,7 +891,7 @@ document.getElementById(view).classList.add("active")
 const top = document.querySelector(".topButtons")
 
 // ukryj pasek tylko na ekranie głównym
-if(view === "home"){
+if(view === "home" || view === "questionFolder"){
 top.style.display = "none"
 }else{
 top.style.display = "flex"
