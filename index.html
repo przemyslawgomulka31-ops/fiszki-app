@@ -2115,37 +2115,6 @@ closeFolderPopup()
 
 }
 
-	function exportQuestions(){
-
-const t1 = db.transaction("questionFolders","readonly")
-const s1 = t1.objectStore("questionFolders")
-const r1 = s1.getAll()
-
-const t2 = db.transaction("questions","readonly")
-const s2 = t2.objectStore("questions")
-const r2 = s2.getAll()
-
-Promise.all([
-new Promise(res => r1.onsuccess = () => res(r1.result)),
-new Promise(res => r2.onsuccess = () => res(r2.result))
-]).then(data => {
-
-const backup = {
-folders:data[0],
-questions:data[1]
-}
-
-const blob = new Blob([JSON.stringify(backup)],{type:"application/json"})
-const url = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = url
-a.download = "questions-backup.json"
-a.click()
-
-})
-
-}
 
 
 	function exportQuestions(){
@@ -2179,11 +2148,7 @@ a.click()
 })
 
 }
-const clear1 = db.transaction("questionFolders","readwrite")
-clear1.objectStore("questionFolders").clear()
 
-const clear2 = db.transaction("questions","readwrite")
-clear2.objectStore("questions").clear()
 	
 	document.getElementById("importQuestions").addEventListener("change",function(e){
 
@@ -2220,6 +2185,71 @@ s2.delete(q.id)
 renderFolders()
 
 }
+
+}
+
+	function importQuestions(file){
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+let data
+
+try{
+data = JSON.parse(e.target.result)
+}catch{
+alert("Błędny plik")
+return
+}
+
+/* WYCZYŚĆ stare dane */
+
+const clear1 = db.transaction("questionFolders","readwrite")
+clear1.objectStore("questionFolders").clear()
+
+const clear2 = db.transaction("questions","readwrite")
+clear2.objectStore("questions").clear()
+
+clear2.oncomplete = function(){
+
+/* IMPORT folderów */
+
+const t1 = db.transaction("questionFolders","readwrite")
+const s1 = t1.objectStore("questionFolders")
+
+data.folders.forEach(f=>{
+delete f.id
+s1.add(f)
+})
+
+t1.oncomplete = function(){
+
+/* IMPORT pytań */
+
+const t2 = db.transaction("questions","readwrite")
+const s2 = t2.objectStore("questions")
+
+data.questions.forEach(q=>{
+delete q.id
+s2.add(q)
+})
+
+t2.oncomplete = function(){
+
+renderFolders()
+
+showPopup("Import zakończony")
+
+}
+
+}
+
+}
+
+}
+
+reader.readAsText(file)
 
 }
 </script>
