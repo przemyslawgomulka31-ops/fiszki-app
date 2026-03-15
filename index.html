@@ -602,12 +602,21 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="questionFolders"></div>
 
-<button class="primary" onclick="addFolder()">➕ Nowy folder</button>
+<button class="primary" onclick="openFolderPopup()">➕ Nowy folder</button>
+
+<div style="display:flex;gap:10px">
+
+<button class="secondary" onclick="exportQuestions()">⬇ Export</button>
+
+<button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
+
+</div>
+
+<input type="file" id="importQuestions" accept=".json" style="display:none">
 
 <button class="secondary" onclick="goHome()">Powrót</button>
 
 </div>
-
 
 <!-- QUESTION FOLDER -->
 
@@ -757,6 +766,25 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
+	<div id="folderPopup" class="modal-backdrop">
+
+<div class="modal">
+
+<h3>Nazwa folderu</h3>
+
+<input id="folderNameInput" placeholder="Np. Interview">
+
+<div style="display:flex;gap:10px;justify-content:flex-end">
+
+<button class="secondary" onclick="closeFolderPopup()">Anuluj</button>
+
+<button class="primary" onclick="saveFolder()">Zapisz</button>
+
+</div>
+
+</div>
+
+</div>
 
 
 <script>
@@ -2047,7 +2075,116 @@ setView("addQuestion")
 }
 
 }
-	
+
+
+	function openFolderPopup(){
+document.getElementById("folderNameInput").value=""
+document.getElementById("folderPopup").classList.add("show")
+}
+
+function closeFolderPopup(){
+document.getElementById("folderPopup").classList.remove("show")
+}
+
+function saveFolder(){
+
+const name = document.getElementById("folderNameInput").value.trim()
+
+if(!name){
+alert("Podaj nazwę folderu")
+return
+}
+
+const transaction = db.transaction("questionFolders","readwrite")
+
+const store = transaction.objectStore("questionFolders")
+
+store.add({name:name})
+
+transaction.oncomplete = function(){
+
+renderFolders()
+
+closeFolderPopup()
+
+}
+
+}
+
+	function exportQuestions(){
+
+const t1 = db.transaction("questionFolders","readonly")
+const s1 = t1.objectStore("questionFolders")
+const r1 = s1.getAll()
+
+const t2 = db.transaction("questions","readonly")
+const s2 = t2.objectStore("questions")
+const r2 = s2.getAll()
+
+Promise.all([
+new Promise(res => r1.onsuccess = () => res(r1.result)),
+new Promise(res => r2.onsuccess = () => res(r2.result))
+]).then(data => {
+
+const backup = {
+folders:data[0],
+questions:data[1]
+}
+
+const blob = new Blob([JSON.stringify(backup)],{type:"application/json"})
+const url = URL.createObjectURL(blob)
+
+const a = document.createElement("a")
+a.href = url
+a.download = "questions-backup.json"
+a.click()
+
+})
+
+}
+
+
+	function exportQuestions(){
+
+const t1 = db.transaction("questionFolders","readonly")
+const s1 = t1.objectStore("questionFolders")
+const r1 = s1.getAll()
+
+const t2 = db.transaction("questions","readonly")
+const s2 = t2.objectStore("questions")
+const r2 = s2.getAll()
+
+Promise.all([
+new Promise(res => r1.onsuccess = () => res(r1.result)),
+new Promise(res => r2.onsuccess = () => res(r2.result))
+]).then(data => {
+
+const backup = {
+folders:data[0],
+questions:data[1]
+}
+
+const blob = new Blob([JSON.stringify(backup)],{type:"application/json"})
+const url = URL.createObjectURL(blob)
+
+const a = document.createElement("a")
+a.href = url
+a.download = "questions-backup.json"
+a.click()
+
+})
+
+}
+
+	document.getElementById("importQuestions").addEventListener("change",function(e){
+
+const file = e.target.files[0]
+
+if(!file) return
+
+importQuestions(file)
+
+})
 </script>
 
 <script>
