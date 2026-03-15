@@ -476,10 +476,6 @@ letter-spacing:2px;
 </div>
 
   <!-- HOME -->
-<div id="home" class="view active">
-
-<div class="menuTitle">MENU</div>
-
 <div class="tiles">
 
 <div class="tile bigTile" onclick="openAll()">
@@ -487,6 +483,9 @@ letter-spacing:2px;
 <span>FISZKI</span>
 </div>
 
+<div class="tile bigTile" onclick="openQuestions()">
+❓
+<span>QUESTION</span>
 </div>
 
 </div>
@@ -524,6 +523,58 @@ Progres: <span id="progress-mini">—</span>
 <button onclick="reviewCard(2)">✅ Łatwe</button>
 
 </div>
+
+</div>
+	!-- QUESTION -->
+<div id="questions" class="view">
+
+<h3>Foldery</h3>
+
+<div id="questionFolders"></div>
+
+<button class="primary" onclick="addFolder()">➕ Nowy folder</button>
+
+<button class="secondary" onclick="goHome()">Powrót</button>
+
+</div>
+
+	<!-- QUESTION FOLDER -->
+
+<div id="questionFolder" class="view">
+
+<div class="topButtons">
+
+<button class="iconBtn" onclick="renderQuestionList()">🗒️</button>
+
+<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
+
+<button class="iconBtn" onclick="goHome()">🏠</button>
+
+<button class="iconBtn" onclick="goToAddQuestion()">➕</button>
+
+</div>
+
+<div id="questionList"></div>
+
+</div>
+
+	<div id="addQuestion" class="view">
+
+<h3>Nowe pytanie</h3>
+
+<textarea id="questionInput" placeholder="Pytanie"></textarea>
+
+<textarea id="answerInput" placeholder="Odpowiedź"></textarea>
+
+<button class="primary" onclick="saveQuestion()">Zapisz</button>
+
+<button class="secondary" onclick="setView('questionFolder')">Powrót</button>
+
+</div>
+
+	<div id="questionCards" class="view">
+
+<div class="card" id="questionCardText"></div>
 
 </div>
   <!-- LIST -->
@@ -619,6 +670,7 @@ let recordedAudioBase64 = null
 let imageURL = null
 let streak = parseInt(localStorage.getItem("streak")) || 0
 let lastStudy = localStorage.getItem("lastStudy") || ""
+	let currentFolderId = null
 
 const request = indexedDB.open("FlashcardsDB",1)
 
@@ -627,10 +679,19 @@ request.onupgradeneeded = function(event){
 
 db = event.target.result
 
+if(!db.objectStoreNames.contains("cards")){
 db.createObjectStore("cards",{keyPath:"id",autoIncrement:true})
-
 }
 
+if(!db.objectStoreNames.contains("questionFolders")){
+db.createObjectStore("questionFolders",{keyPath:"id",autoIncrement:true})
+}
+
+if(!db.objectStoreNames.contains("questions")){
+db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
+}
+
+}
 
 request.onsuccess = function(event){
 
@@ -1522,6 +1583,212 @@ updateCounter()
 	function updateCounter(){
 document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
 }
+
+	function openQuestions(){
+setView("questions")
+renderFolders()
+}
+
+	function renderFolders(){
+
+const container = document.getElementById("questionFolders")
+
+container.innerHTML = ""
+
+const transaction = db.transaction("questionFolders","readonly")
+const store = transaction.objectStore("questionFolders")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+const folders = req.result
+
+folders.forEach(folder=>{
+
+const div = document.createElement("div")
+
+div.className = "listItem"
+
+div.innerHTML = `
+<div class="text">
+<b>${folder.name}</b>
+<span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
+</div>
+`
+
+div.onclick = () => openFolder(folder.id)
+
+container.appendChild(div)
+
+})
+
+/* LICZNIK PYTAŃ */
+
+const qTransaction = db.transaction("questions","readonly")
+const qStore = qTransaction.objectStore("questions")
+const qReq = qStore.getAll()
+
+qReq.onsuccess = function(){
+
+const allQuestions = qReq.result
+
+folders.forEach(folder=>{
+
+const count = allQuestions.filter(q => q.folderId === folder.id).length
+
+const el = document.getElementById("count-"+folder.id)
+
+if(el){
+el.innerText = " (" + count + ")"
+}
+
+})
+
+}
+
+}
+
+}
+
+	function addFolder(){
+
+const name = prompt("Nazwa folderu")
+
+if(!name) return
+
+const transaction = db.transaction("questionFolders","readwrite")
+
+const store = transaction.objectStore("questionFolders")
+
+store.add({name:name})
+
+transaction.oncomplete = renderFolders
+
+}
+
+	function openFolder(id){
+
+currentFolderId = id
+
+setView("questionFolder")
+
+renderQuestionList()
+
+}
+
+
+	function saveQuestion(){
+
+const question = document.getElementById("questionInput").value.trim()
+const answer = document.getElementById("answerInput").value.trim()
+
+if(!question || !answer){
+alert("Wpisz pytanie i odpowiedź")
+return
+}
+
+const transaction = db.transaction("questions","readwrite")
+
+const store = transaction.objectStore("questions")
+
+if(editingQuestionId){
+
+store.put({
+id: editingQuestionId,
+folderId: currentFolderId,
+question: question,
+answer: answer
+})
+
+editingQuestionId = null
+
+}else{
+
+store.add({
+folderId: currentFolderId,
+question: question,
+answer: answer
+})
+
+}
+
+transaction.oncomplete = () => {
+
+document.getElementById("questionInput").value=""
+document.getElementById("answerInput").value=""
+
+setView("questionFolder")
+
+renderQuestionList()
+
+}
+
+}
+	let questionCards = []
+let questionIndex = 0
+let questionAnswerVisible = false
+
+function renderQuestionCard(){
+
+if(questionCards.length === 0) return
+
+const card = questionCards[questionIndex]
+
+const el = document.getElementById("questionCardText")
+
+el.innerText = questionAnswerVisible ? card.answer : card.question
+
+}
+
+	document.getElementById("questionCardText").onclick = () => {
+
+questionAnswerVisible = !questionAnswerVisible
+
+renderQuestionCard()
+
+}
+
+	function deleteQuestion(id){
+
+if(!confirm("Usunąć pytanie?")) return
+
+const transaction = db.transaction("questions","readwrite")
+
+const store = transaction.objectStore("questions")
+
+store.delete(id)
+
+transaction.oncomplete = () => {
+renderQuestionList()
+}
+
+}
+
+	let editingQuestionId = null
+
+	function editQuestion(id){
+
+editingQuestionId = id
+
+const transaction = db.transaction("questions","readonly")
+
+const store = transaction.objectStore("questions")
+
+const req = store.get(id)
+
+req.onsuccess = function(){
+
+const q = req.result
+
+document.getElementById("questionInput").value = q.question
+document.getElementById("answerInput").value = q.answer
+
+setView("addQuestion")
+
+}
+
+}
+	
 </script>
 
 <script>
