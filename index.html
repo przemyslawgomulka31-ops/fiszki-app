@@ -936,7 +936,7 @@ top.style.display = "none"
 return
 }
 
-/* FISZKI */
+//* FISZKI */
 
 if(view === "homeStudy" || view === "list" || view === "add"){
 
@@ -946,6 +946,24 @@ btnList.style.display = "flex"
 btnAdd.style.display = "flex"
 btnAll.style.display = "flex"
 btnSrs.style.display = "flex"
+
+/* funkcje fiszek */
+
+btnList.onclick = function(){
+goToList()
+}
+
+btnAdd.onclick = function(){
+goToAdd()
+}
+
+btnAll.onclick = function(){
+setMode("ALL")
+}
+
+btnSrs.onclick = function(){
+setMode("SRS")
+}
 
 }
 
