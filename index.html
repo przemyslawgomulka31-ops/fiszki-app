@@ -545,26 +545,9 @@ Progres: <span id="progress-mini">—</span>
 </div>
 
 
-<!-- QUESTIONS FOLDERS -->
-
-<div id="questions" class="view">
-
-<div class="questionTopButtons">
-
-<button class="iconBtn" onclick="goHome()">🏠</button>
-
-</div>
-
-<h3>Foldery</h3>
-
-<div id="questionFolders"></div>
-
-<button class="primary" onclick="addFolder()">➕ Nowy folder</button>
-
-</div>
-
-
 <!-- QUESTION FOLDER -->
+
+<div id="questionFolder" class="view">
 
 <div class="questionTopButtons">
 
@@ -744,9 +727,9 @@ let streak = parseInt(localStorage.getItem("streak")) || 0
 let lastStudy = localStorage.getItem("lastStudy") || ""
 	let currentFolderId = null
 
-const request = indexedDB.open("FlashcardsDB",1)
+const request = indexedDB.open("FlashcardsDB",2)
 
-
+	
 request.onupgradeneeded = function(event){
 
 db = event.target.result
@@ -908,6 +891,9 @@ btn.style.display = (view === "homeStudy") ? "block" : "none"
 
 }
 
+	function goToAddQuestion(){
+setView("addQuestion")
+}
 
 /* ===============================
    RENDER CARD
