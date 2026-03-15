@@ -883,7 +883,7 @@ function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 
-ffunction setView(view){
+function setView(view){
 
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById(view).classList.add("active")
@@ -1743,7 +1743,63 @@ setView("questionFolder")
 renderQuestionList()
 
 }
+function renderQuestionList(){
 
+const container = document.getElementById("questionList")
+
+container.innerHTML = ""
+
+const transaction = db.transaction("questions","readonly")
+const store = transaction.objectStore("questions")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+const questions = req.result.filter(q => q.folderId === currentFolderId)
+
+questions.forEach(q=>{
+
+const div = document.createElement("div")
+
+div.className = "listItem"
+
+div.innerHTML = `
+<div class="text"><b>${q.question}</b></div>
+
+<div>
+<button class="smallBtn primary" onclick="editQuestion(${q.id})">✏️</button>
+<button class="smallBtn secondary" onclick="deleteQuestion(${q.id})">🗑️</button>
+</div>
+`
+
+container.appendChild(div)
+
+})
+
+}
+
+}
+
+	function openQuestionCards(){
+
+setView("questionCards")
+
+const transaction = db.transaction("questions","readonly")
+const store = transaction.objectStore("questions")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+questionCards = req.result.filter(q => q.folderId === currentFolderId)
+
+questionIndex = 0
+questionAnswerVisible = false
+
+renderQuestionCard()
+
+}
+
+}
 
 	function saveQuestion(){
 
