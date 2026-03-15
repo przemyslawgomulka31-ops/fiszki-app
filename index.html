@@ -955,12 +955,27 @@ if(view === "questions" || view === "questionFolder" || view === "questionCards"
 
 top.style.display = "flex"
 
+/* ukryj SRS */
+btnSrs.style.display = "none"
+
+/* pokaż przyciski */
 btnList.style.display = "flex"
 btnAdd.style.display = "flex"
 btnAll.style.display = "flex"
 
-btnSrs.style.display = "none"
+/* zmień funkcje przycisków */
 
+btnList.onclick = function(){
+renderQuestionList()
+setView("questionFolder")
+}
+
+btnAdd.onclick = function(){
+goToAddQuestion()
+}
+
+btnAll.onclick = function(){
+openQuestionCards()
 }
 
 }
