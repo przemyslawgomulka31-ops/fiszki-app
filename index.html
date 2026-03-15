@@ -452,6 +452,36 @@ align-items:center;
 gap:10px;
 margin-bottom:20px;
 }
+
+
+	.questionCard{
+
+background: var(--card-bg);
+color:#222;
+
+border-radius:20px;
+padding:20px;
+
+text-align:center;
+
+font-size:clamp(16px,4vw,28px);
+line-height:1.4;
+word-break:break-word;
+
+font-weight:600;
+
+margin-bottom:18px;
+
+box-shadow:0 18px 40px rgba(51,41,112,0.08);
+
+display:flex;
+flex-direction:column;
+align-items:center;
+justify-content:center;
+
+min-height:160px;
+
+}
 	
 </style>
 </head>
@@ -604,7 +634,19 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="questionCards" class="view">
 
-<div class="card" id="questionCardText"></div>
+<div class="questionTopButtons">
+
+<button class="iconBtn" onclick="setView('questionFolder')">🏠</button>
+
+<button class="iconBtn" onclick="renderQuestionList();setView('questionFolder')">🗒</button>
+
+<button class="iconBtn" onclick="goToAddQuestion()">➕</button>
+
+<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
+
+</div>
+
+<div class="questionCard" id="questionCardText"></div>
 
 </div>
 
@@ -810,7 +852,10 @@ handleGesture()
 })
 
 function handleGesture(){
-if(!document.getElementById("homeStudy").classList.contains("active")) return
+if(
+!document.getElementById("homeStudy").classList.contains("active") &&
+!document.getElementById("questionCards").classList.contains("active")
+) return
 const diffX = endX - startX
 const diffY = endY - startY
 
@@ -900,12 +945,11 @@ function setView(view){
 
   const top = document.querySelector(".topButtons");
 
-  // globalny pasek fiszek tylko dla fiszek
-  if(view === "homeStudy" || view === "list" || view === "add"){
-    top.style.display = "flex";
-  } else {
-    top.style.display = "none";
-  }
+ if(view === "homeStudy"){
+top.style.display = "flex"
+}else{
+top.style.display = "none"
+}
 
   // przyciski ALL / SRS tylko w nauce fiszek
   document.querySelectorAll(".studyOnly").forEach(btn=>{
@@ -1665,8 +1709,28 @@ document.getElementById("counter").innerText = cards.length + " | 🔥 " + strea
 }
 
 	function openQuestions(){
+
 setView("questions")
+
 renderFolders()
+
+// automatyczne wejście do pierwszego folderu jeśli istnieje
+const transaction = db.transaction("questionFolders","readonly")
+const store = transaction.objectStore("questionFolders")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+if(req.result.length > 0){
+
+currentFolderId = req.result[0].id
+
+openQuestionCards()
+
+}
+
+}
+
 }
 
 	function renderFolders(){
