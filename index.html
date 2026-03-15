@@ -883,23 +883,23 @@ function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 
-function setView(view){
+ffunction setView(view){
 
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById(view).classList.add("active")
 
 const top = document.querySelector(".topButtons")
 
-// ukryj pasek tylko na ekranie głównym
+// pasek globalny
 if(view === "home" || view === "questionFolder"){
 top.style.display = "none"
 }else{
 top.style.display = "flex"
 }
 
-// ALL i SRS widoczne w całej sekcji fiszek
+// przyciski ALL / SRS tylko w fiszkach
 document.querySelectorAll(".studyOnly").forEach(btn=>{
-btn.style.display = (view !== "home") ? "block" : "none"
+btn.style.display = (view === "homeStudy") ? "block" : "none"
 })
 
 }
