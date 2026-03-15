@@ -1847,6 +1847,10 @@ div.innerHTML = `
 <b>${folder.name}</b>
 <span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
 </div>
+
+<div>
+<button class="smallBtn secondary" onclick="deleteFolder(${folder.id})">🗑</button>
+</div>
 `
 
 div.onclick = () => openFolder(folder.id)
@@ -2175,7 +2179,12 @@ a.click()
 })
 
 }
+const clear1 = db.transaction("questionFolders","readwrite")
+clear1.objectStore("questionFolders").clear()
 
+const clear2 = db.transaction("questions","readwrite")
+clear2.objectStore("questions").clear()
+	
 	document.getElementById("importQuestions").addEventListener("change",function(e){
 
 const file = e.target.files[0]
@@ -2185,6 +2194,34 @@ if(!file) return
 importQuestions(file)
 
 })
+
+	function deleteFolder(id){
+
+if(!confirm("Usunąć folder i wszystkie pytania?")) return
+
+const t1 = db.transaction("questionFolders","readwrite")
+const s1 = t1.objectStore("questionFolders")
+
+s1.delete(id)
+
+const t2 = db.transaction("questions","readwrite")
+const s2 = t2.objectStore("questions")
+
+const req = s2.getAll()
+
+req.onsuccess = function(){
+
+req.result.forEach(q=>{
+if(q.folderId === id){
+s2.delete(q.id)
+}
+})
+
+renderFolders()
+
+}
+
+}
 </script>
 
 <script>
