@@ -2203,39 +2203,57 @@ alert("Błędny plik")
 return
 }
 
-/* WYCZYŚĆ stare dane */
-
-const clear1 = db.transaction("questionFolders","readwrite")
-clear1.objectStore("questionFolders").clear()
-
-const clear2 = db.transaction("questions","readwrite")
-clear2.objectStore("questions").clear()
-
-clear2.oncomplete = function(){
-
-/* IMPORT folderów */
+/* wyczyść bazę */
 
 const t1 = db.transaction("questionFolders","readwrite")
-const s1 = t1.objectStore("questionFolders")
-
-data.folders.forEach(f=>{
-delete f.id
-s1.add(f)
-})
-
-t1.oncomplete = function(){
-
-/* IMPORT pytań */
+t1.objectStore("questionFolders").clear()
 
 const t2 = db.transaction("questions","readwrite")
-const s2 = t2.objectStore("questions")
-
-data.questions.forEach(q=>{
-delete q.id
-s2.add(q)
-})
+t2.objectStore("questions").clear()
 
 t2.oncomplete = function(){
+
+/* MAPA ID */
+
+const folderMap = {}
+
+const tf = db.transaction("questionFolders","readwrite")
+const sf = tf.objectStore("questionFolders")
+
+data.folders.forEach(oldFolder=>{
+
+const oldId = oldFolder.id
+
+delete oldFolder.id
+
+const req = sf.add(oldFolder)
+
+req.onsuccess = function(){
+
+folderMap[oldId] = req.result
+
+}
+
+})
+
+tf.oncomplete = function(){
+
+/* IMPORT PYTAŃ */
+
+const tq = db.transaction("questions","readwrite")
+const sq = tq.objectStore("questions")
+
+data.questions.forEach(q=>{
+
+delete q.id
+
+q.folderId = folderMap[q.folderId]
+
+sq.add(q)
+
+})
+
+tq.oncomplete = function(){
 
 renderFolders()
 
