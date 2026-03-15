@@ -445,9 +445,11 @@ color:#1b1635;
 letter-spacing:2px;
 }
 
-	.questionTopButtons{
+.questionTopButtons{
 display:flex;
-gap:12px;
+justify-content:space-between;
+align-items:center;
+gap:10px;
 margin-bottom:20px;
 }
 	
@@ -547,30 +549,32 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="questions" class="view">
 
+<div class="questionTopButtons">
+
+<button class="iconBtn" onclick="goHome()">🏠</button>
+
+</div>
+
 <h3>Foldery</h3>
 
 <div id="questionFolders"></div>
 
 <button class="primary" onclick="addFolder()">➕ Nowy folder</button>
 
-<button class="secondary" onclick="goHome()">Powrót</button>
-
 </div>
 
 
 <!-- QUESTION FOLDER -->
 
-<div id="questionFolder" class="view">
-
 <div class="questionTopButtons">
-
-<button class="iconBtn" onclick="renderQuestionList()">🗒️</button>
-
-<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
 
 <button class="iconBtn" onclick="goHome()">🏠</button>
 
+<button class="iconBtn" onclick="renderQuestionList()">🗒</button>
+
 <button class="iconBtn" onclick="goToAddQuestion()">➕</button>
+
+<button class="modeBtn" onclick="openQuestionCards()">ALL</button>
 
 </div>
 
@@ -890,14 +894,14 @@ document.getElementById(view).classList.add("active")
 
 const top = document.querySelector(".topButtons")
 
-// pasek globalny
-if(view === "home" || view === "questionFolder"){
-top.style.display = "none"
-}else{
+// globalny pasek fiszek tylko dla fiszek
+if(view === "homeStudy" || view === "list" || view === "add"){
 top.style.display = "flex"
+}else{
+top.style.display = "none"
 }
 
-// przyciski ALL / SRS tylko w fiszkach
+// przyciski ALL / SRS tylko w nauce fiszek
 document.querySelectorAll(".studyOnly").forEach(btn=>{
 btn.style.display = (view === "homeStudy") ? "block" : "none"
 })
