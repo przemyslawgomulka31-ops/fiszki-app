@@ -815,8 +815,6 @@ const request = indexedDB.open("FlashcardsDB",2)
 	
 request.onupgradeneeded = function(event){
 
-const qStore = db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
-qStore.createIndex("folderId","folderId",{unique:false})
 	
 db = event.target.result
 
@@ -1081,37 +1079,6 @@ if(view === "questionCards"){
 }
 }
 
-/* QUESTION */
-
-if(view === "questions" || view === "questionFolder" || view === "questionCards" || view === "addQuestion"){
-
-top.style.display = "flex"
-
-/* ukryj SRS */
-btnSrs.style.display = "none"
-
-/* pokaż przyciski */
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-
-/* zmień funkcje przycisków */
-
-btnList.onclick = function(){
-renderQuestionList()
-setView("questionFolder")
-}
-
-btnAdd.onclick = function(){
-goToAddQuestion()
-}
-
-btnAll.onclick = function(){
-openQuestionCards()
-}
-
-}
-}
 	function goToAddQuestion(){
 setView("addQuestion")
 }
@@ -1863,29 +1830,7 @@ updateCounter()
 document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
 }
 
-	function openQuestionCards(){
-
-setView("questionCards")
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const index = store.index("folderId")
-
-const req = index.getAll(currentFolderId)
-
-req.onsuccess = function(){
-
-questionCards = req.result
-
-questionIndex = 0
-questionAnswerVisible = false
-
-renderQuestionCard()
-
-}
-
-}
-
+	
 	function renderFolders(){
 
 const container = document.getElementById("questionFolders")
