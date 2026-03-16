@@ -437,12 +437,12 @@ letter-spacing:1px;
 }
 	.menuTitle{
 text-align:center;
-font-size:20px;
-font-weight:600;
-margin-top:40px;
-margin-bottom:20px;
-color:#1b1635;
-letter-spacing:2px;
+font-size:22px;
+font-weight:700;
+margin-top:60px;
+margin-bottom:10px;
+letter-spacing:3px;
+color:#2b2250;
 }
 
 
@@ -529,6 +529,7 @@ margin-bottom:20px;
 
 <div class="topButtons">
 <button class="iconBtn" onclick="goHome()">🏠</button>
+	<button id="btnBack" class="iconBtn">◀</button>
 <button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
 <button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
 <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
@@ -540,7 +541,7 @@ margin-bottom:20px;
 <!-- HOME -->
 
 <div id="home" class="view active">
-
+<div class="menuTitle">MENU</div>
 <div class="tiles">
 
 <div class="tile bigTile" onclick="openAll()">
@@ -814,6 +815,9 @@ const request = indexedDB.open("FlashcardsDB",2)
 	
 request.onupgradeneeded = function(event){
 
+const qStore = db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
+qStore.createIndex("folderId","folderId",{unique:false})
+	
 db = event.target.result
 
 if(!db.objectStoreNames.contains("cards")){
@@ -989,10 +993,13 @@ document.getElementById(view).classList.add("active")
 
 const top = document.querySelector(".topButtons")
 
+const btnBack = document.getElementById("btnBack")
 const btnList = document.getElementById("btnList")
 const btnAdd = document.getElementById("btnAdd")
 const btnAll = document.getElementById("btnAll")
 const btnSrs = document.getElementById("btnSrs")
+
+btnBack.onclick = goBack
 
 /* HOME */
 
@@ -1001,35 +1008,77 @@ top.style.display = "none"
 return
 }
 
-//* FISZKI */
-
-if(view === "homeStudy" || view === "list" || view === "add"){
+/* pokaż topbar */
 
 top.style.display = "flex"
+
+/* reset przycisków */
+
+btnBack.style.display = "flex"
+btnList.style.display = "none"
+btnAdd.style.display = "none"
+btnAll.style.display = "none"
+btnSrs.style.display = "none"
+
+
+/* =====================
+   FISZKI
+===================== */
+
+if(view === "homeStudy" || view === "list" || view === "add"){
 
 btnList.style.display = "flex"
 btnAdd.style.display = "flex"
 btnAll.style.display = "flex"
 btnSrs.style.display = "flex"
 
-/* funkcje fiszek */
+btnList.onclick = goToList
+btnAdd.onclick = goToAdd
+btnAll.onclick = () => setMode("ALL")
+btnSrs.onclick = () => setMode("SRS")
 
-btnList.onclick = function(){
-goToList()
 }
 
-btnAdd.onclick = function(){
-goToAdd()
+
+/* =====================
+   FOLDERY PYTAŃ
+===================== */
+
+if(view === "questions"){
+
+// tylko home + back
+
 }
 
-btnAll.onclick = function(){
-setMode("ALL")
+
+/* =====================
+   KONKRETNY FOLDER
+===================== */
+
+if(view === "questionFolder"){
+
+btnList.style.display = "flex"
+btnAdd.style.display = "flex"
+btnAll.style.display = "flex"
+
+btnList.onclick = renderQuestionList
+btnAdd.onclick = goToAddQuestion
+btnAll.onclick = openQuestionCards
+
 }
 
-btnSrs.onclick = function(){
-setMode("SRS")
+
+/* =====================
+   KARTY PYTAŃ
+===================== */
+
+if(view === "questionCards"){
+
+// tylko back
+
 }
 
+}
 }
 
 /* QUESTION */
@@ -1814,11 +1863,26 @@ updateCounter()
 document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
 }
 
-	function openQuestions(){
+	function openQuestionCards(){
 
-setView("questions")
+setView("questionCards")
 
-renderFolders()
+const transaction = db.transaction("questions","readonly")
+const store = transaction.objectStore("questions")
+const index = store.index("folderId")
+
+const req = index.getAll(currentFolderId)
+
+req.onsuccess = function(){
+
+questionCards = req.result
+
+questionIndex = 0
+questionAnswerVisible = false
+
+renderQuestionCard()
+
+}
 
 }
 
@@ -2264,8 +2328,37 @@ showPopup("Import zakończony")
 reader.readAsText(file)
 
 }
+function backCard(){
 
-	
+if(dueCards.length === 0) return
+
+currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length
+
+showingAnswer = false
+
+renderCard()
+
+}
+	function goBack(){
+
+// fiszki
+if(document.getElementById("homeStudy").classList.contains("active")){
+prevCard()
+return
+}
+
+// pytania
+if(document.getElementById("questionCards").classList.contains("active")){
+questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
+questionAnswerVisible = false
+renderQuestionCard()
+return
+}
+
+// inne widoki
+history.back()
+
+}
 </script>
 
 <script>
