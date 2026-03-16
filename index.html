@@ -1,21 +1,13 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
 <meta charset="utf-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-
 <link rel="manifest" href="/manifest.json">
-
 <meta name="theme-color" content="#7b5cff">
-
 <meta name="apple-mobile-web-app-capable" content="yes">
-
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
 <meta name="apple-mobile-web-app-title" content="Fiszki">
-
 <title>Fiszki - poprawione UI</title>
 <style>
 /* ---------- BODY / GRADIENT ---------- */
@@ -28,1148 +20,515 @@
   --card-bg: #ffffff;
   --muted: rgba(0,0,0,0.55);
 }
-
 *{box-sizing:border-box}
-html, body{
-margin:0;
-padding:0;
-height:100%;
-	overflow:hidden;
-	overscroll-behavior:none;
-background:#8f7bff;
-}
-
+html, body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#8f7bff;}
 body{
-padding-top: env(safe-area-inset-top);
-min-height:100dvh;
-font-family: "Segoe UI", Roboto, Arial, sans-serif;
-color:#111;
-
-background: linear-gradient(
-180deg,
-var(--accent1) 0%,
-var(--accent2) 25%,
-var(--accent3) 55%,
-var(--accent4) 80%,
-var(--white) 100%
-);
-
--webkit-font-smoothing:antialiased;
--moz-osx-font-smoothing:grayscale;
+  padding-top: env(safe-area-inset-top);
+  min-height:100dvh;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color:#111;
+  background: linear-gradient(180deg,var(--accent1) 0%,var(--accent2) 25%,var(--accent3) 55%,var(--accent4) 80%,var(--white) 100%);
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
-
-html{
-touch-action: manipulation;
-}
+html{touch-action: manipulation;}
 /* ---------- APP LAYOUT ---------- */
-.app{
-max-width:420px;
-margin:0 auto;
-padding:22px;
-padding-bottom:160px;
-
-height:100dvh;
-
-position:relative;
-
-overflow-y:auto;
--webkit-overflow-scrolling:touch;
-}
-.bottomControls{
-position:fixed;
-
-left:0;
-right:0;
-bottom:0;
-
-padding:16px;
-
-display:flex;
-flex-direction:column;
-gap:12px;
-
-max-width:420px;
-margin:auto;
-
-background:linear-gradient(
-to top,
-rgba(230,227,255,0.95),
-rgba(230,227,255,0)
-);
-
-backdrop-filter:blur(10px);
-}
-/* ---------- HEADER ---------- */
-.header{
-  font-size:20px;
-  font-weight:600;
-  text-align:center;
-  margin:50px 0 14px;
-  color:#1b1635;
-}
-
+.app{max-width:420px;margin:0 auto;padding:22px;padding-bottom:160px;height:100dvh;position:relative;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.bottomControls{position:fixed;left:0;right:0;bottom:0;padding:16px;display:flex;flex-direction:column;gap:12px;max-width:420px;margin:auto;background:linear-gradient(to top,rgba(230,227,255,0.95),rgba(230,227,255,0));backdrop-filter:blur(10px);}
+.header{font-size:20px;font-weight:600;text-align:center;margin:50px 0 14px;color:#1b1635;}
 /* ---------- STATS ---------- */
-.stats{
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(6px);
-  padding:12px 14px;
-  border-radius:14px;
-  margin-bottom:18px;
-  font-size:14px;
-  color: #14121a;
-  display:flex;
-  gap:12px;
-  align-items:center;
-  justify-content:space-between;
-}
+.stats{background: rgba(255,255,255,0.12);backdrop-filter: blur(6px);padding:12px 14px;border-radius:14px;margin-bottom:18px;font-size:14px;color: #14121a;display:flex;gap:12px;align-items:center;justify-content:space-between;}
 .stats .left{display:flex;gap:10px;align-items:center}
-.stats .stat{
-  background: rgba(255,255,255,0.25);
-  padding:6px 10px;
-  border-radius:10px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  font-size:13px;
-  color:#0b0720;
-  box-shadow: 0 6px 18px rgba(43,24,120,0.06);
-}
-
+.stats .stat{background: rgba(255,255,255,0.25);padding:6px 10px;border-radius:10px;display:flex;gap:8px;align-items:center;font-size:13px;color:#0b0720;box-shadow: 0 6px 18px rgba(43,24,120,0.06);}
 /* ---------- CARD ---------- */
-.card{
-background: var(--card-bg);
-color:#222;
-border-radius:20px;
-padding:20px;
-text-align:center;
-font-size:28px;
-font-weight:600;
-margin-bottom:18px;
-box-shadow:0 18px 40px rgba(51,41,112,0.08);
-
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:10px;
-}
-
-/* animation helper (apply when switching card) */
-.card.animate {
-  transform: translateY(-8px);
-  opacity: 0.85;
-}
-
-/* ---------- NAV BUTTONS (Prev/Next) ---------- */
-.navButtons{
-display:flex;
-gap:12px;
-}
-.navButtons button{
-  flex:1;
-  min-height:48px;
-  border-radius:28px;
-  font-size:14px;
-margin-top: 10px;
-}
-
-/* ---------- BUTTONS ---------- */
-button{
-  width:100%;
-  padding:12px 14px;
-  border:none;
-  border-radius:28px;
-  margin-top:10px;
-  font-size:15px;
-  cursor:pointer;
-  transition: transform .12s ease, box-shadow .12s ease;
-  box-shadow: 0 6px 18px rgba(99,58,255,0.08);
-}
+.card{background: var(--card-bg);color:#222;border-radius:20px;padding:20px;text-align:center;font-size:28px;font-weight:600;margin-bottom:18px;box-shadow:0 18px 40px rgba(51,41,112,0.08);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+.card.animate { transform: translateY(-8px); opacity: 0.85;}
+.navButtons{display:flex;gap:12px;}
+.navButtons button{flex:1;min-height:48px;border-radius:28px;font-size:14px;margin-top: 10px;}
+button{width:100%;padding:12px 14px;border:none;border-radius:28px;margin-top:10px;font-size:15px;cursor:pointer;transition: transform .12s ease, box-shadow .12s ease;box-shadow: 0 6px 18px rgba(99,58,255,0.08);}
 button:active{ transform: translateY(1px); }
-
-	.bigButton{
-min-height:60px;
-font-size:18px;
-}
-
-.primary{
-  background: linear-gradient(135deg,#7b5cff,#9f7bff);
-  color:white;
-  font-weight:600;
-margin-top: 10px;
-}
-
-.secondary{
-  background: #ffffff;
-  color: #6a4bff;
-  font-weight:600;
-}
-.topButtons{
-position:absolute;
-top:12px;
-left:22px;
-right:22px;
-display:flex;
-justify-content:space-between;
-gap:12px;
-z-index:20;
-}
-
-.iconBtn{
-
-width:42px;
-height:42px;
-border-radius:12px;
-border:none;
-font-size:22px;
-background:rgba(255,255,255,0.25);
-backdrop-filter: blur(6px);
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-}
-
-/* ---------- LIST ---------- */
-.listItem{
-  background:#fff;
-  color:#222;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:10px;
-  box-shadow: 0 8px 22px rgba(31,20,100,0.04);
-}
+.bigButton{min-height:60px;font-size:18px;}
+.primary{background: linear-gradient(135deg,#7b5cff,#9f7bff);color:white;font-weight:600;margin-top: 10px;}
+.secondary{background: #ffffff;color: #6a4bff;font-weight:600;}
+.topButtons{position:absolute;top:12px;left:22px;right:22px;display:flex;justify-content:space-between;gap:12px;z-index:20;}
+.iconBtn{width:42px;height:42px;border-radius:12px;border:none;font-size:22px;background:rgba(255,255,255,0.25);backdrop-filter: blur(6px);display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.listItem{background:#fff;color:#222;border-radius:14px;padding:12px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;box-shadow: 0 8px 22px rgba(31,20,100,0.04);}
 .listItem .text { flex:1 }
-.smallBtn{
-  width:auto;
-  padding:8px 12px;
-  font-size:13px;
-  border-radius:10px;
-  margin-left:6px;
-}
-
-/* ---------- INPUT ---------- */
-input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin-bottom:10px;
-  font-size:15px;
-  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
-}
-
-/* ---------- VIEW CONTROL ---------- */
+.smallBtn{width:auto;padding:8px 12px;font-size:13px;border-radius:10px;margin-left:6px;}
+input{width:100%;padding:12px;border-radius:12px;border:none;margin-bottom:10px;font-size:15px;box-shadow: 0 8px 16px rgba(17,12,30,0.03);}
 .view{ display:none; }
 .active{ display:block; }
-
-/* ---------- MODAL (EDIT) ---------- */
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(10,8,20,0.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
-}
-.modal-backdrop.show{
-  display:flex;
-}
-.modal{
-  width:90%;
-  max-width:420px;
-  background: #fff;
-  color:#111;
-  border-radius:14px;
-  padding:16px;
-  box-shadow: 0 18px 50px rgba(14,9,40,0.4);
-}
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,8,20,0.45);display:none;align-items:center;justify-content:center;z-index:50;}
+.modal-backdrop.show{display:flex;}
+.modal{width:90%;max-width:420px;background: #fff;color:#111;border-radius:14px;padding:16px;box-shadow: 0 18px 50px rgba(14,9,40,0.4);}
 .modal h3{ margin:0 0 8px 0 }
 .modal .row{ margin-bottom:8px }
-
-/* small responsive tweaks */
-@media (max-width:420px){
-  .card{ padding:36px 14px; font-size:22px }
-  .header{ font-size:18px }
-  .stats{ font-size:13px }
-}
-
-.card{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-}
-
-.speak{
-  cursor:pointer;
-  font-size:26px;
-}
-.record,
-.play{
-  cursor:pointer;
-  font-size:24px;
-}
-	#imageResults{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-margin:10px 0;
-}
-#imageResults img {
-width:100%;
-	border-radius:10px;
-	cursor:pointer;
-}
-	#imageResults img:hover {
-transform:scale(1.05);
-
-}
-	#cardImage{
-width:100%;
-max-height:220px;
-object-fit:cover;
-border-radius:16px;
-margin-bottom:10px;
-}
-.modeBtn{
-padding:8px 14px;
-border-radius:12px;
-border:none;
-background:rgba(255,255,255,0.3);
-font-weight:600;
-}
-	#startScreen{
-
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-
-display:flex;
-justify-content:center;
-align-items:center;
-
-background:linear-gradient(
-180deg,
-#8f7bff,
-#c9c2ff
-);
-
-z-index:9999;
-
-color:white;
-text-align:center;
-}
-
-.startContent h1{
-font-size:38px;
-margin:0;
-}
-
-.tapText{
-margin-top:20px;
-opacity:0.8;
-font-size:14px;
-}
-	.logo{
-font-size:20px;
-		max-width:90px;
-}
-.logoFish{
-width:80px;
-height:auto;
-display:block;
-margin:auto;
-}
-.tap{
-margin-top:20px;
-opacity:0.6;
-font-size:14px;
-}
-
-	.studyOnly{
-display:none;
-}
-
-	.tiles{
-display:grid;
-grid-template-columns:1fr;
-gap:16px;
-margin-top:30px;
-}
-
-.bigTile{
-
-height:140px;
-width:70%;
-
-margin:auto;
-
-border-radius:20px;
-
-background:rgba(255,255,255,0.3);
-backdrop-filter:blur(6px);
-
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-
-font-size:36px;
-font-weight:600;
-
-box-shadow:0 12px 30px rgba(0,0,0,0.08);
-
-cursor:pointer;
-}
-
-.bigTile span{
-font-size:16px;
-margin-top:6px;
-letter-spacing:1px;
-}
-	.menuTitle{
-text-align:center;
-font-size:22px;
-font-weight:700;
-margin-top:60px;
-margin-bottom:10px;
-letter-spacing:3px;
-color:#2b2250;
-}
-
-
-
-	.questionCard{
-
-margin-top:80px;
-
-background:#fff;
-border-radius:20px;
-padding:20px;
-
-font-size:clamp(18px,4vw,28px);
-line-height:1.4;
-word-break:break-word;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-min-height:200px;
-
-box-shadow:0 18px 40px rgba(51,41,112,0.08);
-
-}
-
-.questionSpacer{
-height:20px;
-}
-
-	.questionField,
-.answerField{
-
-width:100%;
-
-font-size:18px;
-
-line-height:1.5;
-
-padding:14px;
-
-border-radius:14px;
-
-border:none;
-
-box-shadow:0 8px 20px rgba(0,0,0,0.05);
-
-resize:none;
-
-}
-
-/* pytanie mniejsze */
-
-.questionField{
-min-height:80px;
-margin-bottom:12px;
-}
-
-/* odpowiedź większa */
-
-.answerField{
-min-height:160px;
-margin-bottom:20px;
-}
-	
+@media (max-width:420px){ .card{ padding:36px 14px; font-size:22px } .header{ font-size:18px } .stats{ font-size:13px } }
+.card{ display:flex; justify-content:center; align-items:center; gap:10px; }
+.speak{ cursor:pointer; font-size:26px; }
+.record, .play{ cursor:pointer; font-size:24px; }
+#imageResults{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; }
+#imageResults img { width:100%; border-radius:10px; cursor:pointer; }
+#imageResults img:hover { transform:scale(1.05); }
+#cardImage{ width:100%; max-height:220px; object-fit:cover; border-radius:16px; margin-bottom:10px; }
+.modeBtn{ padding:8px 14px; border-radius:12px; border:none; background:rgba(255,255,255,0.3); font-weight:600; }
+#startScreen{ position:fixed; top:0; left:0; right:0; bottom:0; display:flex; justify-content:center; align-items:center; background:linear-gradient(180deg,#8f7bff,#c9c2ff); z-index:9999; color:white; text-align:center; }
+.startContent h1{ font-size:38px; margin:0; }
+.tapText{ margin-top:20px; opacity:0.8; font-size:14px; }
+.logo{ font-size:20px; max-width:90px; }
+.logoFish{ width:80px; height:auto; display:block; margin:auto; }
+.tap{ margin-top:20px; opacity:0.6; font-size:14px; }
+.studyOnly{ display:none; }
+.tiles{ display:grid; grid-template-columns:1fr; gap:16px; margin-top:30px; }
+.bigTile{ height:140px; width:70%; margin:auto; border-radius:20px; background:rgba(255,255,255,0.3); backdrop-filter:blur(6px); display:flex; flex-direction:column; justify-content:center; align-items:center; font-size:36px; font-weight:600; box-shadow:0 12px 30px rgba(0,0,0,0.08); cursor:pointer; }
+.bigTile span{ font-size:16px; margin-top:6px; letter-spacing:1px; }
+.menuTitle{ text-align:center; font-size:22px; font-weight:700; margin-top:60px; margin-bottom:10px; letter-spacing:3px; color:#2b2250; }
+.questionCard{ margin-top:80px; background:#fff; border-radius:20px; padding:20px; font-size:clamp(18px,4vw,28px); line-height:1.4; word-break:break-word; display:flex; align-items:center; justify-content:center; min-height:200px; box-shadow:0 18px 40px rgba(51,41,112,0.08); }
+.questionSpacer{ height:20px; }
+.questionField, .answerField{ width:100%; font-size:18px; line-height:1.5; padding:14px; border-radius:14px; border:none; box-shadow:0 8px 20px rgba(0,0,0,0.05); resize:none; }
+.questionField{ min-height:80px; margin-bottom:12px; }
+.answerField{ min-height:160px; margin-bottom:20px; }
 </style>
 </head>
 <body>
 
 <div id="startScreen">
-<div class="startContent">
-<div class="logo">
-<img src="fishki-logo.png" class="logoFish">
-</div>
-<h1>Fishki</h1>
-<p>Learn faster with flashcards</p>
-<div class="tapText">Dotknij aby rozpocząć</div>
-</div>
+  <div class="startContent">
+    <div class="logo"><img src="fishki-logo.png" class="logoFish" alt=""></div>
+    <h1>Fishki</h1>
+    <p>Learn faster with flashcards</p>
+    <div class="tapText">Dotknij aby rozpocząć</div>
+  </div>
 </div>
 
 <div class="app">
 
-<div class="header"></div>
+  <div class="header"></div>
 
-<div class="topButtons">
-<button class="iconBtn" onclick="goHome()">🏠</button>
-	<button id="btnBack" class="iconBtn">◀</button>
-<button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
-<button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
-<button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
-<button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
+  <div class="topButtons">
+    <button class="iconBtn" onclick="goHome()">🏠</button>
+    <button id="btnBack" class="iconBtn" title="Cofnij">◀</button>
+    <button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
+    <button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
+    <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
+    <button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
+  </div>
+
+  <!-- HOME -->
+  <div id="home" class="view active">
+    <div class="menuTitle">MENU</div>
+    <div class="tiles">
+      <div class="tile bigTile" onclick="openAll()">📚<span>FISZKI</span></div>
+      <div class="tile bigTile" onclick="openQuestions()">❓<span>QUESTION</span></div>
+    </div>
+  </div>
+
+  <!-- FLASHCARDS STUDY -->
+  <div id="homeStudy" class="view">
+    <div class="stats">
+      <div class="left"><div class="stat">🔥 Liczba: <strong id="counter">0</strong></div></div>
+      <div style="font-size:13px;color:rgba(11,8,16,0.6)">Progres: <span id="progress-mini">—</span></div>
+    </div>
+
+    <div class="card" id="flashcard">
+      <img id="cardImage" alt="">
+      <span id="cardText">Dodaj pierwszą fiszkę</span>
+      <span class="speak" onclick="dueCards.length && speakWord(dueCards[currentIndex].front)">🔊</span>
+      <span class="play" onclick="playRecording()">▶️</span>
+    </div>
+
+    <div id="reviewButtons">
+      <button onclick="reviewCard(0)">❌ Nie pamiętam</button>
+      <button onclick="reviewCard(1)">🙂 Średnio</button>
+      <button onclick="reviewCard(2)">✅ Łatwe</button>
+    </div>
+  </div>
+
+  <!-- QUESTIONS FOLDERS -->
+  <div id="questions" class="view">
+    <h3>Foldery</h3>
+    <div id="questionFolders"></div>
+    <button class="primary" onclick="openFolderPopup()">➕ Nowy folder</button>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" onclick="exportQuestions()">⬇ Export</button>
+      <button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
+    </div>
+    <input type="file" id="importQuestions" accept=".json" style="display:none">
+    <button class="secondary" onclick="goHome()">Powrót</button>
+  </div>
+
+  <!-- QUESTION FOLDER -->
+  <div id="questionFolder" class="view">
+    <h3>Pytania</h3>
+    <div id="questionList"></div>
+  </div>
+
+  <!-- QUESTION CARDS -->
+  <div id="questionCards" class="view">
+    <div class="questionCard" id="questionCardText"></div>
+  </div>
+
+  <!-- ADD QUESTION -->
+  <div id="addQuestion" class="view">
+    <h3>Nowe pytanie</h3>
+    <label>Pytanie</label>
+    <textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
+    <label>Odpowiedź</label>
+    <textarea class="answerField" id="answerInput" placeholder="Twoja odpowiedź (może być nawet 80 słów)"></textarea>
+    <button class="primary" onclick="saveQuestion()">Zapisz</button>
+    <button class="secondary" onclick="setView('questionFolder')">Powrót</button>
+  </div>
+
+  <!-- LIST -->
+  <div id="list" class="view">
+    <h3>Lista słówek</h3>
+    <div style="margin:8px 0 12px">
+      <input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
+    </div>
+    <div id="wordsList"></div>
+    <div style="display:flex;gap:10px">
+      <button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
+      <button class="secondary" onclick="goHome()">Powrót</button>
+      <button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
+      <input type="file" id="importFile" accept=".json" style="display:none">
+      <button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
+    </div>
+  </div>
+
+  <!-- ADD FLASHCARD -->
+  <div id="add" class="view">
+    <h3>Dodaj fiszkę</h3>
+    <input type="text" id="frontInput" placeholder="Słowo po angielsku">
+    <input type="text" id="backInput" placeholder="Tłumaczenie">
+    <input type="file" id="imageUpload" accept="image/*">
+    <label for="imageUpload">📷 Dodaj własne zdjęcie</label>
+    <div id="imageResults"></div>
+    <button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
+    <button class="secondary" onclick="playRecording()">▶️ Odsłuch nagrania</button>
+    <div id="recordUI" style="display:none;text-align:center;margin-top:10px">
+      <div style="font-size:22px">🎤 Nagrywanie...</div>
+      <div style="font-size:28px;color:red">● REC</div>
+      <div id="recordTimer">0</div>
+    </div>
+    <button class="primary" onclick="addCard()">Dodaj fiszkę</button>
+    <button class="secondary" onclick="goHome()">Powrót</button>
+  </div>
+
+  <!-- EDIT MODAL -->
+  <div id="modal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Edytuj słówko</h3>
+      <div class="row"><input id="editFront" placeholder="Słowo po angielsku" /></div>
+      <div class="row"><input id="editBack" placeholder="Tłumaczenie" /></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button class="secondary" onclick="closeModal()">Anuluj</button>
+        <button class="primary" onclick="saveModal()">Zapisz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- POPUP -->
+  <div id="popup" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="popupText"></h3>
+      <button class="primary" onclick="closePopup()">OK</button>
+    </div>
+  </div>
 
 </div>
 
-
-<!-- HOME -->
-
-<div id="home" class="view active">
-<div class="menuTitle">MENU</div>
-<div class="tiles">
-
-<div class="tile bigTile" onclick="openAll()">
-📚
-<span>FISZKI</span>
+<div id="folderPopup" class="modal-backdrop">
+  <div class="modal">
+    <h3>Nazwa folderu</h3>
+    <input id="folderNameInput" placeholder="Np. Interview">
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="secondary" onclick="closeFolderPopup()">Anuluj</button>
+      <button class="primary" onclick="saveFolder()">Zapisz</button>
+    </div>
+  </div>
 </div>
-
-<div class="tile bigTile" onclick="openQuestions()">
-❓
-<span>QUESTION</span>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- FLASHCARDS STUDY -->
-
-<div id="homeStudy" class="view">
-
-<div class="stats">
-<div class="left">
-<div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
-</div>
-
-<div style="font-size:13px;color:rgba(11,8,16,0.6)">
-Progres: <span id="progress-mini">—</span>
-</div>
-</div>
-
-<div class="card" id="flashcard">
-
-<img id="cardImage">
-
-<span id="cardText">Dodaj pierwszą fiszkę</span>
-
-<span class="speak" onclick="dueCards.length && speakWord(dueCards[currentIndex].front)">🔊</span>
-
-<span class="play" onclick="playRecording()">▶️</span>
-
-</div>
-
-<div id="reviewButtons">
-
-<button onclick="reviewCard(0)">❌ Nie pamiętam</button>
-<button onclick="reviewCard(1)">🙂 Średnio</button>
-<button onclick="reviewCard(2)">✅ Łatwe</button>
-
-</div>
-
-</div>
-
-<!-- QUESTIONS FOLDERS -->
-
-<div id="questions" class="view">
-
-<h3>Foldery</h3>
-
-<div id="questionFolders"></div>
-
-<button class="primary" onclick="openFolderPopup()">➕ Nowy folder</button>
-
-<div style="display:flex;gap:10px">
-
-<button class="secondary" onclick="exportQuestions()">⬇ Export</button>
-
-<button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
-
-</div>
-
-<input type="file" id="importQuestions" accept=".json" style="display:none">
-
-<button class="secondary" onclick="goHome()">Powrót</button>
-
-</div>
-
-<!-- QUESTION FOLDER -->
-
-<div id="questionFolder" class="view">
-
-<h3>Pytania</h3>
-
-<div id="questionList"></div>
-
-</div>
-
-
-<!-- QUESTION CARDS -->
-
-<div id="questionCards" class="view">
-
-<div class="questionCard" id="questionCardText"></div>
-
-</div>
-
-
-<!-- ADD QUESTION -->
-
-<div id="addQuestion" class="view">
-
-<h3>Nowe pytanie</h3>
-
-<label>Pytanie</label>
-<textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
-
-<label>Odpowiedź</label>
-<textarea class="answerField" id="answerInput" placeholder="Twoja odpowiedź (może być nawet 80 słów)"></textarea>
-
-<button class="primary" onclick="saveQuestion()">Zapisz</button>
-
-<button class="secondary" onclick="setView('questionFolder')">Powrót</button>
-
-</div>
-<!-- LIST -->
-
-<div id="list" class="view">
-
-<h3>Lista słówek</h3>
-
-<div style="margin:8px 0 12px">
-<input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
-</div>
-
-<div id="wordsList"></div>
-
-<div style="display:flex;gap:10px">
-
-<button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
-
-<button class="secondary" onclick="goHome()">Powrót</button>
-
-<button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
-
-<input type="file" id="importFile" accept=".json" style="display:none">
-
-<button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
-
-</div>
-
-</div>
-
-
-<!-- ADD FLASHCARD -->
-
-<div id="add" class="view">
-
-<h3>Dodaj fiszkę</h3>
-
-<input type="text" id="frontInput" placeholder="Słowo po angielsku">
-
-<input type="text" id="backInput" placeholder="Tłumaczenie">
-
-<input type="file" id="imageUpload" accept="image/*">
-
-<label for="imageUpload">📷 Dodaj własne zdjęcie</label>
-
-<div id="imageResults"></div>
-
-<button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
-
-<button class="secondary" onclick="playRecording()">▶️ Odsłuch nagrania</button>
-
-<div id="recordUI" style="display:none;text-align:center;margin-top:10px">
-
-<div style="font-size:22px">🎤 Nagrywanie...</div>
-
-<div style="font-size:28px;color:red">● REC</div>
-
-<div id="recordTimer">0</div>
-
-</div>
-
-<button class="primary" onclick="addCard()">Dodaj fiszkę</button>
-
-<button class="secondary" onclick="goHome()">Powrót</button>
-
-</div>
-
-
-<!-- EDIT MODAL -->
-
-<div id="modal" class="modal-backdrop">
-
-<div class="modal">
-
-<h3>Edytuj słówko</h3>
-
-<div class="row">
-<input id="editFront" placeholder="Słowo po angielsku" />
-</div>
-
-<div class="row">
-<input id="editBack" placeholder="Tłumaczenie" />
-</div>
-
-<div style="display:flex;gap:10px;justify-content:flex-end">
-
-<button class="secondary" onclick="closeModal()">Anuluj</button>
-
-<button class="primary" onclick="saveModal()">Zapisz</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- POPUP -->
-
-<div id="popup" class="modal-backdrop">
-
-<div class="modal">
-
-<h3 id="popupText"></h3>
-
-<button class="primary" onclick="closePopup()">OK</button>
-
-</div>
-
-</div>
-
-</div>
-
-	<div id="folderPopup" class="modal-backdrop">
-
-<div class="modal">
-
-<h3>Nazwa folderu</h3>
-
-<input id="folderNameInput" placeholder="Np. Interview">
-
-<div style="display:flex;gap:10px;justify-content:flex-end">
-
-<button class="secondary" onclick="closeFolderPopup()">Anuluj</button>
-
-<button class="primary" onclick="saveFolder()">Zapisz</button>
-
-</div>
-
-</div>
-
-</div>
-
 
 <script>
-
+/* ===============================
+   CACHE DOM
+   ============================== */
+const el = {
+  topButtons: document.querySelector('.topButtons'),
+  btnBack: document.getElementById('btnBack'),
+  btnList: document.getElementById('btnList'),
+  btnAdd: document.getElementById('btnAdd'),
+  btnAll: document.getElementById('btnAll'),
+  btnSrs: document.getElementById('btnSrs'),
+  cardText: document.getElementById('cardText'),
+  cardImage: document.getElementById('cardImage'),
+  counter: document.getElementById('counter'),
+  progressMini: document.getElementById('progress-mini'),
+  imageResults: document.getElementById('imageResults'),
+  startScreen: document.getElementById('startScreen'),
+  recordUI: document.getElementById('recordUI'),
+  recordTimer: document.getElementById('recordTimer')
+};
 
 /* ===============================
-   INDEXED DB
-================================ */
+   STATE
+   ============================== */
+let db;
+let cards = [];
+let currentIndex = 0;
+let showingAnswer = false;
+let sortAZ = true;
+let studyMode = "SRS";
+let mediaRecorder;
+let audioChunks = [];
+let recordedAudioBase64 = null;
+let imageURL = null;
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+let lastStudy = localStorage.getItem("lastStudy") || "";
+let currentFolderId = null;
 
-let db
-let cards = []
-let currentIndex = 0
-let showingAnswer = false
-let sortAZ = true
-let studyMode = "SRS"
-let mediaRecorder
-let audioChunks = []
-let recordedAudioBase64 = null
+/* ===============================
+   INDEXEDDB (upgrade & open)
+   ============================== */
+const request = indexedDB.open("FlashcardsDB", 2);
 
-let imageURL = null
-let streak = parseInt(localStorage.getItem("streak")) || 0
-let lastStudy = localStorage.getItem("lastStudy") || ""
-	let currentFolderId = null
-
-const request = indexedDB.open("FlashcardsDB",2)
-
-	
 request.onupgradeneeded = function(event){
+  db = event.target.result;
 
-	
-db = event.target.result
+  if(!db.objectStoreNames.contains("cards")){
+    db.createObjectStore("cards",{keyPath:"id",autoIncrement:true});
+  }
 
-if(!db.objectStoreNames.contains("cards")){
-db.createObjectStore("cards",{keyPath:"id",autoIncrement:true})
-}
+  if(!db.objectStoreNames.contains("questionFolders")){
+    db.createObjectStore("questionFolders",{keyPath:"id",autoIncrement:true});
+  }
 
-if(!db.objectStoreNames.contains("questionFolders")){
-db.createObjectStore("questionFolders",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("questions")){
-db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
-}
-
-}
+  if(!db.objectStoreNames.contains("questions")){
+    const qStore = db.createObjectStore("questions",{keyPath:"id",autoIncrement:true});
+    // index by folderId for fast queries per-folder
+    qStore.createIndex("folderId","folderId",{unique:false});
+  } else {
+    // existing DB — if index missing, try to create it (safe in most upgrade scenarios)
+    try {
+      const tx = event.target.transaction;
+      const qStore = tx.objectStore("questions");
+      if(!qStore.indexNames.contains("folderId")){
+        qStore.createIndex("folderId","folderId",{unique:false});
+      }
+    } catch(e){
+      // ignore; index creation may not be allowed here if store already existed in older versions
+      // it's OK — queries will still work but be slightly slower
+      console.warn('Upgrade: could not create index (may already exist).', e);
+    }
+  }
+};
 
 request.onsuccess = function(event){
+  db = event.target.result;
+  loadCardsFromDB();
+};
 
-db = event.target.result
-
-loadCardsFromDB()
-
-}
-
-/* ===============================
-TOUCH SYSTEM (SWIPE + TAP)
-================================ */
-let startX = 0
-let startY = 0
-let endX = 0
-let endY = 0
-
-window.addEventListener("load", () => {
-
-const swipeArea = document.querySelector(".app")
-
-if(!swipeArea) return
-
-swipeArea.addEventListener("touchstart", e => {
-
-if(e.target.tagName === "BUTTON") return
-
-startX = e.touches[0].clientX
-startY = e.touches[0].clientY
-
-})
-
-swipeArea.addEventListener("touchend", e => {
-
-if(e.target.tagName === "BUTTON") return
-
-endX = e.changedTouches[0].clientX
-endY = e.changedTouches[0].clientY
-
-handleGesture()
-
-})
-
-})
-
-function handleGesture(){
-if(
-!document.getElementById("homeStudy").classList.contains("active") &&
-!document.getElementById("questionCards").classList.contains("active")
-) return
-const diffX = endX - startX
-const diffY = endY - startY
-
-/* TAP */
-
-if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
-// FISZKI
-if(document.getElementById("homeStudy").classList.contains("active")){
-showAnswer()
-}
-
-// QUESTION
-if(document.getElementById("questionCards").classList.contains("active")){
-questionAnswerVisible = !questionAnswerVisible
-renderQuestionCard()
-}
-return
-}
-
-/* SWIPE */
-
-if(Math.abs(diffX) > Math.abs(diffY)){
-
-if(diffX > 80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-prevCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-
-return
-}
-
-if(diffX < -80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-nextCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex + 1) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-
-return
-}
-	}
-}
+request.onerror = function(e){
+  console.error("IndexedDB error", e);
+};
 
 /* ===============================
-   mood
-================================ */
-function setMode(mode){
-
-studyMode = mode
-
-currentIndex = 0
-
-setView("homeStudy")
-
-renderCard()
-
-}
-
-	
-/* ===============================
-   LOAD FROM DB
-================================ */
-
+   LOAD CARDS (cache in memory)
+   ============================== */
 function loadCardsFromDB(callback){
-
-const transaction = db.transaction("cards","readonly")
-
-const store = transaction.objectStore("cards")
-
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-cards = req.result
-
-renderCard()
-
-if(callback) callback()
-
+  if(!db) return;
+  const transaction = db.transaction("cards","readonly");
+  const store = transaction.objectStore("cards");
+  const req = store.getAll();
+  req.onsuccess = function(){
+    cards = req.result || [];
+    renderCard();
+    if(callback) callback();
+  };
 }
-
-}
-
 
 /* ===============================
-   NAVIGATION
-================================ */
+   NAVIGATION / VIEW CONTROL
+   ============================== */
+function goHome(){ setView("home"); }
+function goToList(){ setView("list"); renderList(); }
+function goToAdd(){ setView("add"); }
 
-function goHome(){ setView("home") }
-function goToList(){ setView("list"); renderList() }
-function goToAdd(){ setView("add") }
 function setView(view){
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  const target = document.getElementById(view);
+  if(target) target.classList.add("active");
 
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-document.getElementById(view).classList.add("active")
+  // bind back
+  el.btnBack.onclick = goBack;
 
-const top = document.querySelector(".topButtons")
+  // HOME
+  if(view === "home"){
+    el.topButtons.style.display = "none";
+    return;
+  }
 
-const btnBack = document.getElementById("btnBack")
-const btnList = document.getElementById("btnList")
-const btnAdd = document.getElementById("btnAdd")
-const btnAll = document.getElementById("btnAll")
-const btnSrs = document.getElementById("btnSrs")
+  // show topbar for other views
+  el.topButtons.style.display = "flex";
 
-btnBack.onclick = goBack
+  // reset button visibility
+  el.btnBack.style.display = "flex";
+  el.btnList.style.display = "none";
+  el.btnAdd.style.display = "none";
+  el.btnAll.style.display = "none";
+  el.btnSrs.style.display = "none";
 
-/* HOME */
+  /* FISZKI: homeStudy, list, add */
+  if(view === "homeStudy" || view === "list" || view === "add"){
+    el.btnList.style.display = "flex";
+    el.btnAdd.style.display = "flex";
+    el.btnAll.style.display = "flex";
+    el.btnSrs.style.display = "flex";
+    el.btnList.onclick = goToList;
+    el.btnAdd.onclick = goToAdd;
+    el.btnAll.onclick = () => setMode("ALL");
+    el.btnSrs.onclick = () => setMode("SRS");
+    return;
+  }
 
-if(view === "home"){
-top.style.display = "none"
-return
+  /* FOLDERS VIEW (list of folders) - only home + back */
+  if(view === "questions"){
+    // only back and home visible (btnList/btnAdd hidden)
+    el.btnList.style.display = "none";
+    el.btnAdd.style.display = "none";
+    el.btnAll.style.display = "none";
+    el.btnSrs.style.display = "none";
+    return;
+  }
+
+  /* Selected folder: provide List/Add/All functionality */
+  if(view === "questionFolder"){
+    el.btnList.style.display = "flex";
+    el.btnAdd.style.display = "flex";
+    el.btnAll.style.display = "flex";
+    el.btnList.onclick = () => { renderQuestionList(); setView('questionFolder'); };
+    el.btnAdd.onclick = goToAddQuestion;
+    el.btnAll.onclick = openQuestionCards;
+    return;
+  }
+
+  /* question cards view - only back + home */
+  if(view === "questionCards"){
+    // leave only back
+    el.btnList.style.display = "none";
+    el.btnAdd.style.display = "none";
+    el.btnAll.style.display = "none";
+    el.btnSrs.style.display = "none";
+    return;
+  }
+
+  /* addQuestion view - back + home */
+  if(view === "addQuestion"){
+    el.btnList.style.display = "none";
+    el.btnAdd.style.display = "none";
+    el.btnAll.style.display = "none";
+    el.btnSrs.style.display = "none";
+    return;
+  }
 }
 
-/* pokaż topbar */
-
-top.style.display = "flex"
-
-/* reset przycisków */
-
-btnBack.style.display = "flex"
-btnList.style.display = "none"
-btnAdd.style.display = "none"
-btnAll.style.display = "none"
-btnSrs.style.display = "none"
-
-
-/* =====================
-   FISZKI
-===================== */
-
-if(view === "homeStudy" || view === "list" || view === "add"){
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnSrs.style.display = "flex"
-
-btnList.onclick = goToList
-btnAdd.onclick = goToAdd
-btnAll.onclick = () => setMode("ALL")
-btnSrs.onclick = () => setMode("SRS")
-
-}
-
-
-/* =====================
-   FOLDERY PYTAŃ
-===================== */
-
-if(view === "questions"){
-
-// tylko home + back
-
-}
-
-
-/* =====================
-   KONKRETNY FOLDER
-===================== */
-
-if(view === "questionFolder"){
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-
-btnList.onclick = renderQuestionList
-btnAdd.onclick = goToAddQuestion
-btnAll.onclick = openQuestionCards
-
-}
-
-
-/* =====================
-   KARTY PYTAŃ
-===================== */
-
-if(view === "questionCards"){
-
-// tylko back
-
-}
-
-}
-
-	function goToAddQuestion(){
-setView("addQuestion")
+/* Back button behavior in SPA */
+function goBack(){
+  // if studying, go to previous card
+  if(document.getElementById("homeStudy").classList.contains("active")){
+    prevCard();
+    return;
+  }
+  // if viewing question cards, move to previous question
+  if(document.getElementById("questionCards").classList.contains("active")){
+    questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length;
+    questionAnswerVisible = false;
+    renderQuestionCard();
+    return;
+  }
+  // if in folder list, go to questions list view -> home
+  if(document.getElementById("questionFolder").classList.contains("active")){
+    setView("questions");
+    return;
+  }
+  // default go home
+  setView("home");
 }
 
 /* ===============================
-   RENDER CARD
-================================ */
-const cardEl = document.getElementById("cardText")
-let dueCards = [];
-function renderCard(){
-
-  // filtrujemy fiszki do powtórki
- if(studyMode === "ALL"){
-
-dueCards = cards
-
-}else{
-
-dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
-
+   STUDY MODE
+   ============================== */
+function setMode(mode){
+  studyMode = mode;
+  currentIndex = 0;
+  setView("homeStudy");
+  renderCard();
 }
 
-  // jeśli brak wszystkich fiszek
+/* ===============================
+   RENDER / REVIEW CARD
+   ============================== */
+let dueCards = [];
+
+function renderCard(){
+  // build dueCards
+  if(studyMode === "ALL"){
+    dueCards = cards;
+  } else {
+    const now = Date.now();
+    dueCards = cards.filter(c => !c.nextReview || c.nextReview <= now);
+  }
+
+  // no cards
   if(cards.length === 0){
     currentIndex = 0;
-    cardEl.innerText = "Dodaj pierwszą fiszkę";
-    document.getElementById("counter").innerText = 0;
-    document.getElementById("progress-mini").innerText = "—";
-    document.getElementById("cardImage").style.display = "none";
+    el.cardText.innerText = "Dodaj pierwszą fiszkę";
+    el.counter.innerText = 0;
+    el.progressMini.innerText = "—";
+    el.cardImage.style.display = "none";
     return;
   }
 
-  // jeśli brak fiszek do powtórki
   if(dueCards.length === 0){
     currentIndex = 0;
-    cardEl.innerText = "Brak fiszek do powtórki 🎉";
-    document.getElementById("progress-mini").innerText = "0 / 0";
-    document.getElementById("cardImage").style.display = "none";
+    el.cardText.innerText = "Brak fiszek do powtórki 🎉";
+    el.progressMini.innerText = "0 / 0";
+    el.cardImage.style.display = "none";
     return;
   }
 
-  // zabezpieczenie indexu
-  if(currentIndex >= dueCards.length){
-    currentIndex = 0;
-  }
-
+  if(currentIndex >= dueCards.length) currentIndex = 0;
   const card = dueCards[currentIndex];
+  el.cardText.innerText = showingAnswer ? card.back : card.front;
 
-  // tekst fiszki
-  cardEl.innerText = showingAnswer ? card.back : card.front;
-
-  // licznik
- updateCounter()
-
-  // progres
-  document.getElementById("progress-mini").innerText =
-    (currentIndex + 1) + " / " + dueCards.length;
-
-  // obrazek
-  const img = document.getElementById("cardImage");
+  updateCounter();
+  el.progressMini.innerText = (currentIndex + 1) + " / " + dueCards.length;
 
   if(card.image){
-    img.src = card.image;
-    img.style.display = "block";
+    el.cardImage.src = card.image;
+    el.cardImage.style.display = "block";
   } else {
-    img.style.display = "none";
+    el.cardImage.style.display = "none";
   }
-const reviewUI = document.getElementById("reviewButtons")
 
-if(studyMode === "ALL"){
-reviewUI.style.display = "none"
-}
-else{
-reviewUI.style.display = "block"
-}
+  const reviewUI = document.getElementById("reviewButtons");
+  if(studyMode === "ALL") reviewUI.style.display = "none"; else reviewUI.style.display = "block";
+
+  // small card animation
+  const flashcard = document.getElementById('flashcard');
+  flashcard && flashcard.classList.add('animate');
+  setTimeout(()=> flashcard && flashcard.classList.remove('animate'), 150);
 }
 
 function reviewCard(score){
-	updateStreak()
+  updateStreak();
   const card = dueCards[currentIndex];
-  const intervals = [1, 3, 7, 14, 30]; // dni
-  if(score === 0){
-    card.level = 0; // reset do nauki
-  } else {
-    card.level = Math.min(card.level + 1, intervals.length - 1);
-  }
+  const intervals = [1,3,7,14,30]; // days
+  if(score === 0) card.level = 0;
+  else card.level = Math.min((card.level||0) + 1, intervals.length - 1);
   card.nextReview = Date.now() + intervals[card.level] * 24*60*60*1000;
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(card);
-  transaction.oncomplete = () => {
-    nextCard();
-  };
+  const tx = db.transaction("cards","readwrite");
+  tx.objectStore("cards").put(card);
+  tx.oncomplete = () => { nextCard(); loadCardsFromDB(); };
 }
 
 function nextCard(){
@@ -1184,1190 +543,524 @@ function prevCard(){
   showingAnswer = false;
   renderCard();
 }
-
-
-/* ===============================
-   STUDY
-================================ */
-
 function showAnswer(){
-
-if(cards.length===0) return
-
-// toggle
-showingAnswer = !showingAnswer
-
-renderCard()
-
+  if(cards.length===0) return;
+  showingAnswer = !showingAnswer;
+  renderCard();
 }
-
-
 
 /* ===============================
-   ADD CARD
-================================ */
-
-function addCard(){
-if(mediaRecorder && mediaRecorder.state === "recording"){
-alert("Nagranie jeszcze trwa")
-return
-}
-
-if(audioChunks.length > 0 && !recordedAudioBase64){
-alert("Poczekaj aż nagranie się zapisze")
-return
-}
-const front = document.getElementById("frontInput").value.trim()
-const back = document.getElementById("backInput").value.trim()
-
-if(!front || !back){
-alert("Wypełnij pola")
-return
-}
-
-// debug
-console.log("Audio przed zapisem:", recordedAudioBase64)
-
-const newCard={
-front:front,
-back:back,
-audio: recordedAudioBase64 || null,
-image:imageURL || null,
-level:0,
-nextReview:Date.now()
-}
-	
-
-const transaction = db.transaction("cards","readwrite")
-const store = transaction.objectStore("cards")
-console.log("Audio zapisane w fiszce:", recordedAudioBase64)
-store.add(newCard)
-
-transaction.oncomplete = function(){
-
-// reset
-recordedAudioBase64 = null
-imageURL = null
-
-document.getElementById("frontInput").value=""
-document.getElementById("backInput").value=""
-document.getElementById("imageResults").innerHTML=""
-
-currentIndex = 0
-
-loadCardsFromDB()
-
-showPopup("Fiszka dodana ✅")
-
-}
-
-}
-
+   ADD / COMPRESS IMAGE / SEARCH
+   ============================== */
 async function compressImage(file, quality = 0.6){
   const imageBitmap = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
-
   const maxWidth = 800;
   let width = imageBitmap.width;
   let height = imageBitmap.height;
-
-  if(width > maxWidth){
-    height = height * (maxWidth / width);
-    width = maxWidth;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-
+  if(width > maxWidth){ height = height * (maxWidth / width); width = maxWidth; }
+  canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-  const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, 'image/jpeg', quality)
-  );
-
-  return new Promise(res => {
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+  return await new Promise(res => {
     const reader = new FileReader();
     reader.onloadend = () => res(reader.result);
     reader.readAsDataURL(blob);
   });
 }
 
-
-
-let searchTimer
-
-document.getElementById("frontInput").addEventListener("input", () => {
-
-clearTimeout(searchTimer)
-searchTimer = setTimeout(searchImages, 500)
-
-})
+let searchTimer;
+const frontInput = document.getElementById('frontInput');
+frontInput && frontInput.addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(searchImages, 500);
+});
 
 async function searchImages(){
-
-const word = document.getElementById("frontInput").value.trim().split(" ")[0]
-
-if(word.length < 2) return
-
-const container = document.getElementById("imageResults")
-
-container.innerHTML = "Ładowanie..."
-
-try{
-
-const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
-
-const res = await fetch(url)
-
-if(!res.ok){
-container.innerHTML = "Błąd API Unsplash"
-return
+  const elFront = document.getElementById("frontInput");
+  if(!elFront) return;
+  const word = elFront.value.trim().split(" ")[0];
+  if(!word || word.length < 2) return;
+  const container = el.imageResults;
+  container.innerHTML = "Ładowanie...";
+  try{
+    // NOTE: Klucz Unsplash umieść swój, tutaj tylko przykład
+    const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w";
+    const res = await fetch(url);
+    if(!res.ok){ container.innerHTML = "Błąd API Unsplash"; return; }
+    const data = await res.json();
+    container.innerHTML = "";
+    if(!data.results || data.results.length === 0){
+      const img = document.createElement("img"); img.src = "https://picsum.photos/300"; container.appendChild(img); return;
+    }
+    data.results.forEach(photo=>{
+      const img = document.createElement("img");
+      img.src = photo.urls.small;
+      img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none"); img.style.border = "3px solid #7b5cff"; };
+      container.appendChild(img);
+    });
+  } catch(err){
+    container.innerHTML = "Błąd pobierania obrazów";
+  }
 }
 
-const data = await res.json()
+document.getElementById("imageUpload") && document.getElementById("imageUpload").addEventListener("change", async function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  imageURL = await compressImage(file, 0.6);
+  const container = el.imageResults;
+  container.innerHTML = "";
+  const img = document.createElement("img"); img.src = imageURL; img.style.border = "3px solid #7b5cff"; container.appendChild(img);
+});
 
-container.innerHTML = ""
-
-if(!data.results || data.results.length === 0){
-
-const img = document.createElement("img")
-img.src = "https://picsum.photos/300"
-
-container.appendChild(img)
-return
-
+/* ===============================
+   ADD CARD
+   ============================== */
+function addCard(){
+  if(mediaRecorder && mediaRecorder.state === "recording"){ alert("Nagranie jeszcze trwa"); return; }
+  if(audioChunks.length > 0 && !recordedAudioBase64){ alert("Poczekaj aż nagranie się zapisze"); return; }
+  const front = document.getElementById("frontInput").value.trim();
+  const back = document.getElementById("backInput").value.trim();
+  if(!front || !back){ alert("Wypełnij pola"); return; }
+  const newCard = { front, back, audio: recordedAudioBase64 || null, image: imageURL || null, level:0, nextReview: Date.now() };
+  const transaction = db.transaction("cards","readwrite");
+  const store = transaction.objectStore("cards");
+  store.add(newCard);
+  transaction.oncomplete = function(){
+    recordedAudioBase64 = null; imageURL = null;
+    document.getElementById("frontInput").value=""; document.getElementById("backInput").value=""; el.imageResults.innerHTML="";
+    currentIndex = 0;
+    loadCardsFromDB();
+    showPopup("Fiszka dodana ✅");
+  };
 }
 
-data.results.forEach(photo=>{
-
-const img = document.createElement("img")
-img.src = photo.urls.small
-
-img.onclick = ()=>{
-
-imageURL = photo.urls.small
-
-document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
-
-img.style.border = "3px solid #7b5cff"
-
-}
-
-container.appendChild(img)
-
-})
-
-}catch(err){
-
-container.innerHTML = "Błąd pobierania obrazów"
-
-}
-
-}
-
-
-document.getElementById("imageUpload").addEventListener("change", async function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-// kompresujemy obraz
-imageURL = await compressImage(file, 0.6)
-
-const container = document.getElementById("imageResults")
-
-container.innerHTML = ""
-
-const img = document.createElement("img")
-
-img.src = imageURL
-img.style.border = "3px solid #7b5cff"
-
-container.appendChild(img)
-
-})
-
-function openQuestions(){
-
-setView("questions")
-
-renderFolders()
-
-}
-if(!db.objectStoreNames.contains("questions")){
-
-const store = db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
-
-store.createIndex("folderId","folderId",{unique:false})
-
-}
-	
 /* ===============================
    DELETE
-================================ */
+   ============================== */
 function deleteCard(index){
   if(!confirm("Usunąć fiszkę?")) return;
   const id = cards[index].id;
   const transaction = db.transaction("cards","readwrite");
   transaction.objectStore("cards").delete(id);
   transaction.oncomplete = function(){
-    // jeśli usunęliśmy ostatnią kartę, resetujemy indeks
-    if(currentIndex >= cards.length){
-      currentIndex = 0;
-    }
-    loadCardsFromDB(renderList);
-  };
-}
-
-
-
-/* ===============================
-   LIST
-================================ */
-
-function renderList(){
-
-const list = document.getElementById("wordsList")
-
-const search = document
-.getElementById("searchBox")
-.value
-.trim()
-.toLowerCase()
-
-list.innerHTML = ""
-
-let arr = [...cards]
-
-/* FILTR WYSZUKIWANIA */
-
-if(search){
-
-arr = arr.filter(card =>
-card.front.toLowerCase().includes(search) ||
-card.back.toLowerCase().includes(search)
-)
-
-}
-
-/* SORTOWANIE */
-
-if(sortAZ){
-arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
-}
-
-/* RENDER */
-
-arr.forEach((card,index)=>{
-
-const div=document.createElement("div")
-
-div.className="listItem"
-
-div.innerHTML=`
-
-<div class="text"><b>${card.front}</b> - ${card.back}</div>
-
-<div>
-<button class="smallBtn primary" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">Edytuj</button>
-<button class="smallBtn secondary" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">Usuń</button>
-</div>
-
-`
-
-list.appendChild(div)
-
-})
-
-}
-
-
-function toggleSort(){
-
-sortAZ=!sortAZ
-
-renderList()
-
-}
-
-
-	function openAll(){
-
-setMode("ALL")
-
-setView("homeStudy")
-
-}
-
-/* ===============================
-   EDIT
-================================ */
-
-let editingIndex = null
-
-function editCard(index){
-
-editingIndex = index
-
-document.getElementById("editFront").value = cards[index].front
-document.getElementById("editBack").value = cards[index].back
-
-document.getElementById("modal").classList.add("show")}
-
-function saveModal(){
-  const newFront = document.getElementById("editFront").value.trim();
-  const newBack = document.getElementById("editBack").value.trim();
-  if(!newFront || !newBack){
-    alert("Wypełnij pola");
-    return;
-  }
-  const id = cards[editingIndex].id;
-  // pobieramy oryginalne dane karty
-  const original = cards[editingIndex];
-  // zapisujemy wszystkie pola, nie tracąc audio/obrazów
-  const updatedCard = {
-    id: id,
-    front: newFront,
-    back: newBack,
-    audio: original.audio,
-    image: original.image,
-    level: original.level,
-    nextReview: original.nextReview
-  };
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(updatedCard);
-  transaction.oncomplete = function(){
-    // po zapisie ponownie załaduj listę i zresetuj indeks
     if(currentIndex >= cards.length) currentIndex = 0;
     loadCardsFromDB(renderList);
   };
+}
+
+/* ===============================
+   LIST rendering
+   ============================== */
+function renderList(){
+  const list = document.getElementById("wordsList");
+  const search = (document.getElementById("searchBox").value || "").trim().toLowerCase();
+  list.innerHTML = "";
+  let arr = [...cards];
+  if(search){
+    arr = arr.filter(card => card.front.toLowerCase().includes(search) || card.back.toLowerCase().includes(search));
+  }
+  if(sortAZ) arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"));
+  arr.forEach((card)=>{
+    const div = document.createElement("div");
+    div.className = "listItem";
+    div.innerHTML = `
+      <div class="text"><b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}</div>
+      <div>
+        <button class="smallBtn primary" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">Edytuj</button>
+        <button class="smallBtn secondary" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">Usuń</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function toggleSort(){ sortAZ = !sortAZ; renderList(); }
+
+/* ===============================
+   EDIT CARD modal
+   ============================== */
+let editingIndex = null;
+function editCard(index){
+  editingIndex = index;
+  document.getElementById("editFront").value = cards[index].front || "";
+  document.getElementById("editBack").value = cards[index].back || "";
+  document.getElementById("modal").classList.add("show");
+}
+function saveModal(){
+  const newFront = document.getElementById("editFront").value.trim();
+  const newBack = document.getElementById("editBack").value.trim();
+  if(!newFront || !newBack){ alert("Wypełnij pola"); return; }
+  const id = cards[editingIndex].id;
+  const original = cards[editingIndex];
+  const updatedCard = { id, front:newFront, back:newBack, audio: original.audio, image: original.image, level: original.level, nextReview: original.nextReview };
+  const transaction = db.transaction("cards","readwrite");
+  transaction.objectStore("cards").put(updatedCard);
+  transaction.oncomplete = function(){ if(currentIndex >= cards.length) currentIndex = 0; loadCardsFromDB(renderList); };
   closeModal();
 }
-function closeModal(){
-  document.getElementById("modal").classList.remove("show")
-}
-/* ===============================
-   REPEAT
-================================ */
-
+function closeModal(){ document.getElementById("modal").classList.remove("show"); }
 
 /* ===============================
-   SPEECH
-================================ */
-
+   SPEECH / RECORD / PLAY
+   ============================== */
 function speakWord(text){
-
-if(!text)return
-
-const speech=new SpeechSynthesisUtterance(text)
-
-speech.lang="en-US"
-
-speech.rate=0.9
-
-speechSynthesis.speak(speech)
-
+  if(!text) return;
+  const speech = new SpeechSynthesisUtterance(text);
+  speech.lang = "en-US";
+  speech.rate = 0.9;
+  speechSynthesis.speak(speech);
 }
-
-
-/* ===============================
-   RECORD AUDIO
-================================ */
 
 async function startRecording(){
-
-// sprawdzenie obsługi
-if(!navigator.mediaDevices || !window.MediaRecorder){
-alert("Twoja przeglądarka nie obsługuje nagrywania audio")
-return
+  if(!navigator.mediaDevices || !window.MediaRecorder){ alert("Twoja przeglądarka nie obsługuje nagrywania audio"); return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    let seconds = 0;
+    el.recordUI.style.display = "block";
+    const timer = setInterval(()=>{ seconds++; el.recordTimer.innerText = seconds + " s"; },1000);
+    mediaRecorder.ondataavailable = event=> audioChunks.push(event.data);
+    mediaRecorder.onstop = () => {
+      clearInterval(timer);
+      el.recordUI.style.display = "none";
+      const blob = new Blob(audioChunks,{type:"audio/mp4"});
+      if(blob.size === 0){ alert("Nagranie jest puste"); return; }
+      const reader = new FileReader();
+      reader.onloadend = function(){ recordedAudioBase64 = reader.result; showPopup("Nagranie zapisane 🎤"); };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop(); },3000);
+  } catch(err){
+    console.error(err);
+    if(err.name === "NotAllowedError") alert("Nie udzielono dostępu do mikrofonu");
+    else alert("Nie można uruchomić nagrywania");
+  }
 }
-
-try{
-
-const stream = await navigator.mediaDevices.getUserMedia({audio:true})
-
-mediaRecorder = new MediaRecorder(stream)
-
-audioChunks = []
-
-let seconds = 0
-
-document.getElementById("recordUI").style.display = "block"
-
-const timer = setInterval(()=>{
-seconds++
-document.getElementById("recordTimer").innerText = seconds + " s"
-},1000)
-
-mediaRecorder.ondataavailable = event=>{
-audioChunks.push(event.data)
-}
-
-mediaRecorder.onstop = () => {
-
-clearInterval(timer)
-
-document.getElementById("recordUI").style.display = "none"
-
-const blob = new Blob(audioChunks,{type:"audio/mp4"});
-
-if(blob.size === 0){
-alert("Nagranie jest puste")
-return
-}
-
-const reader = new FileReader()
-
-reader.onloadend = function(){
-
-recordedAudioBase64 = reader.result
-
-console.log("Audio zapisane:", recordedAudioBase64)
-
-showPopup("Nagranie zapisane 🎤")
-
-}
-
-reader.readAsDataURL(blob)
-
-stream.getTracks().forEach(track => track.stop())
-
-}
-
-// start nagrywania
-mediaRecorder.start();
-
-// zatrzymanie po 3 sekundach
-setTimeout(()=>{
-if(mediaRecorder && mediaRecorder.state !== "inactive"){
-mediaRecorder.stop()
-}
-},3000)
-
-}catch(err){
-
-console.error(err)
-
-if(err.name === "NotAllowedError"){
-alert("Nie udzielono dostępu do mikrofonu")
-}
-else{
-alert("Nie można uruchomić nagrywania")
-}
-
-}
-
-}
-
-
-/* ===============================
-   PLAY AUDIO
-================================ */
 
 function playRecording(){
-
-// jeśli nagranie właśnie nagrane (przed zapisem fiszki)
-if(recordedAudioBase64){
-
-console.log("Odtwarzam nagranie tymczasowe")
-
-const audio = new Audio(recordedAudioBase64)
-
-audio.play().catch(err=>{
-console.error(err)
-alert("Nie można odtworzyć nagrania")
-})
-
-return
-}
-
-// jeśli brak kart
-if(!dueCards || dueCards.length === 0){
-alert("Brak fiszek")
-return
-}
-
-const card = dueCards[currentIndex]
-
-if(!card){
-alert("Błąd odczytu fiszki")
-return
-}
-
-// jeśli karta ma audio
-if(card.audio){
-
-console.log("Odtwarzam nagranie z fiszki")
-
-const audio = new Audio(card.audio)
-
-audio.play().catch(err=>{
-console.error(err)
-alert("Nie można odtworzyć nagrania")
-})
-
-return
-}
-
-// jeśli brak audio
-alert("Ta fiszka nie ma nagrania")
-
+  if(recordedAudioBase64){
+    const audio = new Audio(recordedAudioBase64);
+    audio.play().catch(err=>{ console.error(err); alert("Nie można odtworzyć nagrania"); });
+    return;
+  }
+  if(!dueCards || dueCards.length === 0){ alert("Brak fiszek"); return; }
+  const card = dueCards[currentIndex];
+  if(!card){ alert("Błąd odczytu fiszki"); return; }
+  if(card.audio){ const audio = new Audio(card.audio); audio.play().catch(err=>{ console.error(err); alert("Nie można odtworzyć nagrania"); }); return; }
+  alert("Ta fiszka nie ma nagrania");
 }
 
 /* ===============================
-   EXPORT
-================================ */
-
+   EXPORT / IMPORT
+   ============================== */
 function exportBackup(){
-
-const data=JSON.stringify(cards)
-
-const blob=new Blob([data],{type:"application/json"})
-
-const url=URL.createObjectURL(blob)
-
-const a=document.createElement("a")
-
-a.href=url
-
-a.download="fiszki-backup.json"
-
-a.click()
-
+  const data = JSON.stringify(cards);
+  const blob = new Blob([data],{type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = "fiszki-backup.json"; a.click();
 }
 
+document.getElementById("importFile") && document.getElementById("importFile").addEventListener("change", function(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    let imported;
+    try{ imported = JSON.parse(ev.target.result); } catch(e){ alert("Błędny plik backup"); return; }
+    const transaction = db.transaction("cards","readwrite"), store = transaction.objectStore("cards");
+    imported.forEach(card=>{
+      delete card.id;
+      if(card.level === undefined) card.level = 0;
+      if(!card.nextReview) card.nextReview = Date.now();
+      store.add(card);
+    });
+    transaction.oncomplete = function(){ loadCardsFromDB(); currentIndex = 0; renderCard(); alert("Import OK"); };
+  };
+  reader.readAsText(file);
+});
 
 /* ===============================
-   IMPORT
-================================ */
-
-document.getElementById("importFile").addEventListener("change", function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-const reader = new FileReader()
-
-reader.onload = function(ev){
-
-  let imported
-
-  try{
-    imported = JSON.parse(ev.target.result)
-  }
-  catch(e){
-    alert("Błędny plik backup")
-    return
-  }
-
-  const transaction = db.transaction("cards","readwrite")
-  const store = transaction.objectStore("cards")
-
- imported.forEach(card=>{
-
-delete card.id
-
-// jeśli brak level
-if(card.level === undefined){
-  card.level = 0
+   FOLDERS & QUESTIONS (use index folderId where possible)
+   ============================== */
+function renderFolders(){
+  const container = document.getElementById("questionFolders");
+  container.innerHTML = "";
+  const t = db.transaction("questionFolders","readonly");
+  const s = t.objectStore("questionFolders");
+  const r = s.getAll();
+  r.onsuccess = function(){
+    const folders = r.result || [];
+    // compute counts once (fast)
+    const qTx = db.transaction("questions","readonly");
+    const qStore = qTx.objectStore("questions");
+    // if index exists, use it to get all questions faster
+    const getAllQuestionsReq = qStore.getAll();
+    getAllQuestionsReq.onsuccess = function(){
+      const allQuestions = getAllQuestionsReq.result || [];
+      folders.forEach(folder=>{
+        const div = document.createElement("div");
+        div.className = "listItem";
+        div.innerHTML = `
+          <div class="text"><b>${escapeHtml(folder.name)}</b><span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span></div>
+          <div><button class="smallBtn secondary" onclick="deleteFolder(${folder.id})">🗑</button></div>
+        `;
+        div.onclick = () => openFolder(folder.id);
+        container.appendChild(div);
+      });
+      folders.forEach(folder=>{
+        const count = allQuestions.filter(q => q.folderId === folder.id).length;
+        const elc = document.getElementById("count-"+folder.id);
+        if(elc) elc.innerText = " (" + count + ")";
+      });
+    };
+  };
 }
 
-// jeśli brak nextReview
-if(!card.nextReview){
-  card.nextReview = Date.now()
+function addFolder(){
+  const name = prompt("Nazwa folderu");
+  if(!name) return;
+  const transaction = db.transaction("questionFolders","readwrite");
+  transaction.objectStore("questionFolders").add({name});
+  transaction.oncomplete = renderFolders;
 }
 
-store.add(card)
-
-})
-
-transaction.oncomplete = function(){
-loadCardsFromDB()
-currentIndex = 0
-renderCard()
-alert("Import OK")
+function openQuestions(){
+  setView("questions");
+  renderFolders();
 }
 
+function openFolder(id){
+  currentFolderId = id;
+  setView("questionFolder");
+  renderQuestionList();
 }
 
-reader.readAsText(file)
-
-})   // ← TEGO NAWIASU BRAKOWAŁO
-
-document.getElementById("startScreen").addEventListener("click",function(){
-
-this.style.display = "none"
-
-// ukryj górny pasek na starcie
-document.querySelector(".topButtons").style.display = "none"
-
-})
-	if (window.navigator.standalone) {
-console.log("PWA mode")
-} else {
-console.log("Safari mode")
-}
-
-
-
-	function updateStreak(){
-
-const today = new Date().toDateString()
-
-if(lastStudy !== today){
-
-const yesterday = new Date(Date.now() - 86400000).toDateString()
-
-if(lastStudy === yesterday){
-streak++
-}else{
-streak = 1
-}
-
-lastStudy = today
-
-localStorage.setItem("streak",streak)
-localStorage.setItem("lastStudy",today)
-
-}
-
-updateCounter()
-
-}
-	function updateCounter(){
-document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
-}
-
-	
-	function renderFolders(){
-
-const container = document.getElementById("questionFolders")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questionFolders","readonly")
-const store = transaction.objectStore("questionFolders")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const folders = req.result
-
-folders.forEach(folder=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text">
-<b>${folder.name}</b>
-<span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
-</div>
-
-<div>
-<button class="smallBtn secondary" onclick="deleteFolder(${folder.id})">🗑</button>
-</div>
-`
-
-div.onclick = () => openFolder(folder.id)
-
-container.appendChild(div)
-
-})
-
-/* LICZNIK PYTAŃ */
-
-const qTransaction = db.transaction("questions","readonly")
-const qStore = qTransaction.objectStore("questions")
-const qReq = qStore.getAll()
-
-qReq.onsuccess = function(){
-
-const allQuestions = qReq.result
-
-folders.forEach(folder=>{
-
-const count = allQuestions.filter(q => q.folderId === folder.id).length
-
-const el = document.getElementById("count-"+folder.id)
-
-if(el){
-el.innerText = " (" + count + ")"
-}
-
-})
-
-}
-
-}
-
-}
-
-	function addFolder(){
-
-const name = prompt("Nazwa folderu")
-
-if(!name) return
-
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = renderFolders
-
-}
-
-	function openFolder(id){
-
-currentFolderId = id
-
-setView("questionFolder")
-
-renderQuestionList()
-
-}
 function renderQuestionList(){
-
-const container = document.getElementById("questionList")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const questions = req.result.filter(q => q.folderId === currentFolderId)
-
-questions.forEach(q=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${q.question}</b></div>
-
-<div>
-<button class="smallBtn primary" onclick="editQuestion(${q.id})">✏️</button>
-<button class="smallBtn secondary" onclick="deleteQuestion(${q.id})">🗑️</button>
-</div>
-`
-
-container.appendChild(div)
-
-})
-
+  const container = document.getElementById("questionList");
+  container.innerHTML = "";
+  const tx = db.transaction("questions","readonly");
+  const store = tx.objectStore("questions");
+  if(store.indexNames && store.indexNames.contains('folderId')){
+    const idx = store.index('folderId');
+    const req = idx.getAll(currentFolderId);
+    req.onsuccess = function(){
+      const questions = req.result || [];
+      questions.forEach(q=>{
+        const div = document.createElement("div");
+        div.className = "listItem";
+        div.innerHTML = `
+          <div class="text"><b>${escapeHtml(q.question)}</b></div>
+          <div>
+            <button class="smallBtn primary" onclick="editQuestion(${q.id})">✏️</button>
+            <button class="smallBtn secondary" onclick="deleteQuestion(${q.id})">🗑️</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    };
+  } else {
+    // fallback to getAll + filter
+    const req = store.getAll();
+    req.onsuccess = function(){
+      const questions = (req.result || []).filter(q => q.folderId === currentFolderId);
+      questions.forEach(q=>{
+        const div = document.createElement("div");
+        div.className = "listItem";
+        div.innerHTML = `
+          <div class="text"><b>${escapeHtml(q.question)}</b></div>
+          <div>
+            <button class="smallBtn primary" onclick="editQuestion(${q.id})">✏️</button>
+            <button class="smallBtn secondary" onclick="deleteQuestion(${q.id})">🗑️</button>
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    };
+  }
 }
 
+function openQuestionCards(){
+  setView("questionCards");
+  const tx = db.transaction("questions","readonly");
+  const store = tx.objectStore("questions");
+  if(store.indexNames && store.indexNames.contains('folderId')){
+    const idx = store.index('folderId');
+    const req = idx.getAll(currentFolderId);
+    req.onsuccess = function(){
+      questionCards = req.result || [];
+      questionIndex = 0; questionAnswerVisible = false; renderQuestionCard();
+    };
+  } else {
+    const req = store.getAll();
+    req.onsuccess = function(){
+      questionCards = (req.result || []).filter(q => q.folderId === currentFolderId);
+      questionIndex = 0; questionAnswerVisible = false; renderQuestionCard();
+    };
+  }
 }
 
-	function openQuestionCards(){
-
-setView("questionCards")
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-questionCards = req.result.filter(q => q.folderId === currentFolderId)
-
-questionIndex = 0
-questionAnswerVisible = false
-
-renderQuestionCard()
-
+function saveQuestion(){
+  const question = document.getElementById("questionInput").value.trim();
+  const answer = document.getElementById("answerInput").value.trim();
+  if(!question || !answer){ alert("Wpisz pytanie i odpowiedź"); return; }
+  const tx = db.transaction("questions","readwrite");
+  const store = tx.objectStore("questions");
+  if(editingQuestionId){
+    store.put({ id: editingQuestionId, folderId: currentFolderId, question, answer });
+    editingQuestionId = null;
+  } else {
+    store.add({ folderId: currentFolderId, question, answer });
+  }
+  tx.oncomplete = () => {
+    document.getElementById("questionInput").value = "";
+    document.getElementById("answerInput").value = "";
+    setView("questionFolder");
+    renderQuestionList();
+  };
 }
 
-}
-
-	function saveQuestion(){
-
-const question = document.getElementById("questionInput").value.trim()
-const answer = document.getElementById("answerInput").value.trim()
-
-if(!question || !answer){
-alert("Wpisz pytanie i odpowiedź")
-return
-}
-
-const transaction = db.transaction("questions","readwrite")
-
-const store = transaction.objectStore("questions")
-
-if(editingQuestionId){
-
-store.put({
-id: editingQuestionId,
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-editingQuestionId = null
-
-}else{
-
-store.add({
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-}
-
-transaction.oncomplete = () => {
-
-document.getElementById("questionInput").value=""
-document.getElementById("answerInput").value=""
-
-setView("questionFolder")
-
-renderQuestionList()
-
-}
-
-}
-	let questionCards = []
-let questionIndex = 0
-let questionAnswerVisible = false
-
+let questionCards = [], questionIndex = 0, questionAnswerVisible = false;
 function renderQuestionCard(){
-
-if(questionCards.length === 0) return
-
-const card = questionCards[questionIndex]
-
-const el = document.getElementById("questionCardText")
-
-el.innerText = questionAnswerVisible ? card.answer : card.question
-
+  if(!questionCards || questionCards.length === 0) return;
+  const card = questionCards[questionIndex];
+  const elq = document.getElementById("questionCardText");
+  elq.innerText = questionAnswerVisible ? card.answer : card.question;
 }
 
-
-
-	function deleteQuestion(id){
-
-if(!confirm("Usunąć pytanie?")) return
-
-const transaction = db.transaction("questions","readwrite")
-
-const store = transaction.objectStore("questions")
-
-store.delete(id)
-
-transaction.oncomplete = () => {
-renderQuestionList()
+function deleteQuestion(id){
+  if(!confirm("Usunąć pytanie?")) return;
+  const tx = db.transaction("questions","readwrite");
+  tx.objectStore("questions").delete(id);
+  tx.oncomplete = () => renderQuestionList();
 }
 
+let editingQuestionId = null;
+function editQuestion(id){
+  editingQuestionId = id;
+  const tx = db.transaction("questions","readonly");
+  const store = tx.objectStore("questions");
+  const req = store.get(id);
+  req.onsuccess = function(){
+    const q = req.result;
+    document.getElementById("questionInput").value = q.question;
+    document.getElementById("answerInput").value = q.answer;
+    setView("addQuestion");
+  };
 }
 
-	let editingQuestionId = null
-
-	function editQuestion(id){
-
-editingQuestionId = id
-
-const transaction = db.transaction("questions","readonly")
-
-const store = transaction.objectStore("questions")
-
-const req = store.get(id)
-
-req.onsuccess = function(){
-
-const q = req.result
-
-document.getElementById("questionInput").value = q.question
-document.getElementById("answerInput").value = q.answer
-
-setView("addQuestion")
-
-}
-
-}
-
-
-	function openFolderPopup(){
-document.getElementById("folderNameInput").value=""
-document.getElementById("folderPopup").classList.add("show")
-}
-
-function closeFolderPopup(){
-document.getElementById("folderPopup").classList.remove("show")
-}
-
+function openFolderPopup(){ document.getElementById("folderNameInput").value=""; document.getElementById("folderPopup").classList.add("show"); }
+function closeFolderPopup(){ document.getElementById("folderPopup").classList.remove("show"); }
 function saveFolder(){
-
-const name = document.getElementById("folderNameInput").value.trim()
-
-if(!name){
-alert("Podaj nazwę folderu")
-return
+  const name = document.getElementById("folderNameInput").value.trim();
+  if(!name){ alert("Podaj nazwę folderu"); return; }
+  const tx = db.transaction("questionFolders","readwrite");
+  tx.objectStore("questionFolders").add({name});
+  tx.oncomplete = function(){ renderFolders(); closeFolderPopup(); };
 }
 
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = function(){
-
-renderFolders()
-
-closeFolderPopup()
-
+function exportQuestions(){
+  const t1 = db.transaction("questionFolders","readonly"), s1 = t1.objectStore("questionFolders").getAll();
+  const t2 = db.transaction("questions","readonly"), s2 = t2.objectStore("questions").getAll();
+  Promise.all([ new Promise(res=>s1.onsuccess = ()=>res(s1.result)), new Promise(res=>s2.onsuccess = ()=>res(s2.result)) ]).then(data=>{
+    const backup = { folders:data[0], questions:data[1] };
+    const blob = new Blob([JSON.stringify(backup)],{type:"application/json"}); const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href = url; a.download = "questions-backup.json"; a.click();
+  });
 }
 
+document.getElementById("importQuestions") && document.getElementById("importQuestions").addEventListener("change",function(e){
+  const file = e.target.files[0]; if(!file) return; importQuestions(file);
+});
+
+function deleteFolder(id){
+  if(!confirm("Usunąć folder i wszystkie pytania?")) return;
+  const t1 = db.transaction("questionFolders","readwrite"); t1.objectStore("questionFolders").delete(id);
+  const t2 = db.transaction("questions","readwrite"); const s2 = t2.objectStore("questions");
+  const req = s2.getAll();
+  req.onsuccess = function(){
+    req.result.forEach(q => { if(q.folderId === id) s2.delete(q.id); });
+    renderFolders();
+  };
 }
 
-
-
-	function exportQuestions(){
-
-const t1 = db.transaction("questionFolders","readonly")
-const s1 = t1.objectStore("questionFolders")
-const r1 = s1.getAll()
-
-const t2 = db.transaction("questions","readonly")
-const s2 = t2.objectStore("questions")
-const r2 = s2.getAll()
-
-Promise.all([
-new Promise(res => r1.onsuccess = () => res(r1.result)),
-new Promise(res => r2.onsuccess = () => res(r2.result))
-]).then(data => {
-
-const backup = {
-folders:data[0],
-questions:data[1]
+function importQuestions(file){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let data;
+    try{ data = JSON.parse(e.target.result); } catch { alert("Błędny plik"); return; }
+    const t1 = db.transaction("questionFolders","readwrite"); t1.objectStore("questionFolders").clear();
+    const t2 = db.transaction("questions","readwrite"); t2.objectStore("questions").clear();
+    t2.oncomplete = function(){
+      const folderMap = {};
+      const tf = db.transaction("questionFolders","readwrite"); const sf = tf.objectStore("questionFolders");
+      data.folders.forEach(oldFolder=>{
+        const oldId = oldFolder.id; delete oldFolder.id;
+        const req = sf.add(oldFolder);
+        req.onsuccess = function(){ folderMap[oldId] = req.result; };
+      });
+      tf.oncomplete = function(){
+        const tq = db.transaction("questions","readwrite"); const sq = tq.objectStore("questions");
+        data.questions.forEach(q=>{
+          delete q.id;
+          q.folderId = folderMap[q.folderId];
+          sq.add(q);
+        });
+        tq.oncomplete = function(){ renderFolders(); showPopup("Import zakończony"); };
+      };
+    };
+  };
+  reader.readAsText(file);
 }
 
-const blob = new Blob([JSON.stringify(backup)],{type:"application/json"})
-const url = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = url
-a.download = "questions-backup.json"
-a.click()
-
-})
-
+/* ===============================
+   STREAK / COUNTER
+   ============================== */
+function updateStreak(){
+  const today = new Date().toDateString();
+  if(lastStudy !== today){
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    if(lastStudy === yesterday) streak++; else streak = 1;
+    lastStudy = today;
+    localStorage.setItem("streak",streak);
+    localStorage.setItem("lastStudy",today);
+  }
+  updateCounter();
 }
+function updateCounter(){ document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak; }
 
-	
-	document.getElementById("importQuestions").addEventListener("change",function(e){
+/* ===============================
+   SMALL HELPERS
+   ============================== */
+function showPopup(text){ document.getElementById("popupText").innerText = text; document.getElementById("popup").classList.add("show"); }
+function closePopup(){ document.getElementById("popup").classList.remove("show"); }
+function openFolderPopup(){ document.getElementById("folderNameInput").value=""; document.getElementById("folderPopup").classList.add("show"); }
 
-const file = e.target.files[0]
+/* escape simple HTML for safety in list rendering */
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, s=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[s]); }
 
-if(!file) return
+/* start screen hide */
+el.startScreen && el.startScreen.addEventListener("click", function(){
+  this.style.display = "none";
+  el.topButtons.style.display = "none";
+});
 
-importQuestions(file)
-
-})
-
-	function deleteFolder(id){
-
-if(!confirm("Usunąć folder i wszystkie pytania?")) return
-
-const t1 = db.transaction("questionFolders","readwrite")
-const s1 = t1.objectStore("questionFolders")
-
-s1.delete(id)
-
-const t2 = db.transaction("questions","readwrite")
-const s2 = t2.objectStore("questions")
-
-const req = s2.getAll()
-
-req.onsuccess = function(){
-
-req.result.forEach(q=>{
-if(q.folderId === id){
-s2.delete(q.id)
-}
-})
-
-renderFolders()
-
-}
-
-}
-
-	function importQuestions(file){
-
-const reader = new FileReader()
-
-reader.onload = function(e){
-
-let data
-
-try{
-data = JSON.parse(e.target.result)
-}catch{
-alert("Błędny plik")
-return
-}
-
-/* wyczyść bazę */
-
-const t1 = db.transaction("questionFolders","readwrite")
-t1.objectStore("questionFolders").clear()
-
-const t2 = db.transaction("questions","readwrite")
-t2.objectStore("questions").clear()
-
-t2.oncomplete = function(){
-
-/* MAPA ID */
-
-const folderMap = {}
-
-const tf = db.transaction("questionFolders","readwrite")
-const sf = tf.objectStore("questionFolders")
-
-data.folders.forEach(oldFolder=>{
-
-const oldId = oldFolder.id
-
-delete oldFolder.id
-
-const req = sf.add(oldFolder)
-
-req.onsuccess = function(){
-
-folderMap[oldId] = req.result
-
-}
-
-})
-
-tf.oncomplete = function(){
-
-/* IMPORT PYTAŃ */
-
-const tq = db.transaction("questions","readwrite")
-const sq = tq.objectStore("questions")
-
-data.questions.forEach(q=>{
-
-delete q.id
-
-q.folderId = folderMap[q.folderId]
-
-sq.add(q)
-
-})
-
-tq.oncomplete = function(){
-
-renderFolders()
-
-showPopup("Import zakończony")
-
-}
-
-}
-
-}
-
-}
-
-reader.readAsText(file)
-
-}
-function backCard(){
-
-if(dueCards.length === 0) return
-
-currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length
-
-showingAnswer = false
-
-renderCard()
-
-}
-	function goBack(){
-
-// fiszki
-if(document.getElementById("homeStudy").classList.contains("active")){
-prevCard()
-return
-}
-
-// pytania
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-return
-}
-
-// inne widoki
-history.back()
-
-}
-</script>
-
-<script>
+/* service worker registration (optional) */
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(() => console.log("Service Worker zarejestrowany"))
-    .catch(err => console.log("Błąd SW:", err));
+  navigator.serviceWorker.register("sw.js").then(()=>console.log("Service Worker zarejestrowany")).catch(err=>console.log("Błąd SW:", err));
 }
 
-function showPopup(text){
-
-document.getElementById("popupText").innerText=text
-
-document.getElementById("popup").classList.add("show")
-
-}
-
-function closePopup(){
-
-document.getElementById("popup").classList.remove("show")
-
-}
+/* initial small render safety */
+document.addEventListener("DOMContentLoaded", () => {
+  // nothing else — DB will call loadCardsFromDB on success
+});
 </script>
-
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
