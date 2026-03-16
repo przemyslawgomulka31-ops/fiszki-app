@@ -437,12 +437,13 @@ letter-spacing:1px;
 }
 	.menuTitle{
 text-align:center;
-font-size:20px;
-font-weight:600;
+font-size:18px;
+font-weight:700;
 margin-top:40px;
-margin-bottom:20px;
+margin-bottom:24px;
 color:#1b1635;
-letter-spacing:2px;
+letter-spacing:3px;
+opacity:0.7;
 }
 
 
@@ -507,7 +508,28 @@ margin-bottom:12px;
 min-height:160px;
 margin-bottom:20px;
 }
-	
+#addGrammar textarea{
+
+width:100%;
+height:80px;
+
+font-size:14px;
+
+border-radius:12px;
+border:none;
+
+padding:12px;
+margin-bottom:12px;
+
+box-shadow:0 6px 12px rgba(0,0,0,0.05);
+
+resize:none;        /* blokuje rozciąganie palcem */
+
+}
+#addGrammar{
+max-width:420px;
+margin:auto;
+}	
 </style>
 </head>
 <body>
@@ -529,6 +551,7 @@ margin-bottom:20px;
 
 <div class="topButtons">
 <button class="iconBtn" onclick="goHome()">🏠</button>
+<button class="iconBtn" onclick="goBack()">⬅️</button>
 <button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
 <button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
 <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
@@ -540,7 +563,7 @@ margin-bottom:20px;
 <!-- HOME -->
 
 <div id="home" class="view active">
-
+<div class="menuTitle">MENU</div>
 <div class="tiles">
 
 <div class="tile bigTile" onclick="openAll()">
@@ -551,6 +574,10 @@ margin-bottom:20px;
 <div class="tile bigTile" onclick="openQuestions()">
 ❓
 <span>QUESTION</span>
+</div>
+<div class="tile bigTile" onclick="openGrammar()">
+📖
+<span>GRAMA</span>
 </div>
 
 </div>
@@ -638,6 +665,10 @@ Progres: <span id="progress-mini">—</span>
 </div>
 
 
+
+
+
+
 <!-- ADD QUESTION -->
 
 <div id="addQuestion" class="view">
@@ -655,6 +686,47 @@ Progres: <span id="progress-mini">—</span>
 <button class="secondary" onclick="setView('questionFolder')">Powrót</button>
 
 </div>
+
+
+
+<!-- GRAMMAR STUDY -->
+
+<div id="grammarStudy" class="view">
+
+<div class="questionCard" id="grammarCardText"></div>
+
+</div>
+
+
+<!-- GRAMMAR LIST -->
+
+<div id="grammarList" class="view">
+
+<h3>Gramatyka</h3>
+
+<div id="grammarItems"></div>
+
+</div>
+
+
+<!-- ADD GRAMMAR -->
+
+<div id="addGrammar" class="view">
+
+<h3>Nowa gramatyka</h3>
+
+<input id="gTitle" placeholder="Topic np. Passive Voice">
+
+<textarea id="gExplanation" placeholder="📖 Explanation"></textarea>
+<textarea id="gStructure" placeholder="📐 Structure"></textarea>
+<textarea id="gUsage" placeholder="🧠 Usage"></textarea>
+<textarea id="gExamples" placeholder="💬 Examples"></textarea>
+<textarea id="gPractice" placeholder="✏️ Practice"></textarea>
+<textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
+
+<button class="primary" onclick="saveGrammar()">Zapisz</button>
+
+</div
 <!-- LIST -->
 
 <div id="list" class="view">
@@ -803,13 +875,16 @@ let studyMode = "SRS"
 let mediaRecorder
 let audioChunks = []
 let recordedAudioBase64 = null
-
+let viewHistory = []
 let imageURL = null
 let streak = parseInt(localStorage.getItem("streak")) || 0
 let lastStudy = localStorage.getItem("lastStudy") || ""
 	let currentFolderId = null
+let grammarCards = []
+let grammarIndex = 0
+let grammarAnswer = false
 
-const request = indexedDB.open("FlashcardsDB",2)
+const request = indexedDB.open("FlashcardsDB",4)
 
 	
 request.onupgradeneeded = function(event){
@@ -828,6 +903,10 @@ if(!db.objectStoreNames.contains("questions")){
 db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
 }
 
+if(!db.objectStoreNames.contains("grammar")){
+db.createObjectStore("grammar",{keyPath:"id",autoIncrement:true})
+}
+
 }
 
 request.onsuccess = function(event){
@@ -841,6 +920,7 @@ loadCardsFromDB()
 /* ===============================
 TOUCH SYSTEM (SWIPE + TAP)
 ================================ */
+
 let startX = 0
 let startY = 0
 let endX = 0
@@ -849,12 +929,11 @@ let endY = 0
 window.addEventListener("load", () => {
 
 const swipeArea = document.querySelector(".app")
-
 if(!swipeArea) return
 
 swipeArea.addEventListener("touchstart", e => {
 
-if(e.target.tagName === "BUTTON") return
+if(e.target.tagName === "BUTTON" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return
 
 startX = e.touches[0].clientX
 startY = e.touches[0].clientY
@@ -863,7 +942,7 @@ startY = e.touches[0].clientY
 
 swipeArea.addEventListener("touchend", e => {
 
-if(e.target.tagName === "BUTTON") return
+if(e.target.closest("button") || e.target.closest("input") || e.target.closest("textarea")) return
 
 endX = e.changedTouches[0].clientX
 endY = e.changedTouches[0].clientY
@@ -875,26 +954,34 @@ handleGesture()
 })
 
 function handleGesture(){
+
 if(
 !document.getElementById("homeStudy").classList.contains("active") &&
-!document.getElementById("questionCards").classList.contains("active")
+!document.getElementById("questionCards").classList.contains("active") &&
+!document.getElementById("grammarStudy").classList.contains("active")
 ) return
+
 const diffX = endX - startX
 const diffY = endY - startY
 
 /* TAP */
 
 if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
-// FISZKI
+
 if(document.getElementById("homeStudy").classList.contains("active")){
 showAnswer()
 }
 
-// QUESTION
 if(document.getElementById("questionCards").classList.contains("active")){
 questionAnswerVisible = !questionAnswerVisible
 renderQuestionCard()
 }
+
+if(document.getElementById("grammarStudy").classList.contains("active")){
+grammarAnswer = !grammarAnswer
+renderGrammarCard()
+}
+
 return
 }
 
@@ -913,7 +1000,11 @@ questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.lengt
 questionAnswerVisible = false
 renderQuestionCard()
 }
-
+if(document.getElementById("grammarStudy").classList.contains("active")){
+grammarIndex = (grammarIndex - 1 + grammarCards.length) % grammarCards.length
+grammarAnswer = false
+renderGrammarCard()
+}
 return
 }
 
@@ -928,12 +1019,17 @@ questionIndex = (questionIndex + 1) % questionCards.length
 questionAnswerVisible = false
 renderQuestionCard()
 }
-
+if(document.getElementById("grammarStudy").classList.contains("active")){
+grammarIndex = (grammarIndex + 1) % grammarCards.length
+grammarAnswer = false
+renderGrammarCard()
+}
 return
 }
-	}
+
 }
 
+}
 /* ===============================
    mood
 ================================ */
@@ -957,14 +1053,12 @@ renderCard()
 function loadCardsFromDB(callback){
 
 const transaction = db.transaction("cards","readonly")
-
 const store = transaction.objectStore("cards")
-
 const req = store.getAll()
 
 req.onsuccess = function(){
 
-cards = req.result
+cards = req.result || []
 
 renderCard()
 
@@ -972,8 +1066,12 @@ if(callback) callback()
 
 }
 
+req.onerror = function(){
+console.error("Błąd IndexedDB")
+cards = []
 }
 
+}
 
 /* ===============================
    NAVIGATION
@@ -983,6 +1081,24 @@ function goHome(){ setView("home") }
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
 function setView(view){
+
+const current = document.querySelector(".view.active")
+
+if(current && current.id !== view && current.id !== "home"){
+
+if(viewHistory[viewHistory.length-1] !== current.id){
+viewHistory.push(current.id)
+}
+
+}
+// limit historii żeby nie rosła w nieskończoność
+if(viewHistory.length > 20){
+viewHistory.shift()
+}
+
+
+
+/* ZMIANA WIDOKU */
 
 document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById(view).classList.add("active")
@@ -994,6 +1110,14 @@ const btnAdd = document.getElementById("btnAdd")
 const btnAll = document.getElementById("btnAll")
 const btnSrs = document.getElementById("btnSrs")
 
+/* RESET */
+
+btnList.style.display = "none"
+btnAdd.style.display = "none"
+btnAll.style.display = "none"
+btnSrs.style.display = "none"
+
+
 /* HOME */
 
 if(view === "home"){
@@ -1001,7 +1125,8 @@ top.style.display = "none"
 return
 }
 
-//* FISZKI */
+
+/* FISZKI */
 
 if(view === "homeStudy" || view === "list" || view === "add"){
 
@@ -1012,56 +1137,58 @@ btnAdd.style.display = "flex"
 btnAll.style.display = "flex"
 btnSrs.style.display = "flex"
 
-/* funkcje fiszek */
-
-btnList.onclick = function(){
-goToList()
-}
-
-btnAdd.onclick = function(){
-goToAdd()
-}
-
-btnAll.onclick = function(){
-setMode("ALL")
-}
-
-btnSrs.onclick = function(){
-setMode("SRS")
-}
+btnList.onclick = goToList
+btnAdd.onclick = goToAdd
+btnAll.onclick = () => setMode("ALL")
+btnSrs.onclick = () => setMode("SRS")
 
 }
+
 
 /* QUESTION */
 
-if(view === "questions" || view === "questionFolder" || view === "questionCards" || view === "addQuestion"){
+if(view === "questions" || view === "questionCards" || view === "addQuestion"|| view === "questionFolder" ){
 
 top.style.display = "flex"
 
-/* ukryj SRS */
 btnSrs.style.display = "none"
 
-/* pokaż przyciski */
+}
+
+
+/* QUESTION CARDS */
+
+if(view === "questionCards" || view === "addQuestion" || view === "questionFolder" ){
+
 btnList.style.display = "flex"
 btnAdd.style.display = "flex"
 btnAll.style.display = "flex"
-
-/* zmień funkcje przycisków */
 
 btnList.onclick = function(){
 renderQuestionList()
 setView("questionFolder")
 }
 
-btnAdd.onclick = function(){
-goToAddQuestion()
-}
+btnAdd.onclick = goToAddQuestion
 
-btnAll.onclick = function(){
-openQuestionCards()
-}
+btnAll.onclick = openQuestionCards
 
 }
+
+if(view === "grammarStudy" || view === "grammarList" || view === "addGrammar"){
+
+top.style.display = "flex"
+
+btnList.style.display = "flex"
+btnAdd.style.display = "flex"
+btnAll.style.display = "flex"
+
+btnList.onclick = ()=>setView("grammarList")
+btnAdd.onclick = ()=>setView("addGrammar")
+btnAll.onclick = ()=>setView("grammarStudy")
+
+}
+
 }
 	function goToAddQuestion(){
 setView("addQuestion")
@@ -1522,9 +1649,191 @@ function closeModal(){
   document.getElementById("modal").classList.remove("show")
 }
 /* ===============================
-   REPEAT
+   GRAMA
 ================================ */
+function openGrammar(){
 
+setView("grammarList")
+
+loadGrammarFromDB()
+
+}
+function renderGrammar(){
+
+const container = document.getElementById("grammarItems")
+
+container.innerHTML = ""
+
+grammarCards.forEach(g=>{
+
+const div = document.createElement("div")
+
+div.className = "listItem"
+
+div.innerHTML = `
+<div class="text"><b>${g.title}</b></div>
+
+<div>
+<button class="smallBtn primary" onclick="studyGrammar(${g.id})">▶</button>
+<button class="smallBtn secondary" onclick="deleteGrammar(${g.id})">🗑</button>
+</div>
+`
+
+container.appendChild(div)
+
+})
+
+}
+function studyGrammar(id){
+
+grammarIndex = grammarCards.findIndex(g=>g.id===id)
+
+grammarAnswer = false
+
+setView("grammarStudy")
+renderGrammarCard()
+}
+
+function renderGrammarCard(){
+
+if(grammarCards.length === 0) return
+
+const g = grammarCards[grammarIndex]
+
+const el = document.getElementById("grammarCardText")
+
+if(!grammarAnswer){
+
+el.innerHTML = `
+<h2 style="margin-bottom:10px">${g.title}</h2>
+<p style="opacity:0.01">Tap to show explanation</p>
+`
+
+}else{
+
+el.innerHTML = `
+
+<div style="text-align:left;font-size:16px;line-height:1.5">
+
+<div><b>📖 Explanation</b><br>${g.explanation}</div><br>
+
+<div><b>📐 Structure</b><br>${g.structure}</div><br>
+
+<div><b>🧠 Usage</b><br>${g.usage}</div><br>
+
+<div><b>💬 Examples</b><br>${g.examples}</div><br>
+
+<div><b>✏️ Practice</b><br>${g.practice}</div><br>
+
+<div><b>⚠ Common mistakes</b><br>${g.mistakes}</div>
+
+</div>
+
+`
+
+}
+
+}
+
+
+
+function deleteGrammar(id){
+
+if(!confirm("Usunąć?")) return
+
+const t = db.transaction("grammar","readwrite")
+
+t.objectStore("grammar").delete(id)
+
+t.oncomplete = renderGrammar
+
+}
+
+
+function saveGrammar(){
+
+if(!db){
+alert("Baza danych jeszcze się ładuje")
+return
+}
+
+const btn = document.querySelector("#addGrammar .primary")
+btn.disabled = true
+btn.innerText = "Zapisywanie..."
+
+const title = document.getElementById("gTitle").value.trim()
+
+if(!title){
+alert("Podaj temat")
+btn.disabled = false
+btn.innerText = "Zapisz"
+return
+}
+
+const data = {
+title:title,
+explanation:document.getElementById("gExplanation").value,
+structure:document.getElementById("gStructure").value,
+usage:document.getElementById("gUsage").value,
+examples:document.getElementById("gExamples").value,
+practice:document.getElementById("gPractice").value,
+mistakes:document.getElementById("gMistakes").value
+}
+
+// TRANSAKCJA
+const t = db.transaction("grammar","readwrite")
+const store = t.objectStore("grammar")
+
+const req = store.add(data)
+
+req.onerror = function(){
+console.error("Błąd zapisu:", req.error)
+alert("Nie udało się zapisać")
+
+btn.disabled = false
+btn.innerText = "Zapisz"
+}
+
+t.oncomplete = function(){
+
+// wyczyść formularz
+document.getElementById("gTitle").value=""
+document.getElementById("gExplanation").value=""
+document.getElementById("gStructure").value=""
+document.getElementById("gUsage").value=""
+document.getElementById("gExamples").value=""
+document.getElementById("gPractice").value=""
+document.getElementById("gMistakes").value=""
+
+loadGrammarFromDB()
+
+setView("grammarList")
+
+showPopup("Zapisano temat")
+
+btn.disabled = false
+btn.innerText = "Zapisz"
+
+}
+
+}
+
+
+function loadGrammarFromDB(){
+
+const t = db.transaction("grammar","readonly")
+const store = t.objectStore("grammar")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+grammarCards = req.result
+
+renderGrammar()
+
+}
+
+}
 
 /* ===============================
    SPEECH
@@ -2264,7 +2573,20 @@ showPopup("Import zakończony")
 reader.readAsText(file)
 
 }
+function goBack(){
 
+if(viewHistory.length === 0){
+setView("home")
+return
+}
+
+const previous = viewHistory.pop()
+
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+
+document.getElementById(previous).classList.add("active")
+
+}
 	
 </script>
 
@@ -2293,6 +2615,29 @@ document.getElementById("popup").classList.remove("show")
 
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
