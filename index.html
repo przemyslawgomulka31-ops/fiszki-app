@@ -703,16 +703,23 @@ Progres: <span id="progress-mini">—</span>
 </div>
 
 
-<!-- GRAMMAR LIST -->
-
 <div id="grammarList" class="view">
 
 <h3>Gramatyka</h3>
 
-<div id="grammarItems"></div>
+<div style="display:flex;gap:10px">
+
+<button class="secondary" onclick="exportGrammar()">⬇ Export</button>
+
+<button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
 
 </div>
 
+<input type="file" id="importGrammar" accept=".json" style="display:none">
+
+<div id="grammarItems"></div>
+
+</div>
 
 <!-- ADD GRAMMAR -->
 
@@ -1285,7 +1292,84 @@ btnAll.onclick = ()=>setView("grammarStudy")
 	function goToAddQuestion(){
 setView("addQuestion")
 }
+function exportGrammar(){
 
+const t = db.transaction("grammar","readonly")
+const store = t.objectStore("grammar")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+const data = req.result
+
+const blob = new Blob([JSON.stringify(data)], {type:"application/json"})
+const url = URL.createObjectURL(blob)
+
+const a = document.createElement("a")
+a.href = url
+a.download = "grammar-backup.json"
+a.click()
+
+}
+
+}
+
+	function importGrammar(file){
+
+const reader = new FileReader()
+
+reader.onload = function(e){
+
+let data
+
+try{
+data = JSON.parse(e.target.result)
+}catch{
+showPopup("Błędny plik")
+return
+}
+
+/* wyczyść bazę */
+
+const t = db.transaction("grammar","readwrite")
+const store = t.objectStore("grammar")
+
+store.clear()
+
+t.oncomplete = function(){
+
+const t2 = db.transaction("grammar","readwrite")
+const store2 = t2.objectStore("grammar")
+
+data.forEach(g=>{
+delete g.id
+store2.add(g)
+})
+
+t2.oncomplete = function(){
+
+loadGrammarFromDB()
+showPopup("Import zakończony")
+
+}
+
+}
+
+}
+
+reader.readAsText(file)
+
+}
+
+	document.getElementById("importGrammar").addEventListener("change",function(e){
+
+const file = e.target.files[0]
+
+if(!file) return
+
+importGrammar(file)
+
+})
 /* ===============================
    RENDER CARD
 ================================ */
