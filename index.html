@@ -452,6 +452,9 @@ opacity:0.7;
 
 margin-top:80px;
 
+margin-left:12px;
+margin-right:auto;
+
 background:#fff;
 border-radius:20px;
 padding:20px;
@@ -461,17 +464,17 @@ line-height:1.4;
 word-break:break-word;
 
 display:flex;
-align-items:center;
+flex-direction:column;
+align-items:flex-start;
 justify-content:flex-start;
+
 text-align:left;
-padding:20px;
 
 min-height:200px;
 
 box-shadow:0 18px 40px rgba(51,41,112,0.08);
 
 }
-
 .questionSpacer{
 height:20px;
 }
@@ -685,7 +688,7 @@ Progres: <span id="progress-mini">—</span>
 
 <button class="primary" onclick="saveQuestion()">Zapisz</button>
 
-<button class="secondary" onclick="setView('questionFolder')">Powrót</button>
+<button class="secondary" onclick="setView('questionFolder', false)">Powrót</button>
 
 </div>
 
@@ -887,8 +890,30 @@ let grammarIndex = 0
 let grammarAnswer = false
 let grammarStep = 0
 
+
+
 const request = indexedDB.open("FlashcardsDB",4)
 
+
+const viewLevels = {
+
+home: 0,
+
+homeStudy: 1,
+questions: 1,
+grammarStudy: 1,
+
+list: 2,
+add: 2,
+
+questionFolder: 2,
+questionCards: 2,
+addQuestion: 2,
+
+grammarList: 2,
+addGrammar: 2
+
+}
 	
 request.onupgradeneeded = function(event){
 
@@ -1086,27 +1111,80 @@ cards = []
    NAVIGATION
 ================================ */
 
-function goHome(){ setView("home") }
+function goHome(){
+viewHistory = []
+setView("home", false)
+}
+
 function goToList(){ setView("list"); renderList() }
 function goToAdd(){ setView("add") }
-function setView(view){
 
-const current = document.querySelector(".view.active")
+// ------ STABILNY goBack (z debounce i sanity-checkami) ------
+let _backLocked = false;
 
-if(current && current.id !== view){
-viewHistory.push(current.id)
+function goBack(){
+  // blokada krótkiego, szybkiego wielokrotnego kliknięcia
+  if(_backLocked) return;
+  _backLocked = true;
+  setTimeout(()=> _backLocked = false, 300); // 300ms debounce
+
+  // bieżący widok (może być null)
+  const current = document.querySelector(".view.active");
+
+  // oczyść historyę ze złych wpisów (duplikaty lub brak elementów w DOM)
+  while(viewHistory.length > 0){
+    const last = viewHistory[viewHistory.length - 1];
+    if(!last) { viewHistory.pop(); continue; } // puste
+    if(last === (current && current.id)) { viewHistory.pop(); continue; } // duplikat
+    if(!document.getElementById(last)){ viewHistory.pop(); continue; } // widok już nie istnieje
+    break;
+  }
+
+  if(viewHistory.length === 0){
+    // nie ma gdzie wrócić — idź do HOME (nie zapisujemy tego kroku w historii)
+    setView("home", false);
+    return;
+  }
+
+  const prev = viewHistory.pop();
+  setView(prev, false);
 }
-// limit historii żeby nie rosła w nieskończoność
-if(viewHistory.length > 20){
-viewHistory.shift()
-}
+function setView(view, saveHistory = true){
+  const current = document.querySelector(".view.active");
 
+  /* HISTORIA */
+  if(saveHistory && current && current.id !== view){
+    const currentLevel = viewLevels[current.id] ?? 0;
+    const newLevel = viewLevels[view] ?? 0;
+
+    // zapisujemy tylko gdy wchodzimy "głębiej" (np. level1 -> level2)
+    if(newLevel > currentLevel){
+      // unikamy duplikatów na szczycie
+      if(viewHistory[viewHistory.length - 1] !== current.id){
+        viewHistory.push(current.id);
+      }
+    }
+  }
+
+  // przytnij historię
+  if(viewHistory.length > 30){
+    viewHistory.splice(0, viewHistory.length - 30);
+  }
+
+  /* ZMIANA WIDOKU */
+  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  const el = document.getElementById(view);
+  if(!el){
+    console.warn("setView: nie znaleziono widoku", view);
+    return;
+  }
+  el.classList.add("active");
+
+  // ... reszta Twojej logiki topButtons pozostaje bez zmian ...
 
 
 /* ZMIANA WIDOKU */
 
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-document.getElementById(view).classList.add("active")
 
 const top = document.querySelector(".topButtons")
 
@@ -1122,14 +1200,18 @@ btnAdd.style.display = "none"
 btnAll.style.display = "none"
 btnSrs.style.display = "none"
 
+btnList.onclick = null
+btnAdd.onclick = null
+btnAll.onclick = null
+btnSrs.onclick = null
 
 /* HOME */
 
 if(view === "home"){
 top.style.display = "none"
+viewHistory = []
 return
 }
-
 
 /* FISZKI */
 
@@ -1149,6 +1231,7 @@ btnSrs.onclick = () => setMode("SRS")
 
 }
 
+/* QUESTIONS */
 
 /* QUESTION */
 
@@ -1180,7 +1263,9 @@ btnAll.onclick = openQuestionCards
 
 }
 
-if(view === "grammarStudy" || view === "grammarList" || view === "addGrammar"){
+/* GRAMMAR */
+
+if(view.startsWith("grammar")){
 
 top.style.display = "flex"
 
@@ -1695,6 +1780,7 @@ grammarIndex = grammarCards.findIndex(g=>g.id===id)
 
 grammarAnswer = false
 
+grammarStep = 0
 setView("grammarStudy")
 renderGrammarCard()
 }
@@ -1716,7 +1802,7 @@ const steps = [
 ]
 
 if(grammarStep === 0){
-el.innerHTML = `<h2>${g.title}</h2><p style="opacity:0.5">Tap to start</p>`
+el.innerHTML = `<h2>${g.title}</h2><p style="opacity:0.05">Tap to start</p>`
 return
 }
 
@@ -2080,7 +2166,7 @@ document.getElementById("startScreen").addEventListener("click",function(){
 this.style.display = "none"
 
 // ukryj górny pasek na starcie
-document.querySelector(".topButtons").style.display = "none"
+
 
 })
 	if (window.navigator.standalone) {
@@ -2332,7 +2418,9 @@ const card = questionCards[questionIndex]
 
 const el = document.getElementById("questionCardText")
 
-el.innerText = questionAnswerVisible ? card.answer : card.question
+el.innerHTML = questionAnswerVisible
+? `<b style="margin-bottom:10px">💬 Answer</b><div>${card.answer}</div>`
+: `<b style="margin-bottom:10px">❓ Question</b><div>${card.question}</div>`
 
 }
 
@@ -2568,17 +2656,6 @@ showPopup("Import zakończony")
 
 reader.readAsText(file)
 
-}
-function goBack(){
-
-if(viewHistory.length === 0){
-setView("home")
-return
-}
-
-const previous = viewHistory.pop()
-
-setView(previous)
 }
 
 
