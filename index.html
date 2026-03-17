@@ -726,7 +726,7 @@ Progres: <span id="progress-mini">—</span>
 
 <button class="primary" onclick="saveGrammar()">Zapisz</button>
 
-</div
+</div>
 <!-- LIST -->
 
 <div id="list" class="view">
@@ -883,6 +883,7 @@ let lastStudy = localStorage.getItem("lastStudy") || ""
 let grammarCards = []
 let grammarIndex = 0
 let grammarAnswer = false
+let grammarStep = 0
 
 const request = indexedDB.open("FlashcardsDB",4)
 
@@ -978,7 +979,13 @@ renderQuestionCard()
 }
 
 if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarAnswer = !grammarAnswer
+grammarStep++
+
+if(grammarStep > 6){
+grammarStep = 0
+grammarIndex = (grammarIndex + 1) % grammarCards.length
+}
+
 renderGrammarCard()
 }
 
@@ -1084,12 +1091,8 @@ function setView(view){
 
 const current = document.querySelector(".view.active")
 
-if(current && current.id !== view && current.id !== "home"){
-
-if(viewHistory[viewHistory.length-1] !== current.id){
+if(current && current.id !== view){
 viewHistory.push(current.id)
-}
-
 }
 // limit historii żeby nie rosła w nieskończoność
 if(viewHistory.length > 20){
@@ -1321,19 +1324,19 @@ renderCard()
 
 function addCard(){
 if(mediaRecorder && mediaRecorder.state === "recording"){
-alert("Nagranie jeszcze trwa")
+showPopup("Nagranie jeszcze trwa")
 return
 }
 
 if(audioChunks.length > 0 && !recordedAudioBase64){
-alert("Poczekaj aż nagranie się zapisze")
+showPopup("Poczekaj aż nagranie się zapisze")
 return
 }
 const front = document.getElementById("frontInput").value.trim()
 const back = document.getElementById("backInput").value.trim()
 
 if(!front || !back){
-alert("Wypełnij pola")
+showPopup("Wypełnij pola")
 return
 }
 
@@ -1620,7 +1623,7 @@ function saveModal(){
   const newFront = document.getElementById("editFront").value.trim();
   const newBack = document.getElementById("editBack").value.trim();
   if(!newFront || !newBack){
-    alert("Wypełnij pola");
+    showPopup("Wypełnij pola");
     return;
   }
   const id = cards[editingIndex].id;
@@ -1699,40 +1702,30 @@ function renderGrammarCard(){
 if(grammarCards.length === 0) return
 
 const g = grammarCards[grammarIndex]
-
 const el = document.getElementById("grammarCardText")
 
-if(!grammarAnswer){
+const steps = [
+  {label:"📖 Explanation", value:g.explanation},
+  {label:"📐 Structure", value:g.structure},
+  {label:"🧠 Usage", value:g.usage},
+  {label:"💬 Examples", value:g.examples},
+  {label:"✏️ Practice", value:g.practice},
+  {label:"⚠ Mistakes", value:g.mistakes}
+]
 
-el.innerHTML = `
-<h2 style="margin-bottom:10px">${g.title}</h2>
-<p style="opacity:0.01">Tap to show explanation</p>
-`
-
-}else{
-
-el.innerHTML = `
-
-<div style="text-align:left;font-size:16px;line-height:1.5">
-
-<div><b>📖 Explanation</b><br>${g.explanation}</div><br>
-
-<div><b>📐 Structure</b><br>${g.structure}</div><br>
-
-<div><b>🧠 Usage</b><br>${g.usage}</div><br>
-
-<div><b>💬 Examples</b><br>${g.examples}</div><br>
-
-<div><b>✏️ Practice</b><br>${g.practice}</div><br>
-
-<div><b>⚠ Common mistakes</b><br>${g.mistakes}</div>
-
-</div>
-
-`
-
+if(grammarStep === 0){
+el.innerHTML = `<h2>${g.title}</h2><p style="opacity:0.5">Tap to start</p>`
+return
 }
 
+const step = steps[grammarStep - 1]
+
+el.innerHTML = `
+<div style="text-align:left;font-size:16px">
+<b>${step.label}</b><br><br>
+${step.value || "<i>Brak danych</i>"}
+</div>
+`
 }
 
 
@@ -1753,7 +1746,7 @@ t.oncomplete = renderGrammar
 function saveGrammar(){
 
 if(!db){
-alert("Baza danych jeszcze się ładuje")
+showPopup("Baza danych jeszcze się ładuje")
 return
 }
 
@@ -1764,7 +1757,7 @@ btn.innerText = "Zapisywanie..."
 const title = document.getElementById("gTitle").value.trim()
 
 if(!title){
-alert("Podaj temat")
+showPopup("Podaj temat")
 btn.disabled = false
 btn.innerText = "Zapisz"
 return
@@ -1788,7 +1781,7 @@ const req = store.add(data)
 
 req.onerror = function(){
 console.error("Błąd zapisu:", req.error)
-alert("Nie udało się zapisać")
+showPopup("Nie udało się zapisać")
 
 btn.disabled = false
 btn.innerText = "Zapisz"
@@ -1835,6 +1828,7 @@ renderGrammar()
 
 }
 
+
 /* ===============================
    SPEECH
 ================================ */
@@ -1862,7 +1856,7 @@ async function startRecording(){
 
 // sprawdzenie obsługi
 if(!navigator.mediaDevices || !window.MediaRecorder){
-alert("Twoja przeglądarka nie obsługuje nagrywania audio")
+showPopup("Twoja przeglądarka nie obsługuje nagrywania audio")
 return
 }
 
@@ -1896,7 +1890,7 @@ document.getElementById("recordUI").style.display = "none"
 const blob = new Blob(audioChunks,{type:"audio/mp4"});
 
 if(blob.size === 0){
-alert("Nagranie jest puste")
+showPopup("Nagranie jest puste")
 return
 }
 
@@ -1933,10 +1927,10 @@ mediaRecorder.stop()
 console.error(err)
 
 if(err.name === "NotAllowedError"){
-alert("Nie udzielono dostępu do mikrofonu")
+showPopup("Nie udzielono dostępu do mikrofonu")
 }
 else{
-alert("Nie można uruchomić nagrywania")
+showPopup("Nie można uruchomić nagrywania")
 }
 
 }
@@ -1959,7 +1953,7 @@ const audio = new Audio(recordedAudioBase64)
 
 audio.play().catch(err=>{
 console.error(err)
-alert("Nie można odtworzyć nagrania")
+showPopup("Nie można odtworzyć nagrania")
 })
 
 return
@@ -1967,14 +1961,14 @@ return
 
 // jeśli brak kart
 if(!dueCards || dueCards.length === 0){
-alert("Brak fiszek")
+showPopup("Brak fiszek")
 return
 }
 
 const card = dueCards[currentIndex]
 
 if(!card){
-alert("Błąd odczytu fiszki")
+showPopup("Błąd odczytu fiszki")
 return
 }
 
@@ -1987,14 +1981,14 @@ const audio = new Audio(card.audio)
 
 audio.play().catch(err=>{
 console.error(err)
-alert("Nie można odtworzyć nagrania")
+showPopup("Nie można odtworzyć nagrania")
 })
 
 return
 }
 
 // jeśli brak audio
-alert("Ta fiszka nie ma nagrania")
+showPopup("Ta fiszka nie ma nagrania")
 
 }
 
@@ -2041,7 +2035,7 @@ reader.onload = function(ev){
     imported = JSON.parse(ev.target.result)
   }
   catch(e){
-    alert("Błędny plik backup")
+    showPopup("Błędny plik backup")
     return
   }
 
@@ -2070,7 +2064,7 @@ transaction.oncomplete = function(){
 loadCardsFromDB()
 currentIndex = 0
 renderCard()
-alert("Import OK")
+showPopup("Import OK")
 }
 
 }
@@ -2283,7 +2277,7 @@ const question = document.getElementById("questionInput").value.trim()
 const answer = document.getElementById("answerInput").value.trim()
 
 if(!question || !answer){
-alert("Wpisz pytanie i odpowiedź")
+showPopup("Wpisz pytanie i odpowiedź")
 return
 }
 
@@ -2398,7 +2392,7 @@ function saveFolder(){
 const name = document.getElementById("folderNameInput").value.trim()
 
 if(!name){
-alert("Podaj nazwę folderu")
+showPopup("Podaj nazwę folderu")
 return
 }
 
@@ -2502,7 +2496,7 @@ let data
 try{
 data = JSON.parse(e.target.result)
 }catch{
-alert("Błędny plik")
+showPopup("Błędny plik")
 return
 }
 
@@ -2582,11 +2576,10 @@ return
 
 const previous = viewHistory.pop()
 
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-
-document.getElementById(previous).classList.add("active")
-
+setView(previous)
 }
+
+
 	
 </script>
 
