@@ -1167,6 +1167,18 @@ document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
 document.getElementById("home").classList.add("active")
 
 top.style.display = "none"
+
+// 🔥 RESET BUTTONÓW
+const btnList = document.getElementById("btnList")
+const btnAdd = document.getElementById("btnAdd")
+const btnAll = document.getElementById("btnAll")
+const btnSrs = document.getElementById("btnSrs")
+
+btnList.onclick = null
+btnAdd.onclick = null
+btnAll.onclick = null
+btnSrs.onclick = null
+
 viewHistory = []
 
 return
@@ -1208,7 +1220,7 @@ return
 /* ZMIANA WIDOKU */
 
 
-const top = document.querySelector(".topButtons")
+
 
 const btnList = document.getElementById("btnList")
 const btnAdd = document.getElementById("btnAdd")
@@ -1294,9 +1306,7 @@ btnAdd.onclick = ()=>setView("addGrammar")
 btnAll.onclick = ()=>setView("grammarStudy")
 
 }
-if(top.style.display !== "flex"){
-top.style.display = "none"
-}
+
 }
 	function goToAddQuestion(){
 setView("addQuestion")
