@@ -1123,6 +1123,14 @@ function goToAdd(){ setView("add") }
 let _backLocked = false;
 
 function goBack(){
+/* HOME */
+
+if(view === "home"){
+top.style.display = "none"
+viewHistory = []
+return
+}
+	
   // blokada krótkiego, szybkiego wielokrotnego kliknięcia
   if(_backLocked) return;
   _backLocked = true;
@@ -1205,13 +1213,7 @@ btnAdd.onclick = null
 btnAll.onclick = null
 btnSrs.onclick = null
 
-/* HOME */
 
-if(view === "home"){
-top.style.display = "none"
-viewHistory = []
-return
-}
 
 /* FISZKI */
 
