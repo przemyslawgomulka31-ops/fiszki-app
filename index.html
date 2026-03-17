@@ -1130,41 +1130,48 @@ function goToAdd(){ setView("add") }
 let _backLocked = false;
 
 function goBack(){
-/* HOME */
+
+if(_backLocked) return;
+_backLocked = true;
+setTimeout(()=> _backLocked = false, 300);
+
+const current = document.querySelector(".view.active");
+
+/* CLEAN HISTORIA */
+while(viewHistory.length > 0){
+const last = viewHistory[viewHistory.length - 1];
+
+if(!last || last === (current && current.id) || !document.getElementById(last)){
+viewHistory.pop();
+continue;
+}
+break;
+}
+
+if(viewHistory.length === 0){
+setView("home", false);
+return;
+}
+
+const prev = viewHistory.pop();
+setView(prev, false);
+
+}
+function setView(view, saveHistory = true){
+
+const top = document.querySelector(".topButtons")
 
 if(view === "home"){
+
+document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
+document.getElementById("home").classList.add("active")
+
 top.style.display = "none"
 viewHistory = []
+
 return
 }
 	
-  // blokada krótkiego, szybkiego wielokrotnego kliknięcia
-  if(_backLocked) return;
-  _backLocked = true;
-  setTimeout(()=> _backLocked = false, 300); // 300ms debounce
-
-  // bieżący widok (może być null)
-  const current = document.querySelector(".view.active");
-
-  // oczyść historyę ze złych wpisów (duplikaty lub brak elementów w DOM)
-  while(viewHistory.length > 0){
-    const last = viewHistory[viewHistory.length - 1];
-    if(!last) { viewHistory.pop(); continue; } // puste
-    if(last === (current && current.id)) { viewHistory.pop(); continue; } // duplikat
-    if(!document.getElementById(last)){ viewHistory.pop(); continue; } // widok już nie istnieje
-    break;
-  }
-
-  if(viewHistory.length === 0){
-    // nie ma gdzie wrócić — idź do HOME (nie zapisujemy tego kroku w historii)
-    setView("home", false);
-    return;
-  }
-
-  const prev = viewHistory.pop();
-  setView(prev, false);
-}
-function setView(view, saveHistory = true){
   const current = document.querySelector(".view.active");
 
   /* HISTORIA */
@@ -1287,7 +1294,9 @@ btnAdd.onclick = ()=>setView("addGrammar")
 btnAll.onclick = ()=>setView("grammarStudy")
 
 }
-
+if(top.style.display !== "flex"){
+top.style.display = "none"
+}
 }
 	function goToAddQuestion(){
 setView("addQuestion")
