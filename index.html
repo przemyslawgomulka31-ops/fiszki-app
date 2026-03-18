@@ -696,23 +696,19 @@ Progres: <span id="progress-mini">—</span>
 
 <!-- GRAMMAR STUDY -->
 
-<div id="grammarStudy" class="view">
-
-<div class="questionCard" id="grammarCardText"></div>
-
-</div>
-
-
-
-<input type="file" id="importGrammar" accept=".json" style="display:none">
+<div id="grammarList" class="view">
 
 <h3>Gramatyka</h3>
 
 <div id="grammarItems"></div>
 
-<div style="display:flex;gap:10px">
+<div style="display:flex;gap:10px;margin-top:15px">
   <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
   <button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
+</div>
+
+<input type="file" id="importGrammar" accept=".json" style="display:none">
+
 </div>
 
 <input type="file" id="importGrammar" ...>
