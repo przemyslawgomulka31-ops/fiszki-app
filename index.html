@@ -707,11 +707,14 @@ Progres: <span id="progress-mini">—</span>
 
 <h3>Gramatyka</h3>
 
+<div id="grammarItems"></div>
+
 <div style="display:flex;gap:10px">
+  <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
+  <button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
+</div>
 
-<button class="secondary" onclick="exportGrammar()">⬇ Export</button>
-
-<button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
+<input type="file" id="importGrammar" ...>
 
 </div>
 
