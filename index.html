@@ -218,10 +218,17 @@ textarea{resize:none}
 .audioItem span{font-size:11px;opacity:.6}
 
 .fabContainer{
-  position:fixed;left:50%;transform:translateX(-100%);
-  bottom:env(safe-area-inset-bottom);
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%); /* 🔥 KLUCZOWA ZMIANA */
+  bottom:calc(10px + env(safe-area-inset-bottom)); /* 🔥 iPhone notch safe */
   width:min(420px,100%);
-  display:flex;justify-content:space-between;gap:12px;padding:0 20px;z-index:999;pointer-events:none;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  padding:0 20px;
+  z-index:999;
+  pointer-events:none;
 }
 .fab{
   width:68px;height:69px;border-radius:50%;
