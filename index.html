@@ -33,11 +33,11 @@ background:#8f7bff;
 }
 
 body{
-
+padding-top: env(safe-area-inset-top);
 min-height:100dvh;
 font-family: "Segoe UI", Roboto, Arial, sans-serif;
 color:#111;
-  overscroll-behavior: none;
+
 background: linear-gradient(
 180deg,
 var(--accent1) 0%,
@@ -56,13 +56,14 @@ touch-action: manipulation;
 /* ---------- APP LAYOUT ---------- */
 .app{
   max-width:420px;
-  min-height:100vh;
   margin:0 auto;
-  padding: calc(env(safe-area-inset-top) + 48px) 22px 160px;
-	padding-bottom: calc(160px + env(safe-area-inset-bottom));
+	 
+  padding:22px 22px 160px;
+  height:100dvh;
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
+ 
 }
 button, .actionBtn, .iconBtn, .bigTile {
   outline: none;
@@ -92,11 +93,6 @@ rgba(230,227,255,0)
 );
 
 backdrop-filter:blur(10px);
-}
-	svg {
-  width: 100%;
-  height: 100%;
-  display: block;
 }
 /* ---------- HEADER ---------- */
 .header{
@@ -183,30 +179,29 @@ margin-top: 10px;
 }
 .topButtons{
   position: fixed;
+ background: rgba(123,92,255,0.25);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+ box-shadow:
+    0 20px 50px rgba(50,30,120,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
   top: 0;
   left: 0;
   right: 0;
 
-  padding-top: calc(env(safe-area-inset-top) + 8px);
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-bottom: 8px;
+  display: none; /* 🔥 ważne */
 
-  display: none;
   justify-content: space-between;
-  gap: 10px;
+  gap: 12px;
 
-  background: rgba(123,92,255,0.72);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-
-  border-bottom: 1px solid rgba(255,255,255,0.18);
-  box-shadow:
-    0 10px 30px rgba(50,30,120,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.35);
+  padding: 5px 22px;
 
   z-index: 1000;
+
+  
 }
+
+
 .iconBtn{
   width:50px;
   height:50px;
@@ -664,7 +659,7 @@ margin:auto;
 .fab{
   width: 68px;
   height: 69px;
-bottom: max(20px, env(safe-area-inset-bottom));
+
   border-radius: 50%;
 
   background: rgba(30, 20, 100, 0.28);
@@ -767,7 +762,6 @@ bottom: max(20px, env(safe-area-inset-bottom));
 .actionBtn{
   width:42px;
   height:42px;
-color:#2d1f80;
 
   border-radius:12px;
 
