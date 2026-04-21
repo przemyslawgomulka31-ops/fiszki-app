@@ -39,18 +39,16 @@ height:100%;
 background:#8f7bff;
 }
 
-body{
-  min-height:100dvh;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  color:#111;
+html, body{
+  margin:0;
+  padding:0;
+  height:100%;
 
-  background:#8f7bff; /* tylko kolor, bez gradientu */
+  overscroll-behavior:none;
 }
-	body::before{
-  content:"";
-  position:fixed;
-  inset:0;
 
+/* 🔥 GRADIENT NA HTML (nie na body) */
+html{
   background: linear-gradient(
     180deg,
     #8f7bff 0%,
@@ -60,13 +58,19 @@ body{
     #ffffff 100%
   );
 
-  z-index:-1;
-
-  transform: translateZ(0); /* 🔥 fix iOS */
+  background-attachment: fixed; /* 🔥 klucz na iOS */
 }
 
-html{
-touch-action: manipulation;
+/* 🔥 BODY BEZ TŁA */
+body{
+  min-height:100dvh;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color:#111;
+
+  background: transparent; /* 🔥 bardzo ważne */
+
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
 }
 /* ---------- APP LAYOUT ---------- */
 .app{
