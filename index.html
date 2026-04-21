@@ -67,6 +67,9 @@ touch-action: manipulation;
   margin:0 auto;
   padding:22px 22px 160px;
   height:100dvh;
+  position:relative;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
 button, .actionBtn, .iconBtn, .bigTile {
   outline: none;
@@ -182,6 +185,9 @@ margin-top: 10px;
 }
 .topButtons{
   position: fixed;
+	  top: env(safe-area-inset-top); /* 🔥 jedyna ważna zmiana */
+  left: 0;
+  right: 0;
  background: rgba(123,92,255,0.25);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(255,255,255,0.2);
