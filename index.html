@@ -70,7 +70,10 @@ touch-action: manipulation;
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
+	
+  transform: translateZ(0); /* 🔥 */
 }
+	
 button, .actionBtn, .iconBtn, .bigTile {
   outline: none;
   -webkit-tap-highlight-color: transparent;
@@ -2729,9 +2732,12 @@ store.add(card)
 })
 
 transaction.oncomplete = function(){
-loadCardsFromDB()
 currentIndex = 0
-renderCard()
+
+  loadCardsFromDB(() => {
+    renderCard()
+    renderList()
+  })
 showPopup("Import OK")
 }
 
@@ -3259,10 +3265,15 @@ sq.add(q)
 
 tq.oncomplete = function(){
 
-renderFolders()
+  currentFolderId = null
+  questionCards = []
+  questionIndex = 0
 
-showPopup("Import zakończony")
+  renderFolders()
 
+  setView("questions", false) // 🔥 reset widoku
+
+  showPopup("Import zakończony")
 }
 
 }
@@ -3307,7 +3318,21 @@ function speakCurrentCard(){
 document.getElementById("btnBack").onclick = goBack
 document.getElementById("btnHome").onclick = goHome
 
+function refreshUI(){
 
+  if(document.getElementById("list").classList.contains("active")){
+    renderList()
+  }
+
+  if(document.getElementById("homeStudy").classList.contains("active")){
+    renderCard()
+  }
+
+  if(document.getElementById("questions").classList.contains("active")){
+    renderFolders()
+  }
+
+}
 
 </script>
 
