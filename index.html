@@ -1770,13 +1770,18 @@ btnAll.onclick = () => {
     }
 refreshUI();
 
-/* 🔥 FIX iOS SCROLL BUG */
-window.scrollTo(0, 0)
+/* 🔥 FIX iOS BACKGROUND BUG */
 
-document.body.style.transform = "translateZ(0)";
-setTimeout(() => {
-  document.body.style.transform = "";
-}, 10);
+// reset scrolla
+const app = document.querySelector(".app");
+if(app) app.scrollTop = 0;
+
+// force repaint gradientu
+document.documentElement.style.backgroundPosition = "0 1px";
+
+requestAnimationFrame(() => {
+  document.documentElement.style.backgroundPosition = "0 0";
+});
   }
 	function goToAddQuestion(){
 setView("addQuestion")
