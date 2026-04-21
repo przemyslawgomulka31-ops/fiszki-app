@@ -54,30 +54,33 @@ svg{display:block;width:100%;height:100%}
   isolation:isolate;
 }
 
-/* Scroll area */
+.topButtons{
+  position:fixed;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:420px;
+  padding: calc(50px + env(safe-area-inset-top) + 8px) 12px 12px;
+  display:none;
+  justify-content:space-between;
+  gap:10px;
+  background: rgba(123,92,255,0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  z-index:1000;
+}
+
 #scrollArea{
   position:absolute;
   inset:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  padding: calc(env(safe-area-inset-top) + 62px) 22px calc(90px + env(safe-area-inset-bottom));
+  padding:
+    calc(env(safe-area-inset-top) + var(--topbar-height))
+    22px
+    calc(var(--bottom-space) + env(safe-area-inset-bottom));
   scrollbar-width:none;
-}
-#scrollArea::-webkit-scrollbar{display:none}
-
-.topButtons{
-  position:fixed;
-  top:0; left:50%; transform:translateX(-50%);
-  width:100%; max-width:420px;
-  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
-  display:none;
-  justify-content:space-between; gap:10px;
-  background: rgba(123,92,255,0.72);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border-bottom:1px solid rgba(255,255,255,0.18);
-  box-shadow:0 10px 30px rgba(50,30,120,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
-  z-index:1000;
 }
 .iconBtn,.actionBtn,.fab,.cornerBtn,.modeBtn{border:none; cursor:pointer; -webkit-user-select:none; user-select:none}
 .iconBtn{
