@@ -70,7 +70,7 @@ touch-action: manipulation;
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
- overscroll-behavior: none;
+ 
 }
 button, .actionBtn, .iconBtn, .bigTile {
   outline: none;
@@ -1007,6 +1007,17 @@ margin:auto;
 
 <button class="primary" onclick="openFolderPopup()">➕ New folder</button>
 
+<div style="display:flex;gap:10px">
+
+<button class="secondary" onclick="exportQuestions()">⬇ Export</button>
+
+<button class="secondary" onclick="importQuestions()">⬆ Import</button>
+
+</div>
+
+
+
+
 
 </div>
 
@@ -1070,7 +1081,14 @@ margin:auto;
   <!-- LISTA -->
   <div id="grammarItems"></div>
 
+  <!-- BUTTONY -->
+  <div style="display:flex;gap:10px;margin-top:15px">
+    <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
+    <button class="secondary" onclick="importGrammar()">⬆ Import</button>
 
+  </div>
+
+  
 
 </div>
 
@@ -1119,6 +1137,11 @@ margin:auto;
 
 <button class="secondary" onclick="toggleSort()">Sort A→Z</button>
 
+
+
+<button class="secondary" onclick="exportBackup()">⬇ Export</button>
+
+<button class="secondary" onclick="importBackup()">⬆ Import</button>
 
 </div>
 
@@ -1254,11 +1277,7 @@ margin:auto;
     </div>
   </div>
 </div>
-
-
-
-
-
+<input type="file" id="importFile" accept=".json" style="display:none">
 <script>
 
 
