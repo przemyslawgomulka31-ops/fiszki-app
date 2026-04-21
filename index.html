@@ -60,7 +60,7 @@ svg{display:block;width:100%;height:100%}
   inset:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-  padding: calc(env(safe-area-inset-top) + 62px) 22px calc(170px + env(safe-area-inset-bottom));
+  padding: calc(env(safe-area-inset-top) + 62px) 22px calc(90px + env(safe-area-inset-bottom));
   scrollbar-width:none;
 }
 #scrollArea::-webkit-scrollbar{display:none}
@@ -219,16 +219,13 @@ textarea{resize:none}
 
 .fabContainer{
   position:fixed;
-  left:50%;
-  transform:translateX(-50%); /* 🔥 KLUCZOWA ZMIANA */
-  bottom:calc(env(safe-area-inset-bottom)); /* 🔥 iPhone notch safe */
-  width:min(420px,100%);
+  left:0;
+  right:0;
+  bottom:0;
+  padding:0 20px calc(10px + env(safe-area-inset-bottom));
   display:flex;
   justify-content:space-between;
-  gap:12px;
-  padding:0 20px;
-  z-index:999;
-  pointer-events:none;
+  z-index:1000;
 }
 .fab{
   width:68px;height:69px;border-radius:50%;
@@ -241,7 +238,19 @@ textarea{resize:none}
 .fab:active{transform:scale(.92)}
 .fab svg{width:24px;height:24px;display:block}
 
-.bottomControls{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100%);padding:16px;display:flex;flex-direction:column;gap:12px;pointer-events:none;z-index:998}
+.bottomControls{
+  position:fixed;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:0;
+  width:min(420px,100%);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  pointer-events:none;
+  z-index:998;
+}
 .bottomControls .btns{pointer-events:auto}
 .bottomControls .panel{
   background:rgba(230,227,255,0.95);
