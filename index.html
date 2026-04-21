@@ -1011,7 +1011,7 @@ margin:auto;
 
 <button class="secondary" onclick="exportQuestions()">⬇ Export</button>
 
-<button class="secondary" onclick="importQuestions()">⬆ Import</button>
+<button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
 
 </div>
 
@@ -1084,7 +1084,7 @@ margin:auto;
   <!-- BUTTONY -->
   <div style="display:flex;gap:10px;margin-top:15px">
     <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
-    <button class="secondary" onclick="importGrammar()">⬆ Import</button>
+    <button onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
 
   </div>
 
@@ -1141,7 +1141,7 @@ margin:auto;
 
 <button class="secondary" onclick="exportBackup()">⬇ Export</button>
 
-<button class="secondary" onclick="importBackup()">⬆ Import</button>
+<button onclick="document.getElementById('importFile').click()">⬆ Import</button>
 
 </div>
 
@@ -1278,6 +1278,8 @@ margin:auto;
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
+<input type="file" id="importQuestions" accept=".json" style="display:none">
+<input type="file" id="importGrammar" accept=".json" style="display:none">
 <script>
 
 
@@ -2714,7 +2716,8 @@ updateCounter()
 
 }
 	function updateCounter(){
-document.getElementById("counter").innerText = cards.length + " | 🔥 " + streak
+document.getElementById("counter").innerText = cards.length
+document.getElementById("streakUI").innerText = streak
 }
 
 	function openQuestions(){
@@ -3176,9 +3179,7 @@ reader.readAsText(file)
 
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(() => console.log("Service Worker zarejestrowany"))
-    .catch(err => console.log("Błąd SW:", err));
+  console.log("SW wyłączony")
 }
 
 function showPopup(text){
@@ -3194,6 +3195,18 @@ function closePopup(){
 document.getElementById("popup").classList.remove("show")
 
 }
+
+function speakCurrentCard(){
+  if(!dueCards.length) return
+  const card = dueCards[currentIndex]
+  speakWord(card.front)
+}
+
+document.getElementById("btnBack").onclick = goBack
+document.getElementById("btnHome").onclick = goHome
+
+
+
 </script>
 
 
