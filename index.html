@@ -1,3439 +1,929 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-
-<meta charset="utf-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
-
-<link rel="manifest" href="/manifest.json">
-
-<meta name="theme-color" content="#7b5cff">
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<meta name="apple-mobile-web-app-title" content="Fiszki">
-<link rel="apple-touch-icon" href="icon.png">
-<title>Fiszki - poprawione UI</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#7b5cff" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Fiszki" />
+<link rel="apple-touch-icon" href="icon.png" />
+<title>Fiszki - iOS clean</title>
 <style>
-/* ---------- BODY / GRADIENT ---------- */
 :root{
-  --accent1: #8f7bff;
-  --accent2: #a89bff;
-  --accent3: #c9c2ff;
-  --accent4: #e6e3ff;
-  --white: #ffffff;
-  --card-bg: #ffffff;
-  --muted: rgba(0,0,0,0.55);
+  --accent1:#8f7bff;
+  --accent2:#a89bff;
+  --accent3:#c9c2ff;
+  --accent4:#e6e3ff;
+  --white:#fff;
+  --card-bg:#fff;
+  --ink:#1b1635;
+  --primary:#7b5cff;
+  --primary2:#9f7bff;
+  --glass: rgba(255,255,255,.18);
+  --glass2: rgba(255,255,255,.3);
 }
-
 *{box-sizing:border-box}
-html, body{
-margin:0;
-padding:0;
-height:100%;
-	
-	overscroll-behavior:none;
-background:#8f7bff;
-}
-
-html, body{
-  margin:0;
-  padding:0;
-  height:100%;
-
-  overscroll-behavior:none;
-}
-
-/* 🔥 GRADIENT NA HTML (nie na body) */
+html, body{margin:0;padding:0;height:100%;overscroll-behavior:none}
 html{
-  background: linear-gradient(
-    180deg,
-    #8f7bff 0%,
-    #a89bff 25%,
-    #c9c2ff 55%,
-    #e6e3ff 80%,
-    #ffffff 100%
-  );
-
-  background-attachment: fixed; /* 🔥 klucz na iOS */
+  background: linear-gradient(180deg,#8f7bff 0%,#a89bff 25%,#c9c2ff 55%,#e6e3ff 80%,#ffffff 100%);
+  background-attachment: fixed;
 }
-
-/* 🔥 BODY BEZ TŁA */
 body{
   min-height:100dvh;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   color:#111;
-
-  background: transparent; /* 🔥 bardzo ważne */
-
+  background:transparent;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow:hidden;
 }
-/* ---------- APP LAYOUT ---------- */
+*{-webkit-tap-highlight-color: transparent}
+button,input,textarea{font:inherit}
+button{touch-action:manipulation}
+svg{display:block;width:100%;height:100%}
+
 .app{
   max-width:420px;
-  min-height:100vh;
+  height:100dvh;
   margin:0 auto;
-  padding: calc(env(safe-area-inset-top) + 48px) 22px 160px;
-	padding-bottom: calc(160px + env(safe-area-inset-bottom));
   position:relative;
+  overflow:hidden;
+  transform:translateZ(0);
+  isolation:isolate;
+}
+
+/* Scroll area */
+#scrollArea{
+  position:absolute;
+  inset:0;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
-	
-  transform: translateZ(0); /* 🔥 */
+  padding: calc(env(safe-area-inset-top) + 62px) 22px calc(170px + env(safe-area-inset-bottom));
+  scrollbar-width:none;
 }
-	
-button, .actionBtn, .iconBtn, .bigTile {
-  outline: none;
-  -webkit-tap-highlight-color: transparent;
-}
+#scrollArea::-webkit-scrollbar{display:none}
 
-.bottomControls{
-position:fixed;
-
-left:0;
-right:0;
-bottom:0;
-
-padding:16px;
-
-display:flex;
-flex-direction:column;
-gap:12px;
-
-max-width:420px;
-margin:auto;
-
-background:linear-gradient(
-to top,
-rgba(230,227,255,0.95),
-rgba(230,227,255,0)
-
-	 backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-
-  background: rgba(230,227,255,0.95); /* stały kolor */
-);
-
-backdrop-filter:blur(10px);
-}
-	svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-/* ---------- HEADER ---------- */
-.header{
-  font-size:20px;
-  font-weight:600;
-  text-align:center;
-  margin:0px 0 14px;
-padding-top:50px;
-
-  color:#1b1635;
-}
-
-/* ---------- STATS ---------- */
-
-
-/* ---------- CARD ---------- */
-.card{
-background: var(--card-bg);
-color:#222;
-border-radius:20px;
-padding:20px;
-text-align:center;
-font-size:28px;
-font-weight:600;
-margin-bottom:18px;
-box-shadow:0 18px 40px rgba(51,41,112,0.08);
-
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-gap:10px;
-}
-
-/* animation helper (apply when switching card) */
-.card.animate {
-  transform: translateY(-8px);
-  opacity: 0.85;
-}
-
-/* ---------- NAV BUTTONS (Prev/Next) ---------- */
-.navButtons{
-display:flex;
-gap:12px;
-}
-.navButtons button{
-  flex:1;
-  min-height:48px;
-  border-radius:28px;
-  font-size:14px;
-margin-top: 10px;
-}
-
-/* ---------- BUTTONS ---------- */
-button{
-  width:100%;
-  padding:12px 14px;
-  border:none;
-  border-radius:28px;
-  margin-top:10px;
-  font-size:15px;
-  cursor:pointer;
-  transition: transform .12s ease, box-shadow .12s ease;
-  box-shadow: 0 6px 18px rgba(99,58,255,0.08);
-}
-button:active{ transform: translateY(1px); }
-
-	.bigButton{
-min-height:60px;
-font-size:18px;
-}
-
-.primary{
-  background: linear-gradient(135deg,#7b5cff,#9f7bff);
-  color:white;
-  font-weight:600;
-margin-top: 10px;
-}
-
-.secondary{
-  background: #ffffff;
-  color: #6a4bff;
-  font-weight:600;
-}
 .topButtons{
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
-  padding-top: calc(env(safe-area-inset-top) + 8px);
-  padding-left: 12px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-
-  display: none;
-  justify-content: space-between;
-  gap: 10px;
-
+  position:fixed;
+  top:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:420px;
+  padding: calc(env(safe-area-inset-top) + 8px) 12px 8px;
+  display:none;
+  justify-content:space-between; gap:10px;
   background: rgba(123,92,255,0.72);
   -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
-
-  border-bottom: 1px solid rgba(255,255,255,0.18);
-  box-shadow:
-    0 10px 30px rgba(50,30,120,0.12),
-    inset 0 1px 0 rgba(255,255,255,0.35);
-
-  z-index: 1000;
+  border-bottom:1px solid rgba(255,255,255,0.18);
+  box-shadow:0 10px 30px rgba(50,30,120,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
+  z-index:1000;
 }
+.iconBtn,.actionBtn,.fab,.cornerBtn,.modeBtn{border:none; cursor:pointer; -webkit-user-select:none; user-select:none}
 .iconBtn{
-  width:50px;
-  height:50px;
-
-  border-radius:16px;
-
-  background: rgba(255,255,255,0.18);
-  backdrop-filter: blur(10px);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
+  width:50px;height:50px;border-radius:16px;
+  background:rgba(255,255,255,0.18);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  display:flex;align-items:center;justify-content:center;
   border:1px solid rgba(255,255,255,0.25);
-
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.3),
-    0 6px 20px rgba(0,0,0,0.1);
-
-  transition: all 0.2s ease;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.1);
+  transition: transform .2s ease, opacity .2s ease;
+}
+.iconBtn:active{transform:scale(.92)}
+.modeBtn{
+  width:auto; padding:8px 18px; border-radius:999px;
+  background:rgba(255,255,255,0.15); color:#2d1f80; font-weight:700; font-size:13px; letter-spacing:.5px;
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.iconBtn:active{
-  transform: scale(0.92);
+.view{display:none; transform:translateZ(0)}
+.view.active{display:block}
+
+.header{font-size:20px;font-weight:600;text-align:center;margin:0 0 14px;color:var(--ink);padding-top:50px}
+.menuTitle{ text-align:center; font-size:26px; font-weight:800; margin:20px 0; color:var(--ink); letter-spacing:3px; opacity:.7 }
+.tiles{display:grid;grid-template-columns:1fr;gap:16px;margin-top:20px}
+.bigTile{
+  height:120px; width:75%; margin:auto; border-radius:26px;
+  background:linear-gradient(180deg,rgba(255,255,255,0.65),rgba(255,255,255,0.35));
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  display:flex;flex-direction:row;align-items:center;justify-content:center;gap:14px;
+  box-shadow:0 20px 60px rgba(50,30,120,0.25), inset 0 2px 2px rgba(255,255,255,0.8);
+  transition: transform .2s ease;
 }
-/* ---------- LIST ---------- */
+.bigTile:active{transform:translateY(4px) scale(.97)}
+.bigTile span{font-size:15px;font-weight:700;color:var(--ink);letter-spacing:2px;line-height:1;display:flex;align-items:center}
+.tileIcon{width:64px;height:64px;flex-shrink:0;display:block}
+
+.stats{display:flex;gap:10px;margin-bottom:18px}
+.stat{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  padding:10px 12px; border-radius:14px; background:rgba(255,255,255,.25);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  border:1px solid rgba(255,255,255,0.3);
+  box-shadow:0 6px 18px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.6);
+  font-size:13px; font-weight:700; color:var(--ink);
+}
+.stat strong,.stat span{margin-left:6px;font-weight:800}
+.stat:nth-child(2) strong{color:#ff7a00}
+.stat:nth-child(3){opacity:.8}
+
+.card,.questionCard{
+  background:var(--card-bg); color:#222; border-radius:20px; padding:20px; margin-bottom:18px;
+  box-shadow:0 18px 40px rgba(51,41,112,.08);
+}
+.card{
+  text-align:center; font-size:28px; font-weight:700;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px;
+  min-height:220px;
+}
+.card.animate{transform:translateY(-8px);opacity:.85}
+#cardImage{width:100%;max-height:220px;object-fit:cover;border-radius:16px;margin-bottom:10px;display:none}
+#cardText{font-size:26px;font-weight:800;letter-spacing:1px}
+
+.questionCard{
+  margin-top:20px;
+  margin-left:12px;
+  margin-right:auto;
+  font-size:clamp(18px,4vw,28px);
+  line-height:1.4;
+  word-break:break-word;
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;text-align:left;min-height:200px;
+}
+.questionSpacer{height:20px}
+
+button{
+  width:100%; padding:12px 14px; border:none; border-radius:28px; margin-top:10px; font-size:15px; cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease; box-shadow:0 6px 18px rgba(99,58,255,.08);
+}
+button:active{transform:translateY(1px)}
+.primary{background:linear-gradient(135deg,#7b5cff,#9f7bff);color:#fff;font-weight:700}
+.secondary{background:#fff;color:#6a4bff;font-weight:700}
+.bigButton{min-height:60px;font-size:18px}
+.navButtons{display:flex;gap:12px}
+.navButtons button{flex:1;min-height:48px;border-radius:28px;font-size:14px;margin-top:10px}
+
 .listItem{
-  background: rgba(255,255,255,0.35);
-backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-
-  background: rgba(255,255,255,0.75); /* zamiast blur */
-
+  background:rgba(255,255,255,0.75);
   border-radius:20px;
-
   padding:14px 16px;
   margin-bottom:12px;
-
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
   border:1px solid rgba(255,255,255,0.3);
-
-  box-shadow:
-    0 12px 30px rgba(50,30,120,0.12),
-    inset 0 1px 1px rgba(255,255,255,0.7);
-
-  transition: all 0.2s ease;
+  box-shadow:0 12px 30px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.7);
+  transition:transform .2s ease;
 }
-
-.listItem:active{
-  transform: scale(0.98);
-}
-.listItem .text { flex:1 }
-.smallBtn{
-  width:auto;
-  padding:8px 12px;
-  font-size:13px;
-  border-radius:10px;
-  margin-left:6px;
-}
-
-/* ---------- INPUT ---------- */
-input{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin-bottom:10px;
-  font-size:15px;
-  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
-}
-
-/* ---------- VIEW CONTROL ---------- */
-.view{ display:none;
-	  transform: translateZ(0);}
-.active{ display:block; }
-
-/* ---------- MODAL (EDIT) ---------- */
-.modal-backdrop{
-  position:fixed;
-  inset:0;
-  background:rgba(10,8,20,0.45);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:50;
-}
-.modal-backdrop.show{
-  display:flex;
-}
-.modal{
-  width:90%;
-  max-width:420px;
-  background: #fff;
-  color:#111;
-  border-radius:14px;
-  padding:16px;
-  box-shadow: 0 18px 50px rgba(14,9,40,0.4);
-}
-.modal h3{ margin:0 0 8px 0 }
-.modal .row{ margin-bottom:8px }
-
-/* small responsive tweaks */
-@media (max-width:420px){
-  .card{ padding:36px 14px; font-size:22px }
-  .header{ font-size:18px }
-  .stats{ font-size:13px }
-}
-
-
-
-.speak{
-  cursor:pointer;
-  font-size:26px;
-}
-.record,
-.play{
-  cursor:pointer;
-  font-size:24px;
-}
-	#imageResults{
-display:grid;
-grid-template-columns:repeat(3,1fr);
-gap:8px;
-margin:10px 0;
-}
-#imageResults img {
-width:100%;
-	border-radius:10px;
-	cursor:pointer;
-}
-	#imageResults img:hover {
-transform:scale(1.05);
-
-}
-	#cardImage{
-width:100%;
-max-height:220px;
-object-fit:cover;
-border-radius:16px;
-margin-bottom:10px;
-}
-
-.modeBtn{
-
-  width:auto;
-  padding:8px 18px;
-  border-radius:999px;
-
-  background: rgba(255,255,255,0.15);
-  color:#2d1f80 ;
-
-  font-weight:600;
-  font-size:13px;
-  letter-spacing:0.5px;
-align-items:center;
-  justify-content:center;
-  backdrop-filter: blur(10px);
-
-  border:1px solid rgba(255,255,255,0.25);
-
-  box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.3),
-    0 6px 20px rgba(0,0,0,0.08);
-
-  transition: all 0.2s ease;
-}
-	#startScreen{
-
-position:fixed;
-top:0;
-left:0;
-right:0;
-bottom:0;
-
-display:flex;
-justify-content:center;
-align-items:center;
-
-background:linear-gradient(
-180deg,
-#8f7bff,
-#c9c2ff
-);
-
-z-index:9999;
-
-color:white;
-text-align:center;
-}
-
-.startContent p{
-  opacity:0.8;
-  font-size:15px;
-  letter-spacing:0.5px;
-}
-
-.tapText{
-margin-top:20px;
-opacity:0.8;
-font-size:14px;
-}
-	.logo{
-font-size:20px;
-		max-width:90px;
-}
-.logoFish{
-  width:100px;
-  animation: float 2s ease-in-out infinite;
-}
-
-@keyframes float{
-  0%,100%{ transform: translateY(0); }
-  50%{ transform: translateY(-6px); }
-}
-.tap{
-margin-top:20px;
-opacity:0.6;
-font-size:14px;
-}
-
-	.studyOnly{
-display:none;
-}
-
-	.tiles{
-  display: grid;
-  grid-template-columns: 1fr ; /* 🔥 DWIE OBOK SIEBIE */
-  gap: 16px;
-  margin-top: 20px;
-}
-
-
-.bigTile{
-  height:120px;
-  width:75%;
-
-  margin:auto;
-
-  border-radius:26px;
-
-  background: linear-gradient(
-    180deg,
-    rgba(255,255,255,0.65),
-    rgba(255,255,255,0.35)
-  );
-
-  backdrop-filter: blur(16px);
-
-  display:flex;
-  flex-direction:row;
-
-  align-items:center;
-  justify-content:center; /* 🔥 CENTROWANIE */
-
-  gap:14px;
-
-  box-shadow:
-    0 20px 60px rgba(50,30,120,0.25),
-    inset 0 2px 2px rgba(255,255,255,0.8);
-
-  transition: all 0.2s ease;
-}
-.bigTile{
-  transform: translateY(0);
-}
-
-.bigTile:active{
-  transform: translateY(4px) scale(0.97);
-}
-.bigTile span{
-  font-size:15px;
-  font-weight:600;
-
-  color:#1b1635;
-
-  letter-spacing:2px;
-
-  line-height:1; /* 🔥 KLUCZ */
-  display:flex;
-  align-items:center;
-}
-	.menuTitle{
-text-align:center;
-font-size:26px;
-font-weight:700;
-margin-top:20px;
-
-margin-bottom:20px;
-color:#1b1635;
-letter-spacing:3px;
-opacity:0.7;
-}
-.tileIcon{
-  width:64px;
-  height:64px;
-
-  flex-shrink:0;
-
-  display:block; /* 🔥 fix Android */
-}
-
-	.questionCard{
-
-margin-top:20px;
-
-margin-left:12px;
-margin-right:auto;
-
-background:#fff;
-border-radius:20px;
-padding:20px;
-
-font-size:clamp(18px,4vw,28px);
-line-height:1.4;
-word-break:break-word;
-
-display:flex;
-flex-direction:column;
-align-items:flex-start;
-justify-content:flex-start;
-
-text-align:left;
-
-min-height:200px;
-
-box-shadow:0 18px 40px rgba(51,41,112,0.08);
-
-}
-.questionSpacer{
-height:20px;
-}
-
-	.questionField,
-.answerField{
-
-width:100%;
-
-font-size:18px;
-
-line-height:1.5;
-
-padding:14px;
-
-border-radius:14px;
-
-border:none;
-
-box-shadow:0 8px 20px rgba(0,0,0,0.05);
-
-resize:none;
-
-}
-
-/* pytanie mniejsze */
-
-.questionField{
-min-height:80px;
-margin-bottom:12px;
-}
-
-/* odpowiedź większa */
-
-.answerField{
-min-height:160px;
-margin-bottom:20px;
-}
-#addGrammar textarea{
-
-width:100%;
-height:80px;
-
-font-size:14px;
-
-border-radius:12px;
-border:none;
-
-padding:12px;
-margin-bottom:12px;
-
-box-shadow:0 6px 12px rgba(0,0,0,0.05);
-
-resize:none;        /* blokuje rozciąganie palcem */
-
-}
-#addGrammar{
-max-width:420px;
-margin:auto;
-}
-
-
-.bottomCorners{
-  position:fixed;
-   bottom: calc(100px + env(safe-area-inset-bottom));
-
-  left:50%;
-  transform:translateX(-50%);
-
-  width:100%;
-  max-width:420px;
-
-  z-index:999;
-  pointer-events:none;
-}
-
-/* wspólne */
-.cornerBtn{
-  position:absolute;
-
-  width: clamp(50px, 18vw, 90px);
-  height: clamp(50px, 18vw, 90px);
-
-  background: linear-gradient(135deg,#7b5cff,#9f7bff);
-  color:white;
-
-  font-size: clamp(20px, 5vw, 28px);
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  box-shadow:0 10px 30px rgba(123,92,255,0.4);
-
-  pointer-events:auto;
-  border:none;
-}
-
-.cornerBtn.left{
-  left:20px;
-}
-
-.cornerBtn.right{
-  right:20px;
-}
-/* klik efekt */
-.cornerBtn:active{
-  transform:scale(0.92);
-}
-.fabContainer{
-  position: fixed;
-  bottom: max(20px, env(safe-area-inset-bottom));
-  left: 0;
-  right: 0;
-
-  max-width: 420px;
-  margin: auto;
-
-  display: flex;
-  justify-content: space-between;
-
-  padding: 0 20px;
-
-  z-index: 999;
-  pointer-events: none;
-}
-
-.fab{
-  width: 68px;
-  height: 69px;
-bottom: max(20px, env(safe-area-inset-bottom));
-  border-radius: 50%;
-
-  background: rgba(30, 20, 100, 0.28);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border: 1px solid rgba(255, 255, 255, 0.2);
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  color: #2d1f80;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-
-  transition: transform 0.2s ease, background 0.2s ease;
-  pointer-events: auto;
-  padding: 0;
-}
-
-.fab:active{
-  transform: scale(0.92);
-}
-
-.fab svg{
-  width: 24px;
-  height: 24px;
-  display: block;
-}
-
-.audioButtons{
-  display:flex;
-  justify-content:center;
-  gap:14px;
-  margin-top:10px;
-}
-
-.audioButtons button{
-  width:48px;
-  height:48px;
-
-  border-radius:50%;
-  border:none;
-
-  background: linear-gradient(135deg,#7b5cff,#9f7bff);
-  color:white;
-
-  font-size:20px;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  box-shadow:0 6px 16px rgba(0,0,0,0.2);
-
-  cursor:pointer;
-}
-
-.audioItem{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-
-  font-size:22px;
-  cursor:pointer;
-}
-
-.audioItem span{
-  font-size:11px;
-  opacity:0.6;
-}
-#imageUpload{
-  display:none;
-}
-.uploadBtn{
-  display:block;
-
-  text-align:center;
-
-  padding:10px;
-  border-radius:14px;
-
-  background:rgba(255,255,255,0.25);
-  backdrop-filter:blur(6px);
-
-  font-size:14px;
-  font-weight:600;
-
-  color:#2d1f80;
-
-  margin-bottom:12px;
-}
-
-#cardText{
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
+.listItem:active{transform:scale(.98)}
+.listItem .text{flex:1}
+.smallBtn{width:auto;padding:8px 12px;font-size:13px;border-radius:10px;margin-left:6px}
 .actionBtn{
-  width:42px;
-  height:42px;
-color:#2d1f80;
-
-  border-radius:12px;
-
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(10px);
-
+  width:42px;height:42px;color:#2d1f80;border-radius:12px;
+  background:rgba(255,255,255,0.55);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
   border:1px solid rgba(255,255,255,0.3);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,0.1);
+  transition:transform .2s ease;
+}
+.actionBtn:active{transform:scale(.9)}
+.actionBtn svg{width:20px;height:20px}
 
-  display:flex;
-  align-items:center;
-  justify-content:center;
+input, textarea{
+  width:100%; border:none; border-radius:12px; padding:12px; margin-bottom:10px; font-size:16px;
+  box-shadow:0 8px 16px rgba(17,12,30,0.03);
+}
+textarea{resize:none}
+.questionField{min-height:80px;margin-bottom:12px}
+.answerField{min-height:160px;margin-bottom:20px}
+#addGrammar{max-width:420px;margin:auto}
+#addGrammar textarea{height:80px;font-size:14px;border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 6px 12px rgba(0,0,0,.05)}
 
-  box-shadow:
-    0 6px 16px rgba(0,0,0,0.1);
+.modal-backdrop{position:fixed;inset:0;background:rgba(10,8,20,0.45);display:none;align-items:center;justify-content:center;z-index:50}
+.modal-backdrop.show{display:flex}
+.modal{width:90%;max-width:420px;background:#fff;color:#111;border-radius:14px;padding:16px;box-shadow:0 18px 50px rgba(14,9,40,0.4)}
+.modal h3{margin:0 0 8px 0}
+.modal .row{margin-bottom:8px}
 
-  transition: all 0.2s ease;
+.topActionRow,.bottomActionRow{display:flex;gap:10px}
+.topActionRow button,.bottomActionRow button{flex:1}
+
+#imageResults{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+#imageResults img{width:100%;border-radius:10px;cursor:pointer}
+#imageResults img:hover{transform:scale(1.05)}
+.uploadBtn{display:block;text-align:center;padding:10px;border-radius:14px;background:rgba(255,255,255,0.25);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);font-size:14px;font-weight:700;color:#2d1f80;margin-bottom:12px}
+#imageUpload{display:none}
+.audioButtons{display:flex;justify-content:center;gap:14px;margin-top:10px}
+.audioItem{display:flex;flex-direction:column;align-items:center;font-size:22px;cursor:pointer}
+.audioItem span{font-size:11px;opacity:.6}
+
+.fabContainer{
+  position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(20px + env(safe-area-inset-bottom));
+  width:min(420px,100%);
+  display:flex;justify-content:space-between;gap:12px;padding:0 20px;z-index:999;pointer-events:none;
+}
+.fab{
+  width:68px;height:69px;border-radius:50%;
+  background:rgba(30,20,100,0.28);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,0.2);
+  display:flex;align-items:center;justify-content:center;
+  color:#2d1f80;box-shadow:0 6px 20px rgba(0,0,0,0.2);padding:0;pointer-events:auto;
+}
+.fab:active{transform:scale(.92)}
+.fab svg{width:24px;height:24px;display:block}
+
+.bottomControls{position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(420px,100%);padding:16px;display:flex;flex-direction:column;gap:12px;pointer-events:none;z-index:998}
+.bottomControls .btns{pointer-events:auto}
+.bottomControls .panel{
+  background:rgba(230,227,255,0.95);
+  border-top-left-radius:20px;border-top-right-radius:20px;
 }
 
-.actionBtn:active{
-  transform: scale(0.9);
+#startScreen{
+  position:fixed;inset:0;display:flex;justify-content:center;align-items:center;
+  background:linear-gradient(180deg,#8f7bff,#c9c2ff);
+  z-index:9999;color:#fff;text-align:center
 }
+.startContent p{opacity:.8;font-size:15px;letter-spacing:.5px}
+.tapText{margin-top:20px;opacity:.8;font-size:14px}
+.logo{max-width:90px}
+.logoFish{width:100px;animation:float 2s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.studyOnly{display:none}
+.tileIcon{transform:translateZ(0)}
 
-.actionBtn svg{
-  width:20px;
-  height:20px;
-}
-
-.stats{
-  display:flex;
-  gap:10px;
-
-  margin-bottom:18px;
-}
-
-.stat{
-  flex:1;
-
-  display:flex;
-  align-items:center;
-  justify-content:center;
-
-  padding:10px 12px;
-
-  border-radius:14px;
-
-  background: rgba(255,255,255,0.25);
-  backdrop-filter: blur(10px);
-
-  border:1px solid rgba(255,255,255,0.3);
-
-  box-shadow:
-    0 6px 18px rgba(50,30,120,0.12),
-    inset 0 1px 1px rgba(255,255,255,0.6);
-
-  font-size:13px;
-  font-weight:600;
-
-  color:#1b1635;
-}
-.stat strong,
-.stat span{
-  margin-left:6px;
-  font-weight:700;
-}
-.stat:nth-child(1) strong{
-  color:#2d1f80; /* cards */
-}
-
-.stat:nth-child(2) strong{
-  color:#ff7a00; /* streak 🔥 */
-}
-
-.stat:nth-child(3){
-  opacity:0.8;
+@media (max-width:420px){
+  .card{padding:36px 14px;font-size:22px}
+  .header{font-size:18px}
+  .stats{font-size:13px}
 }
 </style>
 </head>
 <body>
-
 <div id="startScreen">
-<div class="startContent">
-<div class="logo">
-<img src="fishki-logo.png" class="logoFish">
-</div>
-<h1>Fishki</h1>
-<p>Train your brain daily</p>
-<div class="tapText">Let’s go</div>
-</div>
+  <div class="startContent">
+    <div class="logo"><img src="fishki-logo.png" class="logoFish" alt="Fishki"></div>
+    <h1>Fishki</h1>
+    <p>Train your brain daily</p>
+    <div class="tapText">Let’s go</div>
+  </div>
 </div>
 
 <div class="app">
-
-<div class="header"></div>
-
-<div class="topButtons">
-<button id="btnBack" class="iconBtn">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M14 6L8 12L14 18" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>
-</button>
-
-<button id="btnHome" class="iconBtn">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M3 10L12 3L21 10V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V10Z" stroke="#2d1f80" stroke-width="2"/>
-<path d="M9 21V12H15V21" stroke="#2d1f80" stroke-width="2"/>
-</svg>
-</button>
-
-<button id="btnList" class="iconBtn">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M9 6H20M9 12H20M9 18H20" stroke="#2d1f80" stroke-width="2"/>
-<circle cx="4" cy="6" r="1.5" fill="#2d1f80"/>
-<circle cx="4" cy="12" r="1.5" fill="#2d1f80"/>
-<circle cx="4" cy="18" r="1.5" fill="#2d1f80"/>
-</svg>
-</button>
-
-<button id="btnAdd" class="iconBtn">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M12 5V19M5 12H19" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round"/>
-</svg>
-</button>
-
-<button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
-<button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
-
-</div>
-
-
-<!-- HOME -->
-
-<div id="home" class="view active">
-<div class="menuTitle">MENU</div>
-<div class="tiles">
-
-<div class="bigTile" onclick="openAll()">
-
-<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
-  <rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/>
-  <rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/>
-</svg>
-
-<span>FLASHCARDS</span>
-</div>
-
-<div class="bigTile" onclick="openQuestions()">
-
-<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
-  <path d="M9 9C9 7.5 10.2 6.5 12 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.2 10.8 13.3 11.3C12.5 11.8 12 12.3 12 13.5" 
-        stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="12" cy="17" r="1" fill="#2d1f80"/>
-</svg>
-
-<span>QUESTION</span>
-</div>
-<div class="bigTile" onclick="openGrammar()">
-
-<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
-  <path d="M4 6H10V18H4Z" stroke="#2d1f80" stroke-width="2"/>
-  <path d="M14 6H20V18H14Z" stroke="#2d1f80" stroke-width="2"/>
-  <path d="M10 6C10 6 12 7 14 6" stroke="#2d1f80" stroke-width="2"/>
-</svg>
-
-<span>GRAMMAR</span>
-</div>
-
-</div>
-
-</div>
-
-
-<!-- FLASHCARDS STUDY -->
-
-<div id="homeStudy" class="view">
-
-
-
-
-  <div class="stats">
-
-  <div class="stat">📚 <strong id="counter">0</strong></div>
-
-  <div class="stat">🔥 <strong id="streakUI">0</strong></div>
-
-  <div class="stat">📊 <span id="progress-mini">—</span></div>
-
-</div>
-
-
-
-<div class="card" id="flashcard">
-
-<img id="cardImage">
-
-<span id="cardText">Add flashcard</span>
-
-
-
-</div>
-
-<div id="reviewButtons">
-
-<button onclick="reviewCard(0)">❌ I don't remember</button>
-<button onclick="reviewCard(1)">🙂 Average</button>
-<button onclick="reviewCard(2)">✅ Easy</button>
-
-</div>
-
-<div class="fabContainer">
-
- <button class="fab fab-left" onclick="playRecording()">
-  <svg viewBox="0 0 24 24" fill="#2d1f80">
-    <path d="M8 5L19 12L8 19V5Z"/>
-  </svg>
-</button>
-
-  <button class="fab fab-right" onclick="speakCurrentCard()">
-  <svg viewBox="0 0 24 24" fill="none">
-    <path d="M5 9V15H9L14 20V4L9 9H5Z" stroke="#2d1f80" stroke-width="2" stroke-linejoin="round"/>
-    <path d="M16 9C17.5 10.5 17.5 13.5 16 15" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
-    <path d="M18.5 7C21 9.5 21 14.5 18.5 17" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
-
-</div>
-
-</div>
-
-<!-- QUESTIONS FOLDERS -->
-
-<div id="questions" class="view">
-
-<h3>Folders</h3>
-
-<div id="questionFolders"></div>
-
-<button class="primary" onclick="openFolderPopup()">➕ New folder</button>
-
-<div style="display:flex;gap:10px">
-
-<button class="secondary" onclick="exportQuestions()">⬇ Export</button>
-
-<button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
-
-</div>
-
-
-
-
-
-</div>
-
-<!-- QUESTION FOLDER -->
-
-<div id="questionFolder" class="view">
-
-<h3>Questions</h3>
-
-<div id="questionList"></div>
-
-</div>
-
-
-<!-- QUESTION CARDS -->
-
-<div id="questionCards" class="view">
-<div class="stats">
-
-  <div class="stat">❓ <strong id="questionCounter">0</strong></div>
-
-  <div class="stat">📊 <span id="questionProgress">—</span></div>
-
-</div>
-<div class="questionCard" id="questionCardText"></div>
-
-</div>
-
-
-
-
-
-
-<!-- ADD QUESTION -->
-
-<div id="addQuestion" class="view">
-
-<h3>New question</h3>
-
-<label>Question</label>
-<textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
-
-<label>Answer</label>
-<textarea class="answerField" id="answerInput" placeholder="Your answer"></textarea>
-
-<button class="primary" onclick="saveQuestion()">Save</button>
-
-<button class="secondary" onclick="setView('questionFolder', false)">Back</button>
-
-</div>
-
-
-
-<!-- GRAMMAR STUDY -->
-
-
-<div id="grammarList" class="view">
-
-  <h3>Grammar</h3>
-
-  <!-- LISTA -->
-  <div id="grammarItems"></div>
-
-  <!-- BUTTONY -->
-  <div style="display:flex;gap:10px;margin-top:15px">
-    <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
-    <button onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
-
+  <div class="topButtons">
+    <button id="btnBack" class="iconBtn" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M14 6L8 12L14 18" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button id="btnHome" class="iconBtn" aria-label="Home">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V10Z" stroke="#2d1f80" stroke-width="2"/><path d="M9 21V12H15V21" stroke="#2d1f80" stroke-width="2"/></svg>
+    </button>
+    <button id="btnList" class="iconBtn" aria-label="List">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 6H20M9 12H20M9 18H20" stroke="#2d1f80" stroke-width="2"/><circle cx="4" cy="6" r="1.5" fill="#2d1f80"/><circle cx="4" cy="12" r="1.5" fill="#2d1f80"/><circle cx="4" cy="18" r="1.5" fill="#2d1f80"/></svg>
+    </button>
+    <button id="btnAdd" class="iconBtn" aria-label="Add">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </button>
+    <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
+    <button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
   </div>
 
-  
+  <div id="scrollArea">
+    <div id="home" class="view active">
+      <div class="menuTitle">MENU</div>
+      <div class="tiles">
+        <div class="bigTile" onclick="openAll()">
+          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/><rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/></svg>
+          <span>FLASHCARDS</span>
+        </div>
+        <div class="bigTile" onclick="openQuestions()">
+          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M9 9C9 7.5 10.2 6.5 12 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.2 10.8 13.3 11.3C12.5 11.8 12 12.3 12 13.5" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#2d1f80"/></svg>
+          <span>QUESTION</span>
+        </div>
+        <div class="bigTile" onclick="openGrammar()">
+          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M4 6H10V18H4Z" stroke="#2d1f80" stroke-width="2"/><path d="M14 6H20V18H14Z" stroke="#2d1f80" stroke-width="2"/><path d="M10 6C10 6 12 7 14 6" stroke="#2d1f80" stroke-width="2"/></svg>
+          <span>GRAMMAR</span>
+        </div>
+      </div>
+    </div>
 
-</div>
+    <div id="homeStudy" class="view">
+      <div class="stats">
+        <div class="stat">📚 <strong id="counter">0</strong></div>
+        <div class="stat">🔥 <strong id="streakUI">0</strong></div>
+        <div class="stat">📊 <span id="progress-mini">—</span></div>
+      </div>
+      <div class="card" id="flashcard">
+        <img id="cardImage" alt="card image" />
+        <span id="cardText">Add flashcard</span>
+      </div>
+      <div id="reviewButtons">
+        <button onclick="reviewCard(0)">❌ I don't remember</button>
+        <button onclick="reviewCard(1)">🙂 Average</button>
+        <button onclick="reviewCard(2)">✅ Easy</button>
+      </div>
+      <div class="fabContainer">
+        <button class="fab fab-left" onclick="playRecording()" aria-label="Play recording">
+          <svg viewBox="0 0 24 24" fill="#2d1f80"><path d="M8 5L19 12L8 19V5Z"/></svg>
+        </button>
+        <button class="fab fab-right" onclick="speakCurrentCard()" aria-label="Speak card">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 9V15H9L14 20V4L9 9H5Z" stroke="#2d1f80" stroke-width="2" stroke-linejoin="round"/><path d="M16 9C17.5 10.5 17.5 13.5 16 15" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/><path d="M18.5 7C21 9.5 21 14.5 18.5 17" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </div>
 
-<div id="grammarStudy" class="view">
-<div class="stats">
+    <div id="questions" class="view">
+      <h3>Folders</h3>
+      <div id="questionFolders"></div>
+      <button class="primary" onclick="openFolderPopup()">➕ New folder</button>
+      <div class="topActionRow">
+        <button class="secondary" onclick="exportQuestions()">⬇ Export</button>
+        <button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
+      </div>
+    </div>
 
-  <div class="stat">📖 <strong id="grammarCounter">0</strong></div>
+    <div id="questionFolder" class="view">
+      <h3>Questions</h3>
+      <div id="questionList"></div>
+    </div>
 
-  <div class="stat">📊 <span id="grammarProgress">—</span></div>
+    <div id="questionCards" class="view">
+      <div class="stats">
+        <div class="stat">❓ <strong id="questionCounter">0</strong></div>
+        <div class="stat">📊 <span id="questionProgress">—</span></div>
+      </div>
+      <div class="questionCard" id="questionCardText"></div>
+    </div>
 
-</div>
-  <div class="questionCard" id="grammarCardText"></div>
-</div>
+    <div id="addQuestion" class="view">
+      <h3>New question</h3>
+      <label>Question</label>
+      <textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
+      <label>Answer</label>
+      <textarea class="answerField" id="answerInput" placeholder="Your answer"></textarea>
+      <button class="primary" onclick="saveQuestion()">Save</button>
+      <button class="secondary" onclick="setView('questionFolder', false)">Back</button>
+    </div>
 
-<!-- ADD GRAMMAR -->
+    <div id="grammarList" class="view">
+      <h3>Grammar</h3>
+      <div id="grammarItems"></div>
+      <div class="topActionRow" style="margin-top:15px">
+        <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
+        <button onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
+      </div>
+    </div>
 
-<div id="addGrammar" class="view">
+    <div id="grammarStudy" class="view">
+      <div class="stats">
+        <div class="stat">📖 <strong id="grammarCounter">0</strong></div>
+        <div class="stat">📊 <span id="grammarProgress">—</span></div>
+      </div>
+      <div class="questionCard" id="grammarCardText"></div>
+    </div>
 
-<h3>New grammar</h3>
+    <div id="addGrammar" class="view">
+      <h3>New grammar</h3>
+      <input id="gTitle" placeholder="Topic np. Passive Voice" />
+      <textarea id="gExplanation" placeholder="📖 Explanation"></textarea>
+      <textarea id="gStructure" placeholder="📐 Structure"></textarea>
+      <textarea id="gUsage" placeholder="🧠 Usage"></textarea>
+      <textarea id="gExamples" placeholder="💬 Examples"></textarea>
+      <textarea id="gPractice" placeholder="✏️ Practice"></textarea>
+      <textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
+      <button class="primary" onclick="saveGrammar()">Save</button>
+    </div>
 
-<input id="gTitle" placeholder="Topic np. Passive Voice">
+    <div id="list" class="view">
+      <h3>Vocabulary List</h3>
+      <div style="margin:8px 0 12px"><input id="searchBox" placeholder="Search..." oninput="renderList()" /></div>
+      <div id="wordsList"></div>
+      <div class="topActionRow">
+        <button class="secondary" onclick="toggleSort()">Sort A→Z</button>
+        <button class="secondary" onclick="exportBackup()">⬇ Export</button>
+        <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
+      </div>
+    </div>
 
-<textarea id="gExplanation" placeholder="📖 Explanation"></textarea>
-<textarea id="gStructure" placeholder="📐 Structure"></textarea>
-<textarea id="gUsage" placeholder="🧠 Usage"></textarea>
-<textarea id="gExamples" placeholder="💬 Examples"></textarea>
-<textarea id="gPractice" placeholder="✏️ Practice"></textarea>
-<textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
-
-<button class="primary" onclick="saveGrammar()">Save</button>
-
-</div>
-<!-- LIST -->
-
-<div id="list" class="view">
-
-<h3>Vocabulary List</h3>
-
-<div style="margin:8px 0 12px">
-<input id="searchBox" placeholder="Search..." oninput="renderList()" />
-</div>
-
-<div id="wordsList"></div>
-
-<div style="display:flex;gap:10px">
-
-<button class="secondary" onclick="toggleSort()">Sort A→Z</button>
-
-
-
-<button class="secondary" onclick="exportBackup()">⬇ Export</button>
-
-<button onclick="document.getElementById('importFile').click()">⬆ Import</button>
-
-</div>
-
-</div>
-
-
-<!-- ADD FLASHCARD -->
-
-<div id="add" class="view">
-
-<h3>Add flashcard</h3>
-
-<input type="text" id="frontInput" placeholder="The word in English">
-<input type="text" id="backInput" placeholder="Translation">
-
-<input type="file" id="imageUpload" accept="image/*">
-
-<label for="imageUpload" class="uploadBtn">
-  📷 Add photo
-</label>
-
-<div id="imageResults"></div>
-
-<div class="audioButtons">
-  <div class="audioItem" onclick="startRecording()">
-    🎤
-    <span>Record</span>
-  </div>
-  <div class="audioItem" onclick="playRecording()">
-    ▶️
-    <span>Play</span>
+    <div id="add" class="view">
+      <h3>Add flashcard</h3>
+      <input type="text" id="frontInput" placeholder="The word in English" />
+      <input type="text" id="backInput" placeholder="Translation" />
+      <input type="file" id="imageUpload" accept="image/*" />
+      <label for="imageUpload" class="uploadBtn">📷 Add photo</label>
+      <div id="imageResults"></div>
+      <div class="audioButtons">
+        <div class="audioItem" onclick="startRecording()">🎤<span>Record</span></div>
+        <div class="audioItem" onclick="playRecording()">▶️<span>Play</span></div>
+      </div>
+      <div id="recordUI" style="display:none;text-align:center;margin-top:10px">
+        <div style="font-size:22px">🎤 Recording...</div>
+        <div style="font-size:28px;color:red">● REC</div>
+        <div id="recordTimer">0</div>
+      </div>
+      <button class="primary" onclick="addCard()">Add flashcard</button>
+      <div style="text-align:center;font-size:11px;opacity:.5;margin-top:30px;padding-bottom:20px;">Photos by Unsplash</div>
+    </div>
   </div>
 </div>
 
-<div id="recordUI" style="display:none;text-align:center;margin-top:10px">
-
-<div style="font-size:22px">🎤 Recording...</div>
-
-<div style="font-size:28px;color:red">● REC</div>
-
-<div id="recordTimer">0</div>
-</div>
-
-<button class="primary" onclick="addCard()">Add flashcard</button>
-
-  <div style="
-  text-align:center;
-  font-size:11px;
-  opacity:0.5;
-  margin-top:30px;
-  padding-bottom:20px;
-  ">
-  Photos by Unsplash
-  </div>
-
-</div>
-
-
-</div>
-
-
-<!-- EDIT MODAL -->
-
+<!-- MODALS -->
 <div id="modal" class="modal-backdrop">
-
-<div class="modal">
-
-<h3>Edit word</h3>
-
-<div class="row">
-<input id="editFront" placeholder="The word in English" />
+  <div class="modal">
+    <h3>Edit word</h3>
+    <div class="row"><input id="editFront" placeholder="The word in English" /></div>
+    <div class="row"><input id="editBack" placeholder="Translation" /></div>
+    <div class="bottomActionRow">
+      <button class="secondary" onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveModal()">Save</button>
+    </div>
+  </div>
 </div>
-
-<div class="row">
-<input id="editBack" placeholder="Translation" />
-</div>
-
-<div style="display:flex;gap:10px;justify-content:flex-end">
-
-<button class="secondary" onclick="closeModal()">Cancel</button>
-
-<button class="primary" onclick="saveModal()">Save</button>
-
-</div>
-
-</div>
-
-</div>
-
-
-<!-- POPUP -->
 
 <div id="popup" class="modal-backdrop">
-
-<div class="modal">
-
-<h3 id="popupText"></h3>
-
-<button class="primary" onclick="closePopup()">OK</button>
-
+  <div class="modal">
+    <h3 id="popupText"></h3>
+    <button class="primary" onclick="closePopup()">OK</button>
+  </div>
 </div>
-
-</div>
-
-
 
 <div id="folderPopup" class="modal-backdrop">
-
-<div class="modal">
-
-<h3>Name folder</h3>
-
-<input id="folderNameInput" placeholder="Np. Interview">
-
-<div style="display:flex;gap:10px;justify-content:flex-end">
-
-<button class="secondary" onclick="closeFolderPopup()">Cancel</button>
-
-<button class="primary" onclick="saveFolder()">Save</button>
-
+  <div class="modal">
+    <h3>Name folder</h3>
+    <input id="folderNameInput" placeholder="Np. Interview" />
+    <div class="bottomActionRow">
+      <button class="secondary" onclick="closeFolderPopup()">Cancel</button>
+      <button class="primary" onclick="saveFolder()">Save</button>
+    </div>
+  </div>
 </div>
 
-</div>
-
-</div>
-</div>
 <div id="confirmPopup" class="modal-backdrop">
   <div class="modal">
     <h3 id="confirmText">Are you sure?</h3>
-    <div style="display:flex;gap:10px;justify-content:flex-end">
+    <div class="bottomActionRow">
       <button class="secondary" onclick="closeConfirm()">Cancel</button>
       <button class="primary" id="confirmOk">OK</button>
     </div>
   </div>
 </div>
-<input type="file" id="importFile" accept=".json" style="display:none">
-<input type="file" id="importQuestions" accept=".json" style="display:none">
-<input type="file" id="importGrammar" accept=".json" style="display:none">
+
+<input type="file" id="importFile" accept=".json" style="display:none" />
+<input type="file" id="importQuestions" accept=".json" style="display:none" />
+<input type="file" id="importGrammar" accept=".json" style="display:none" />
+
 <script>
+let db;
+let cards = [];
+let currentIndex = 0;
+let showingAnswer = false;
+let sortAZ = true;
+let studyMode = 'SRS';
+let mediaRecorder;
+let audioChunks = [];
+let recordedAudioBase64 = null;
+let viewHistory = [];
+let imageURL = null;
+let streak = parseInt(localStorage.getItem('streak')) || 0;
+let lastStudy = localStorage.getItem('lastStudy') || '';
+let currentFolderId = null;
+let grammarCards = [];
+let grammarIndex = 0;
+let grammarStep = 0;
+let questionCards = [];
+let questionIndex = 0;
+let questionAnswerVisible = false;
+let editingIndex = null;
+let editingQuestionId = null;
+let dueCards = [];
+let startX = 0, startY = 0, endX = 0, endY = 0;
+let _backLocked = false;
+const viewLevels = { home:0, homeStudy:1, questions:1, grammarStudy:1, list:2, add:2, questionFolder:2, questionCards:2, addQuestion:2, grammarList:2, addGrammar:2 };
 
-
-/* ===============================
-   INDEXED DB
-================================ */
-
-let db
-let cards = []
-let currentIndex = 0
-let showingAnswer = false
-let sortAZ = true
-let studyMode = "SRS"
-let mediaRecorder
-let audioChunks = []
-let recordedAudioBase64 = null
-let viewHistory = []
-let imageURL = null
-let streak = parseInt(localStorage.getItem("streak")) || 0
-let lastStudy = localStorage.getItem("lastStudy") || ""
-	let currentFolderId = null
-let grammarCards = []
-let grammarIndex = 0
-let grammarAnswer = false
-let grammarStep = 0
-
-
-
-const request = indexedDB.open("FlashcardsDB",4)
-
-
-const viewLevels = {
-
-home: 0,
-
-homeStudy: 1,
-questions: 1,
-grammarStudy: 1,
-
-list: 2,
-add: 2,
-
-questionFolder: 2,
-questionCards: 2,
-addQuestion: 2,
-
-grammarList: 2,
-addGrammar: 2
-
-}
-	
+const request = indexedDB.open('FlashcardsDB', 4);
 request.onupgradeneeded = function(event){
+  db = event.target.result;
+  if(!db.objectStoreNames.contains('cards')) db.createObjectStore('cards', {keyPath:'id', autoIncrement:true});
+  if(!db.objectStoreNames.contains('questionFolders')) db.createObjectStore('questionFolders', {keyPath:'id', autoIncrement:true});
+  if(!db.objectStoreNames.contains('questions')) db.createObjectStore('questions', {keyPath:'id', autoIncrement:true});
+  if(!db.objectStoreNames.contains('grammar')) db.createObjectStore('grammar', {keyPath:'id', autoIncrement:true});
+};
+request.onsuccess = function(event){ db = event.target.result; loadCardsFromDB(); };
 
-db = event.target.result
-
-if(!db.objectStoreNames.contains("cards")){
-db.createObjectStore("cards",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("questionFolders")){
-db.createObjectStore("questionFolders",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("questions")){
-db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("grammar")){
-db.createObjectStore("grammar",{keyPath:"id",autoIncrement:true})
-}
-
-}
-
-request.onsuccess = function(event){
-
-db = event.target.result
-
-loadCardsFromDB()
-
-}
-
-/* ===============================
-TOUCH SYSTEM (SWIPE + TAP)
-================================ */
-
-let startX = 0
-let startY = 0
-let endX = 0
-let endY = 0
-
-window.addEventListener("load", () => {
-
-const swipeArea = document.querySelector(".app")
-if(!swipeArea) return
-
-swipeArea.addEventListener("touchstart", e => {
-
-if(e.target.tagName === "BUTTON" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return
-
-startX = e.touches[0].clientX
-startY = e.touches[0].clientY
-
-})
-
-swipeArea.addEventListener("touchend", e => {
-
-if(e.target.closest("button") || e.target.closest("input") || e.target.closest("textarea")) return
-
-endX = e.changedTouches[0].clientX
-endY = e.changedTouches[0].clientY
-
-handleGesture()
-
-})
-
-})
+window.addEventListener('load', ()=>{
+  const swipeArea = document.querySelector('.app');
+  if(!swipeArea) return;
+  swipeArea.addEventListener('touchstart', e=>{
+    if(e.target.closest('button,input,textarea')) return;
+    startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+  }, {passive:true});
+  swipeArea.addEventListener('touchend', e=>{
+    if(e.target.closest('button,input,textarea')) return;
+    endX = e.changedTouches[0].clientX; endY = e.changedTouches[0].clientY;
+    handleGesture();
+  }, {passive:true});
+});
 
 function handleGesture(){
-
-if(
-!document.getElementById("homeStudy").classList.contains("active") &&
-!document.getElementById("questionCards").classList.contains("active") &&
-!document.getElementById("grammarStudy").classList.contains("active")
-) return
-
-const diffX = endX - startX
-const diffY = endY - startY
-
-/* TAP */
-
-if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-showAnswer()
+  if(!document.getElementById('homeStudy').classList.contains('active') && !document.getElementById('questionCards').classList.contains('active') && !document.getElementById('grammarStudy').classList.contains('active')) return;
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+  if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
+    if(document.getElementById('homeStudy').classList.contains('active')) showAnswer();
+    if(document.getElementById('questionCards').classList.contains('active')){ questionAnswerVisible = !questionAnswerVisible; renderQuestionCard(); }
+    if(document.getElementById('grammarStudy').classList.contains('active')){ grammarStep++; if(grammarStep > 6){ grammarStep = 0; grammarIndex = (grammarIndex + 1) % grammarCards.length; } renderGrammarCard(); }
+    return;
+  }
+  if(Math.abs(diffX) > Math.abs(diffY)){
+    if(diffX > 80){
+      if(document.getElementById('homeStudy').classList.contains('active')) prevCard();
+      if(document.getElementById('questionCards').classList.contains('active')){ questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length; questionAnswerVisible = false; renderQuestionCard(); }
+      if(document.getElementById('grammarStudy').classList.contains('active')){ grammarIndex = (grammarIndex - 1 + grammarCards.length) % grammarCards.length; grammarAnswer = false; renderGrammarCard(); }
+      return;
+    }
+    if(diffX < -80){
+      if(document.getElementById('homeStudy').classList.contains('active')) nextCard();
+      if(document.getElementById('questionCards').classList.contains('active')){ questionIndex = (questionIndex + 1) % questionCards.length; questionAnswerVisible = false; renderQuestionCard(); }
+      if(document.getElementById('grammarStudy').classList.contains('active')){ grammarIndex = (grammarIndex + 1) % grammarCards.length; grammarAnswer = false; renderGrammarCard(); }
+      return;
+    }
+  }
 }
 
-if(document.getElementById("questionCards").classList.contains("active")){
-questionAnswerVisible = !questionAnswerVisible
-renderQuestionCard()
-}
-
-if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarStep++
-
-if(grammarStep > 6){
-grammarStep = 0
-grammarIndex = (grammarIndex + 1) % grammarCards.length
-}
-
-renderGrammarCard()
-}
-
-return
-}
-
-/* SWIPE */
-
-if(Math.abs(diffX) > Math.abs(diffY)){
-
-if(diffX > 80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-prevCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarIndex = (grammarIndex - 1 + grammarCards.length) % grammarCards.length
-grammarAnswer = false
-renderGrammarCard()
-}
-return
-}
-
-if(diffX < -80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-nextCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex + 1) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarIndex = (grammarIndex + 1) % grammarCards.length
-grammarAnswer = false
-renderGrammarCard()
-}
-return
-}
-
-}
-
-}
-/* ===============================
-   mood
-================================ */
-function setMode(mode){
-
-studyMode = mode
-
-currentIndex = 0
-
-setView("homeStudy")
-
-renderCard()
-
-}
-
-	
-/* ===============================
-   LOAD FROM DB
-================================ */
-
+function setMode(mode){ studyMode = mode; currentIndex = 0; setView('homeStudy'); renderCard(); }
 function loadCardsFromDB(callback){
-
-const transaction = db.transaction("cards","readonly")
-const store = transaction.objectStore("cards")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-cards = req.result || []
-
-renderCard()
-
-if(callback) callback()
-
+  if(!db) return;
+  const req = db.transaction('cards','readonly').objectStore('cards').getAll();
+  req.onsuccess = ()=>{ cards = req.result || []; renderCard(); if(callback) callback(); };
+  req.onerror = ()=>{ cards = []; };
 }
-
-req.onerror = function(){
-console.error("Błąd IndexedDB")
-cards = []
-}
-
-}
-
-/* ===============================
-   NAVIGATION
-================================ */
-
-function goHome(){
-viewHistory = []
-setView("home", false)
-}
-
-function goToList(){ setView("list"); renderList() }
-function goToAdd(){ setView("add") }
-
-// ------ STABILNY goBack (z debounce i sanity-checkami) ------
-let _backLocked = false;
-
-function goBack(){
-
-if(_backLocked) return;
-_backLocked = true;
-setTimeout(()=> _backLocked = false, 300);
-
-const current = document.querySelector(".view.active");
-
-/* CLEAN HISTORIA */
-while(viewHistory.length > 0){
-const last = viewHistory[viewHistory.length - 1];
-
-if(!last || last === (current && current.id) || !document.getElementById(last)){
-viewHistory.pop();
-continue;
-}
-break;
-}
-
-if(viewHistory.length === 0){
-setView("home", false);
-return;
-}
-
-const prev = viewHistory.pop();
-setView(prev, false);
-
-}
-	function goToAddQuestion(){
-setView("addQuestion")
-}
-
-
-
-function setView(view, saveHistory = true){
-
-const top = document.querySelector(".topButtons")
-const btnHome = document.getElementById("btnHome")
-const btnBack = document.getElementById("btnBack")
-
-if(view === "home"){
-
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-document.getElementById("home").classList.add("active")
-
-top.style.display = "none"
-
-// 🔥 RESET BUTTONÓW
-const btnList = document.getElementById("btnList")
-const btnAdd = document.getElementById("btnAdd")
-const btnAll = document.getElementById("btnAll")
-const btnSrs = document.getElementById("btnSrs")
-
-btnList.onclick = null
-btnAdd.onclick = null
-btnAll.onclick = null
-btnSrs.onclick = null
-btnHome.style.display = "none"
-btnBack.style.display = "none"
-viewHistory = []
-refreshUI();
-return
-}
-	
-  const current = document.querySelector(".view.active");
-
-  /* HISTORIA */
+function goHome(){ viewHistory = []; setView('home', false); }
+function goToList(){ setView('list'); renderList(); }
+function goToAdd(){ setView('add'); }
+function goToAddQuestion(){ setView('addQuestion'); }
+function setView(view, saveHistory=true){
+  const top = document.querySelector('.topButtons');
+  const btnHome = document.getElementById('btnHome');
+  const btnBack = document.getElementById('btnBack');
+  const btnList = document.getElementById('btnList');
+  const btnAdd = document.getElementById('btnAdd');
+  const btnAll = document.getElementById('btnAll');
+  const btnSrs = document.getElementById('btnSrs');
+  const current = document.querySelector('.view.active');
   if(saveHistory && current && current.id !== view){
     const currentLevel = viewLevels[current.id] ?? 0;
     const newLevel = viewLevels[view] ?? 0;
-
-    // zapisujemy tylko gdy wchodzimy "głębiej" (np. level1 -> level2)
-    if(newLevel > currentLevel){
-      // unikamy duplikatów na szczycie
-      if(viewHistory[viewHistory.length - 1] !== current.id){
-        viewHistory.push(current.id);
-      }
-    }
+    if(newLevel > currentLevel && viewHistory[viewHistory.length - 1] !== current.id) viewHistory.push(current.id);
   }
-
-  // przytnij historię
-  if(viewHistory.length > 30){
-    viewHistory.splice(0, viewHistory.length - 30);
-  }
-
-  /* ZMIANA WIDOKU */
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  if(viewHistory.length > 30) viewHistory.splice(0, viewHistory.length - 30);
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   const el = document.getElementById(view);
-  if(!el){
-    console.warn("setView: nie znaleziono widoku", view);
+  if(!el) return;
+  el.classList.add('active');
+  btnList.style.display = btnAdd.style.display = btnAll.style.display = btnSrs.style.display = btnHome.style.display = btnBack.style.display = 'none';
+  btnList.onclick = btnAdd.onclick = btnAll.onclick = btnSrs.onclick = null;
+  if(view === 'home'){
+    top.style.display = 'none';
+    btnHome.style.display = 'none'; btnBack.style.display = 'none';
+    viewHistory = [];
+    refreshUI();
     return;
   }
-  el.classList.add("active");
-
-  // ... reszta Twojej logiki topButtons pozostaje bez zmian ...
-
-
-/* ZMIANA WIDOKU */
-
-
-
-
-const btnList = document.getElementById("btnList")
-const btnAdd = document.getElementById("btnAdd")
-const btnAll = document.getElementById("btnAll")
-const btnSrs = document.getElementById("btnSrs")
-
-/* RESET */
-
-btnList.style.display = "none"
-btnAdd.style.display = "none"
-btnAll.style.display = "none"
-btnSrs.style.display = "none"
-btnHome.style.display = "none"
-btnBack.style.display = "none"
-
-btnList.onclick = null
-btnAdd.onclick = null
-btnAll.onclick = null
-btnSrs.onclick = null
-
-
-
-/* FISZKI */
-
-if(view === "homeStudy" || view === "list" || view === "add"){
-
-top.style.display = "flex"
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnSrs.style.display = "flex"
-btnHome.style.display = "flex"
-
-btnList.onclick = goToList
-btnAdd.onclick = goToAdd
-btnAll.onclick = () => setMode("ALL")
-btnSrs.onclick = () => setMode("SRS")
-
-}
-
-/* QUESTIONS */
-
-/* QUESTION */
-
-if(view === "questions" || view === "questionCards" || view === "addQuestion"|| view === "questionFolder" ){
-
-top.style.display = "flex"
-btnHome.style.display = "flex"
-btnBack.style.display = "flex"
-btnSrs.style.display = "none"
-
-}
-
-
-/* QUESTION CARDS */
-
-if(view === "questionCards" || view === "addQuestion" || view === "questionFolder" ){
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnHome.style.display = "flex"
-btnBack.style.display = "flex"
-btnList.onclick = function(){
-renderQuestionList()
-setView("questionFolder")
-}
-
-btnAdd.onclick = goToAddQuestion
-
-btnAll.onclick = openQuestionCards
-
-}
-
-/* GRAMMAR */
-
-if(
-  view === "grammarList" ||
-  view === "grammarStudy" ||
-  view === "addGrammar"
-){
-
-top.style.display = "flex"
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnHome.style.display = "flex"
-btnList.onclick = ()=>setView("grammarList")
-btnAdd.onclick = ()=>setView("addGrammar")
-btnAll.onclick = () => {
-  grammarIndex = 0
-  grammarStep = 0
-  grammarAnswer = false
-  setView("grammarStudy")
-  renderGrammarCard()
-      }
-    }
-refreshUI();
-
-/* 🔥 FIX iOS BACKGROUND BUG */
-
-// reset scrolla
-const app = document.querySelector(".app");
-if(app) app.scrollTop = 0;
-
-// force repaint gradientu
-document.documentElement.style.backgroundPosition = "0 1px";
-
-requestAnimationFrame(() => {
-  document.documentElement.style.backgroundPosition = "0 0";
-});
+  if(view === 'homeStudy' || view === 'list' || view === 'add'){
+    top.style.display = 'flex';
+    btnList.style.display = btnAdd.style.display = btnAll.style.display = btnSrs.style.display = btnHome.style.display = 'flex';
+    btnList.onclick = goToList; btnAdd.onclick = goToAdd; btnAll.onclick = ()=>setMode('ALL'); btnSrs.onclick = ()=>setMode('SRS');
   }
-	function goToAddQuestion(){
-setView("addQuestion")
+  if(view === 'questions' || view === 'questionCards' || view === 'addQuestion' || view === 'questionFolder'){
+    top.style.display = 'flex'; btnHome.style.display = btnBack.style.display = 'flex';
+  }
+  if(view === 'questionCards' || view === 'addQuestion' || view === 'questionFolder'){
+    btnList.style.display = btnAdd.style.display = btnAll.style.display = btnHome.style.display = btnBack.style.display = 'flex';
+    btnList.onclick = ()=>{ renderQuestionList(); setView('questionFolder'); };
+    btnAdd.onclick = goToAddQuestion; btnAll.onclick = openQuestionCards;
+  }
+  if(view === 'grammarList' || view === 'grammarStudy' || view === 'addGrammar'){
+    top.style.display = 'flex'; btnList.style.display = btnAdd.style.display = btnAll.style.display = btnHome.style.display = 'flex';
+    btnList.onclick = ()=>setView('grammarList'); btnAdd.onclick = ()=>setView('addGrammar'); btnAll.onclick = ()=>{ grammarIndex=0; grammarStep=0; grammarAnswer=false; setView('grammarStudy'); renderGrammarCard(); };
+  }
+  refreshUI();
+  const app = document.getElementById('scrollArea');
+  if(app) app.scrollTop = 0;
+  window.scrollTo(0,0);
+  document.documentElement.style.backgroundPosition = '0 1px';
+  requestAnimationFrame(()=>{ document.documentElement.style.backgroundPosition = '0 0'; });
 }
-function exportGrammar(){
-
-const t = db.transaction("grammar","readonly")
-const store = t.objectStore("grammar")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const data = req.result
-
-const blob = new Blob([JSON.stringify(data)], {type:"application/json"})
-const url = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = url
-a.download = "grammar-backup.json"
-a.click()
-
+function goBack(){
+  if(_backLocked) return;
+  _backLocked = true; setTimeout(()=>_backLocked = false, 300);
+  const current = document.querySelector('.view.active');
+  while(viewHistory.length > 0){
+    const last = viewHistory[viewHistory.length - 1];
+    if(!last || last === (current && current.id) || !document.getElementById(last)){ viewHistory.pop(); continue; }
+    break;
+  }
+  if(viewHistory.length === 0){ setView('home', false); return; }
+  setView(viewHistory.pop(), false);
 }
+function openAll(){ setMode('ALL'); setView('homeStudy'); }
+function openQuestions(){ setView('questions'); renderFolders(); }
+function openGrammar(){ setView('grammarList'); loadGrammarFromDB(); }
 
-}
-
-	function importGrammar(file){
-
-const reader = new FileReader()
-
-reader.onload = function(e){
-
-let data
-
-try{
-data = JSON.parse(e.target.result)
-}catch{
-showPopup("Błędny plik")
-return
-}
-
-/* wyczyść bazę */
-
-const t = db.transaction("grammar","readwrite")
-const store = t.objectStore("grammar")
-
-store.clear()
-
-t.oncomplete = function(){
-
-const t2 = db.transaction("grammar","readwrite")
-const store2 = t2.objectStore("grammar")
-
-data.forEach(g=>{
-delete g.id
-store2.add(g)
-})
-
-t2.oncomplete = function(){
-
-loadGrammarFromDB()
-showPopup("Import zakończony")
-
-}
-
-}
-
-}
-
-reader.readAsText(file)
-
-}
-
-	document.getElementById("importGrammar").addEventListener("change",function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-importGrammar(file)
-
-})
-/* ===============================
-   RENDER CARD
-================================ */
-const cardEl = document.getElementById("cardText")
-let dueCards = [];
+const cardEl = document.getElementById('cardText');
 function renderCard(){
-
-  // filtrujemy fiszki do powtórki
- if(studyMode === "ALL"){
-
-dueCards = cards
-
-}else{
-
-dueCards = cards.filter(c => !c.nextReview || c.nextReview <= Date.now())
-
-}
-
-  // jeśli brak wszystkich fiszek
-  if(cards.length === 0){
-    currentIndex = 0;
-    cardEl.innerText = "Dodaj pierwszą fiszkę";
-    document.getElementById("counter").innerText = 0;
-    document.getElementById("progress-mini").innerText = "—";
-    document.getElementById("cardImage").style.display = "none";
-    return;
-  }
-
-  // jeśli brak fiszek do powtórki
-  if(dueCards.length === 0){
-    currentIndex = 0;
-    cardEl.innerText = "Brak fiszek do powtórki 🎉";
-    document.getElementById("progress-mini").innerText = "0 / 0";
-    document.getElementById("cardImage").style.display = "none";
-    return;
-  }
-
-  // zabezpieczenie indexu
-  if(currentIndex >= dueCards.length){
-    currentIndex = 0;
-  }
-
+  dueCards = (studyMode === 'ALL') ? cards : cards.filter(c => !c.nextReview || c.nextReview <= Date.now());
+  const img = document.getElementById('cardImage');
+  const reviewUI = document.getElementById('reviewButtons');
+  if(cards.length === 0){ currentIndex = 0; cardEl.innerText = 'Dodaj pierwszą fiszkę'; document.getElementById('counter').innerText = 0; document.getElementById('progress-mini').innerText = '—'; img.style.display='none'; reviewUI.style.display='none'; return; }
+  if(dueCards.length === 0){ currentIndex = 0; cardEl.innerText = 'Brak fiszek do powtórki 🎉'; document.getElementById('progress-mini').innerText = '0 / 0'; img.style.display='none'; reviewUI.style.display='none'; return; }
+  if(currentIndex >= dueCards.length) currentIndex = 0;
   const card = dueCards[currentIndex];
-
-  // tekst fiszki
   cardEl.innerText = showingAnswer ? card.back : card.front;
-
-  // licznik
- updateCounter()
-
-  // progres
-  document.getElementById("progress-mini").innerText =
-    (currentIndex + 1) + " / " + dueCards.length;
-
-  // obrazek
-  const img = document.getElementById("cardImage");
-
-  if(card.image){
-    img.src = card.image;
-    img.style.display = "block";
-  } else {
-    img.style.display = "none";
-  }
-const reviewUI = document.getElementById("reviewButtons")
-
-if(studyMode === "ALL"){
-reviewUI.style.display = "none"
+  updateCounter();
+  document.getElementById('progress-mini').innerText = `${currentIndex + 1} / ${dueCards.length}`;
+  if(card.image){ img.src = card.image; img.style.display='block'; } else { img.style.display='none'; }
+  reviewUI.style.display = (studyMode === 'ALL') ? 'none' : 'block';
 }
-else{
-reviewUI.style.display = "block"
-}
-}
-
+function nextCard(){ if(dueCards.length === 0) return; currentIndex = (currentIndex + 1) % dueCards.length; showingAnswer = false; renderCard(); }
+function prevCard(){ if(dueCards.length === 0) return; currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length; showingAnswer = false; renderCard(); }
+function showAnswer(){ if(cards.length === 0) return; showingAnswer = !showingAnswer; renderCard(); }
 function reviewCard(score){
-	updateStreak()
-  const card = dueCards[currentIndex];
-  const intervals = [1, 3, 7, 14, 30]; // dni
-  if(score === 0){
-    card.level = 0; // reset do nauki
-  } else {
-    card.level = Math.min(card.level + 1, intervals.length - 1);
-  }
+  updateStreak();
+  const card = dueCards[currentIndex]; if(!card) return;
+  const intervals = [1,3,7,14,30];
+  if(score === 0) card.level = 0; else card.level = Math.min((card.level || 0) + 1, intervals.length - 1);
   card.nextReview = Date.now() + intervals[card.level] * 24*60*60*1000;
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(card);
-  transaction.oncomplete = () => {
-    nextCard();
+  db.transaction('cards','readwrite').objectStore('cards').put(card).oncomplete = ()=>nextCard();
+}
+function updateStreak(){
+  const today = new Date().toDateString();
+  if(lastStudy !== today){
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    streak = (lastStudy === yesterday) ? streak + 1 : 1;
+    lastStudy = today;
+    localStorage.setItem('streak', streak);
+    localStorage.setItem('lastStudy', today);
+  }
+  updateCounter();
+}
+function updateCounter(){ document.getElementById('counter').innerText = cards.length; document.getElementById('streakUI').innerText = streak; }
+function speakWord(text){ if(!text) return; const speech = new SpeechSynthesisUtterance(text); speech.lang='en-US'; speech.rate=0.9; speechSynthesis.speak(speech); }
+function speakCurrentCard(){ if(!dueCards.length) return; speakWord(dueCards[currentIndex].front); }
+
+async function addCard(){
+  if(mediaRecorder && mediaRecorder.state === 'recording'){ showPopup('Nagranie jeszcze trwa'); return; }
+  if(audioChunks.length > 0 && !recordedAudioBase64){ showPopup('Poczekaj aż nagranie się zapisze'); return; }
+  const front = document.getElementById('frontInput').value.trim();
+  const back = document.getElementById('backInput').value.trim();
+  if(!front || !back){ showPopup('Wypełnij pola'); return; }
+  const newCard = { front, back, audio: recordedAudioBase64 || null, image: imageURL || null, level:0, nextReview: Date.now() };
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').add(newCard);
+  tx.oncomplete = ()=>{
+    recordedAudioBase64 = null; imageURL = null;
+    document.getElementById('frontInput').value=''; document.getElementById('backInput').value=''; document.getElementById('imageResults').innerHTML='';
+    currentIndex = 0;
+    loadCardsFromDB(()=>{ renderCard(); renderList(); });
+    showPopup('Fiszka dodana ✅');
   };
 }
-
-function nextCard(){
-  if(dueCards.length === 0) return;
-  currentIndex = (currentIndex + 1) % dueCards.length;
-  showingAnswer = false;
-  renderCard();
-}
-function prevCard(){
-  if(dueCards.length === 0) return;
-  currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length;
-  showingAnswer = false;
-  renderCard();
-}
-
-
-/* ===============================
-   STUDY
-================================ */
-
-function showAnswer(){
-
-if(cards.length===0) return
-
-// toggle
-showingAnswer = !showingAnswer
-
-renderCard()
-
-}
-
-
-
-/* ===============================
-   ADD CARD
-================================ */
-
-function addCard(){
-if(mediaRecorder && mediaRecorder.state === "recording"){
-showPopup("Nagranie jeszcze trwa")
-return
-}
-
-if(audioChunks.length > 0 && !recordedAudioBase64){
-showPopup("Poczekaj aż nagranie się zapisze")
-return
-}
-const front = document.getElementById("frontInput").value.trim()
-const back = document.getElementById("backInput").value.trim()
-
-if(!front || !back){
-showPopup("Wypełnij pola")
-return
-}
-
-// debug
-console.log("Audio przed zapisem:", recordedAudioBase64)
-
-const newCard={
-front:front,
-back:back,
-audio: recordedAudioBase64 || null,
-image:imageURL || null,
-level:0,
-nextReview:Date.now()
-}
-	
-
-const transaction = db.transaction("cards","readwrite")
-const store = transaction.objectStore("cards")
-console.log("Audio zapisane w fiszce:", recordedAudioBase64)
-store.add(newCard)
-
-transaction.oncomplete = function(){
-
-// reset
-recordedAudioBase64 = null
-imageURL = null
-
-document.getElementById("frontInput").value=""
-document.getElementById("backInput").value=""
-document.getElementById("imageResults").innerHTML=""
-
-currentIndex = 0
-
-loadCardsFromDB()
-
-showPopup("Fiszka dodana ✅")
-
-}
-
-}
-
 async function compressImage(file, quality = 0.6){
   const imageBitmap = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
-
   const maxWidth = 800;
-  let width = imageBitmap.width;
-  let height = imageBitmap.height;
+  let width = imageBitmap.width; let height = imageBitmap.height;
+  if(width > maxWidth){ height = height * (maxWidth / width); width = maxWidth; }
+  canvas.width = width; canvas.height = height;
+  canvas.getContext('2d').drawImage(imageBitmap, 0, 0, width, height);
+  const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', quality));
+  return await new Promise(res=>{ const reader = new FileReader(); reader.onloadend = ()=>res(reader.result); reader.readAsDataURL(blob); });
+}
+let searchTimer;
+document.getElementById('frontInput').addEventListener('input', ()=>{ clearTimeout(searchTimer); searchTimer = setTimeout(searchImages, 500); });
+async function searchImages(){
+  const word = document.getElementById('frontInput').value.trim().split(' ')[0];
+  if(word.length < 2) return;
+  const container = document.getElementById('imageResults');
+  container.innerHTML = 'Ładowanie...';
+  try{
+    const url = 'https://api.unsplash.com/search/photos?query=' + encodeURIComponent(word) + '&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w';
+    const res = await fetch(url); if(!res.ok){ container.innerHTML='Błąd API Unsplash'; return; }
+    const data = await res.json(); container.innerHTML = '';
+    if(!data.results || data.results.length === 0){ const img = document.createElement('img'); img.src='https://picsum.photos/300'; container.appendChild(img); return; }
+    data.results.forEach(photo=>{ const img = document.createElement('img'); img.src = photo.urls.small; img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll('#imageResults img').forEach(i=>i.style.border='none'); img.style.border='3px solid #7b5cff'; }; container.appendChild(img); });
+  }catch(err){ container.innerHTML='Błąd pobierania obrazów'; }
+}
+document.getElementById('imageUpload').addEventListener('change', async function(e){ const file = e.target.files[0]; if(!file) return; imageURL = await compressImage(file, 0.6); const container = document.getElementById('imageResults'); container.innerHTML=''; const img = document.createElement('img'); img.src = imageURL; img.style.border = '3px solid #7b5cff'; container.appendChild(img); });
 
-  if(width > maxWidth){
-    height = height * (maxWidth / width);
-    width = maxWidth;
-  }
-
-  canvas.width = width;
-  canvas.height = height;
-
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(imageBitmap, 0, 0, width, height);
-
-  const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, 'image/jpeg', quality)
-  );
-
-  return new Promise(res => {
-    const reader = new FileReader();
-    reader.onloadend = () => res(reader.result);
-    reader.readAsDataURL(blob);
+function deleteCard(index){ if(!confirm('Usunąć fiszkę?')) return; const id = cards[index].id; db.transaction('cards','readwrite').objectStore('cards').delete(id).oncomplete = ()=>{ if(currentIndex >= cards.length) currentIndex = 0; loadCardsFromDB(renderList); }; }
+function renderList(){
+  const list = document.getElementById('wordsList');
+  const search = document.getElementById('searchBox').value.trim().toLowerCase();
+  list.innerHTML = '';
+  let arr = [...cards];
+  if(search) arr = arr.filter(card => card.front.toLowerCase().includes(search) || card.back.toLowerCase().includes(search));
+  if(sortAZ) arr.sort((a,b)=>a.front.localeCompare(b.front,'pl'));
+  arr.slice(0,30).forEach(card=>{
+    const div = document.createElement('div');
+    div.className = 'listItem';
+    div.innerHTML = `
+      <div class="text"><b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}</div>
+      <div style="display:flex;gap:8px">
+        <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
+        <button class="actionBtn" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
+      </div>`;
+    list.appendChild(div);
   });
 }
-
-
-
-let searchTimer
-
-document.getElementById("frontInput").addEventListener("input", () => {
-
-clearTimeout(searchTimer)
-searchTimer = setTimeout(searchImages, 500)
-
-})
-
-async function searchImages(){
-
-const word = document.getElementById("frontInput").value.trim().split(" ")[0]
-
-if(word.length < 2) return
-
-const container = document.getElementById("imageResults")
-
-container.innerHTML = "Ładowanie..."
-
-try{
-
-const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
-
-const res = await fetch(url)
-
-if(!res.ok){
-container.innerHTML = "Błąd API Unsplash"
-return
-}
-
-const data = await res.json()
-
-container.innerHTML = ""
-
-if(!data.results || data.results.length === 0){
-
-const img = document.createElement("img")
-img.src = "https://picsum.photos/300"
-
-container.appendChild(img)
-return
-
-}
-
-data.results.forEach(photo=>{
-
-const img = document.createElement("img")
-img.src = photo.urls.small
-
-img.onclick = ()=>{
-
-imageURL = photo.urls.small
-
-document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
-
-img.style.border = "3px solid #7b5cff"
-
-}
-
-container.appendChild(img)
-
-})
-
-}catch(err){
-
-container.innerHTML = "Błąd pobierania obrazów"
-
-}
-
-}
-
-
-document.getElementById("imageUpload").addEventListener("change", async function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-// kompresujemy obraz
-imageURL = await compressImage(file, 0.6)
-
-const container = document.getElementById("imageResults")
-
-container.innerHTML = ""
-
-const img = document.createElement("img")
-
-img.src = imageURL
-img.style.border = "3px solid #7b5cff"
-
-container.appendChild(img)
-
-})
-
-
-
-	
-/* ===============================
-   DELETE
-================================ */
-function deleteCard(index){
-  if(!confirm("Usunąć fiszkę?")) return;
-  const id = cards[index].id;
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").delete(id);
-  transaction.oncomplete = function(){
-    // jeśli usunęliśmy ostatnią kartę, resetujemy indeks
-    if(currentIndex >= cards.length){
-      currentIndex = 0;
-    }
-    loadCardsFromDB(renderList);
-  };
-}
-
-
-
-/* ===============================
-   LIST
-================================ */
-
-function renderList(){
-
-const list = document.getElementById("wordsList")
-
-const search = document
-.getElementById("searchBox")
-.value
-.trim()
-.toLowerCase()
-
-list.innerHTML = ""
-
-let arr = [...cards]
-
-/* FILTR WYSZUKIWANIA */
-
-if(search){
-
-arr = arr.filter(card =>
-card.front.toLowerCase().includes(search) ||
-card.back.toLowerCase().includes(search)
-)
-
-}
-
-/* SORTOWANIE */
-
-if(sortAZ){
-arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
-}
-
-/* RENDER */
-
-const MAX_RENDER = 30
-
-arr.slice(0, MAX_RENDER).forEach((card,index)=>{
-
-const div=document.createElement("div")
-
-div.className="listItem"
-
-div.innerHTML=`
-
-<div class="text"><b>${card.front}</b> - ${card.back}</div>
-
-<div style="display:flex; gap:8px">
-
-  <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn delete" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-
-</div>
-
-`
-
-list.appendChild(div)
-
-})
-
-}
-
-
-function toggleSort(){
-
-sortAZ=!sortAZ
-
-renderList()
-
-}
-
-
-	function openAll(){
-
-setMode("ALL")
-
-setView("homeStudy")
-
-}
-
-/* ===============================
-   EDIT
-================================ */
-
-let editingIndex = null
-
-function editCard(index){
-
-editingIndex = index
-
-document.getElementById("editFront").value = cards[index].front
-document.getElementById("editBack").value = cards[index].back
-
-document.getElementById("modal").classList.add("show")}
-
+function toggleSort(){ sortAZ = !sortAZ; renderList(); }
+function editCard(index){ editingIndex = index; document.getElementById('editFront').value = cards[index].front; document.getElementById('editBack').value = cards[index].back; document.getElementById('modal').classList.add('show'); }
 function saveModal(){
-  const newFront = document.getElementById("editFront").value.trim();
-  const newBack = document.getElementById("editBack").value.trim();
-  if(!newFront || !newBack){
-    showPopup("Wypełnij pola");
-    return;
-  }
-  const id = cards[editingIndex].id;
-  // pobieramy oryginalne dane karty
+  const newFront = document.getElementById('editFront').value.trim();
+  const newBack = document.getElementById('editBack').value.trim();
+  if(!newFront || !newBack){ showPopup('Wypełnij pola'); return; }
   const original = cards[editingIndex];
-  // zapisujemy wszystkie pola, nie tracąc audio/obrazów
-  const updatedCard = {
-    id: id,
-    front: newFront,
-    back: newBack,
-    audio: original.audio,
-    image: original.image,
-    level: original.level,
-    nextReview: original.nextReview
-  };
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(updatedCard);
-  transaction.oncomplete = function(){
-    // po zapisie ponownie załaduj listę i zresetuj indeks
-    if(currentIndex >= cards.length) currentIndex = 0;
-    loadCardsFromDB(renderList);
-  };
+  const updatedCard = { id: original.id, front:newFront, back:newBack, audio:original.audio, image:original.image, level:original.level, nextReview:original.nextReview };
+  db.transaction('cards','readwrite').objectStore('cards').put(updatedCard).oncomplete = ()=>{ loadCardsFromDB(renderList); };
   closeModal();
 }
-function closeModal(){
-  document.getElementById("modal").classList.remove("show")
-}
-/* ===============================
-   GRAMA
-================================ */
-function openGrammar(){
+function closeModal(){ document.getElementById('modal').classList.remove('show'); }
 
-setView("grammarList")
+function exportBackup(){ const blob = new Blob([JSON.stringify(cards)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fiszki-backup.json'; a.click(); }
+document.getElementById('importFile').addEventListener('change', function(e){ const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(ev){ let imported; try{ imported = JSON.parse(ev.target.result); }catch{ showPopup('Błędny plik backup'); return; } const tx = db.transaction('cards','readwrite'); const store = tx.objectStore('cards'); store.clear(); imported.forEach(card=>{ delete card.id; if(card.level === undefined) card.level = 0; if(!card.nextReview) card.nextReview = Date.now(); store.add(card); }); tx.oncomplete = function(){ currentIndex = 0; loadCardsFromDB(()=>{ renderCard(); renderList(); }); showPopup('Import OK'); }; }; reader.readAsText(file); });
 
-loadGrammarFromDB()
-
-}
+function loadGrammarFromDB(){ const req = db.transaction('grammar','readonly').objectStore('grammar').getAll(); req.onsuccess = ()=>{ grammarCards = req.result || []; renderGrammar(); }; }
 function renderGrammar(){
-
-const container = document.getElementById("grammarItems")
-
-container.innerHTML = ""
-
-grammarCards.forEach(g=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${g.title}</b></div>
-
-<div style="display:flex; gap:8px">
-
-  <button class="actionBtn play" onclick="studyGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" width="22" height="22">
-      <path d="M8 5L19 12L8 19V5Z" fill="currentColor"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn edit" onclick="editGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" width="22" height="22">
-      <path d="M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn delete" onclick="deleteGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" width="22" height="22">
-      <path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <path d="M8 6V4H16V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      <path d="M19 6L18 20H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </button>
-
-</div>
-
-`
-
-container.appendChild(div)
-
-})
-
+  const container = document.getElementById('grammarItems'); container.innerHTML='';
+  grammarCards.forEach(g=>{
+    const div=document.createElement('div'); div.className='listItem';
+    div.innerHTML = `
+      <div class="text"><b>${escapeHtml(g.title)}</b></div>
+      <div style="display:flex;gap:8px">
+        <button class="actionBtn" onclick="studyGrammar(${g.id})" aria-label="Study"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5L19 12L8 19V5Z" fill="currentColor"/></svg></button>
+        <button class="actionBtn" onclick="editGrammar(${g.id})" aria-label="Edit"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="actionBtn" onclick="deleteGrammar(${g.id})" aria-label="Delete"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 6V4H16V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6L18 20H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </div>`;
+    container.appendChild(div);
+  });
 }
-function studyGrammar(id){
-
-grammarIndex = grammarCards.findIndex(g=>g.id===id)
-
-grammarAnswer = false
-
-grammarStep = 0
-setView("grammarStudy")
-renderGrammarCard()
-}
-
+function studyGrammar(id){ grammarIndex = grammarCards.findIndex(g=>g.id===id); grammarStep=0; grammarAnswer=false; setView('grammarStudy'); renderGrammarCard(); }
 function renderGrammarCard(){
-
-if(grammarCards.length === 0) return
-
-const g = grammarCards[grammarIndex]
-const el = document.getElementById("grammarCardText")
-
-const steps = [
-  {label:"📖 Explanation", value:g.explanation},
-  {label:"📐 Structure", value:g.structure},
-  {label:"🧠 Usage", value:g.usage},
-  {label:"💬 Examples", value:g.examples},
-  {label:"✏️ Practice", value:g.practice},
-  {label:"⚠ Mistakes", value:g.mistakes}
-]
-
-if(grammarStep === 0){
-el.innerHTML = `<h2>${g.title}</h2><p style="opacity:0.05">Tap to start</p>`
-return
+  if(grammarCards.length === 0){ document.getElementById('grammarCardText').innerHTML = '<i>No grammar items</i>'; return; }
+  const g = grammarCards[grammarIndex]; const el = document.getElementById('grammarCardText');
+  const steps = [ {label:'📖 Explanation', value:g.explanation}, {label:'📐 Structure', value:g.structure}, {label:'🧠 Usage', value:g.usage}, {label:'💬 Examples', value:g.examples}, {label:'✏️ Practice', value:g.practice}, {label:'⚠ Mistakes', value:g.mistakes} ];
+  if(grammarStep === 0){ el.innerHTML = `<h2>${escapeHtml(g.title)}</h2><p style="opacity:.5">Tap to start</p>`; return; }
+  const step = steps[grammarStep - 1];
+  el.innerHTML = `<div style="text-align:left;font-size:16px"><b>${step.label}</b><br><br>${escapeHtml(step.value || 'Brak danych')}</div>`;
 }
-
-const step = steps[grammarStep - 1]
-
-el.innerHTML = `
-<div style="text-align:left;font-size:16px">
-<b>${step.label}</b><br><br>
-${step.value || "<i>Brak danych</i>"}
-</div>
-`
-}
-
-
-
-function deleteGrammar(id){
-
-if(!confirm("Usunąć?")) return
-
-const t = db.transaction("grammar","readwrite")
-
-t.objectStore("grammar").delete(id)
-
-t.oncomplete = renderGrammar
-
-}
-
-
+function deleteGrammar(id){ if(!confirm('Usunąć?')) return; db.transaction('grammar','readwrite').objectStore('grammar').delete(id).oncomplete = renderGrammar; }
 function saveGrammar(){
-
-if(!db){
-showPopup("Baza danych jeszcze się ładuje")
-return
+  if(!db){ showPopup('Baza danych jeszcze się ładuje'); return; }
+  const btn = document.querySelector('#addGrammar .primary'); btn.disabled = true; btn.innerText = 'Zapisywanie...';
+  const title = document.getElementById('gTitle').value.trim(); if(!title){ showPopup('Podaj temat'); btn.disabled=false; btn.innerText='Save'; return; }
+  const data = { title, explanation:document.getElementById('gExplanation').value, structure:document.getElementById('gStructure').value, usage:document.getElementById('gUsage').value, examples:document.getElementById('gExamples').value, practice:document.getElementById('gPractice').value, mistakes:document.getElementById('gMistakes').value };
+  const t = db.transaction('grammar','readwrite'); const req = t.objectStore('grammar').add(data);
+  req.onerror = ()=>{ showPopup('Nie udało się zapisać'); btn.disabled=false; btn.innerText='Save'; };
+  t.oncomplete = ()=>{ ['gTitle','gExplanation','gStructure','gUsage','gExamples','gPractice','gMistakes'].forEach(id=>document.getElementById(id).value=''); loadGrammarFromDB(); setView('grammarList'); showPopup('Zapisano temat'); btn.disabled=false; btn.innerText='Save'; };
 }
+function exportGrammar(){ const req = db.transaction('grammar','readonly').objectStore('grammar').getAll(); req.onsuccess = ()=>{ const blob = new Blob([JSON.stringify(req.result)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='grammar-backup.json'; a.click(); }; }
+document.getElementById('importGrammar').addEventListener('change', function(e){ const file=e.target.files[0]; if(!file) return; importGrammar(file); });
+function importGrammar(file){ const reader=new FileReader(); reader.onload=e=>{ let data; try{ data = JSON.parse(e.target.result); }catch{ showPopup('Błędny plik'); return; } const t = db.transaction('grammar','readwrite'); const store = t.objectStore('grammar'); store.clear(); t.oncomplete = ()=>{ const t2 = db.transaction('grammar','readwrite'); const store2 = t2.objectStore('grammar'); data.forEach(g=>{ delete g.id; store2.add(g); }); t2.oncomplete = ()=>{ loadGrammarFromDB(); showPopup('Import zakończony'); }; }; }; reader.readAsText(file); }
 
-const btn = document.querySelector("#addGrammar .primary")
-btn.disabled = true
-btn.innerText = "Zapisywanie..."
-
-const title = document.getElementById("gTitle").value.trim()
-
-if(!title){
-showPopup("Podaj temat")
-btn.disabled = false
-btn.innerText = "Zapisz"
-return
+function renderFolders(){
+  const container = document.getElementById('questionFolders'); container.innerHTML='';
+  const req = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
+  req.onsuccess = ()=>{
+    const folders = req.result || [];
+    const qReq = db.transaction('questions','readonly').objectStore('questions').getAll();
+    qReq.onsuccess = ()=>{
+      const allQuestions = qReq.result || [];
+      folders.forEach(folder=>{
+        const div = document.createElement('div'); div.className = 'listItem';
+        div.innerHTML = `<div class="text"><b>${escapeHtml(folder.name)}</b><span style="opacity:.6;font-size:12px" id="count-${folder.id}"></span></div><div><button class="actionBtn" onclick="deleteFolder(${folder.id})"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button></div>`;
+        div.onclick = ()=>openFolder(folder.id);
+        container.appendChild(div);
+        const count = allQuestions.filter(q => q.folderId === folder.id).length;
+        setTimeout(()=>{ const el = document.getElementById('count-'+folder.id); if(el) el.innerText = ` (${count})`; },0);
+      });
+    };
+  };
 }
-
-const data = {
-title:title,
-explanation:document.getElementById("gExplanation").value,
-structure:document.getElementById("gStructure").value,
-usage:document.getElementById("gUsage").value,
-examples:document.getElementById("gExamples").value,
-practice:document.getElementById("gPractice").value,
-mistakes:document.getElementById("gMistakes").value
+function openFolderPopup(){ document.getElementById('folderNameInput').value=''; document.getElementById('folderPopup').classList.add('show'); }
+function closeFolderPopup(){ document.getElementById('folderPopup').classList.remove('show'); }
+function saveFolder(){ const name = document.getElementById('folderNameInput').value.trim(); if(!name){ showPopup('Podaj nazwę folderu'); return; } const tx = db.transaction('questionFolders','readwrite'); tx.objectStore('questionFolders').add({name}); tx.oncomplete = ()=>{ renderFolders(); closeFolderPopup(); }; }
+function openFolder(id){ currentFolderId = id; setView('questionFolder'); renderQuestionList(); }
+function renderQuestionList(){
+  const container = document.getElementById('questionList'); container.innerHTML='';
+  const req = db.transaction('questions','readonly').objectStore('questions').getAll();
+  req.onsuccess = ()=>{
+    (req.result || []).filter(q => q.folderId === currentFolderId).forEach(q=>{
+      const div = document.createElement('div'); div.className='listItem';
+      div.innerHTML = `<div class="text"><b>${escapeHtml(q.question)}</b></div><div style="display:flex;gap:8px"><button class="actionBtn" onclick="editQuestion(${q.id})"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button><button class="actionBtn" onclick="deleteQuestion(${q.id})"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button></div>`;
+      container.appendChild(div);
+    });
+  };
 }
-
-// TRANSAKCJA
-const t = db.transaction("grammar","readwrite")
-const store = t.objectStore("grammar")
-
-const req = store.add(data)
-
-req.onerror = function(){
-console.error("Błąd zapisu:", req.error)
-showPopup("Nie udało się zapisać")
-
-btn.disabled = false
-btn.innerText = "Zapisz"
+function saveQuestion(){
+  const question = document.getElementById('questionInput').value.trim();
+  const answer = document.getElementById('answerInput').value.trim();
+  if(!question || !answer){ showPopup('Wpisz pytanie i odpowiedź'); return; }
+  const tx = db.transaction('questions','readwrite'); const store = tx.objectStore('questions');
+  if(editingQuestionId){ store.put({id:editingQuestionId, folderId:currentFolderId, question, answer}); editingQuestionId = null; }
+  else { store.add({folderId:currentFolderId, question, answer}); }
+  tx.oncomplete = ()=>{ document.getElementById('questionInput').value=''; document.getElementById('answerInput').value=''; setView('questionFolder'); renderQuestionList(); };
 }
-
-t.oncomplete = function(){
-
-// wyczyść formularz
-document.getElementById("gTitle").value=""
-document.getElementById("gExplanation").value=""
-document.getElementById("gStructure").value=""
-document.getElementById("gUsage").value=""
-document.getElementById("gExamples").value=""
-document.getElementById("gPractice").value=""
-document.getElementById("gMistakes").value=""
-
-loadGrammarFromDB()
-
-setView("grammarList")
-
-showPopup("Zapisano temat")
-
-btn.disabled = false
-btn.innerText = "Zapisz"
-
+function renderQuestionCard(){
+  if(questionCards.length === 0) return;
+  const card = questionCards[questionIndex];
+  document.getElementById('questionCardText').innerHTML = questionAnswerVisible ? `<b style="margin-bottom:10px">💬 Answer</b><div>${escapeHtml(card.answer)}</div>` : `<b style="margin-bottom:10px">❓ Question</b><div>${escapeHtml(card.question)}</div>`;
 }
-
+function openQuestionCards(){
+  const req = db.transaction('questions','readonly').objectStore('questions').getAll();
+  req.onsuccess = ()=>{
+    questionCards = (req.result || []).filter(q => q.folderId === currentFolderId);
+    questionIndex = 0; questionAnswerVisible = false;
+    setView('questionCards');
+    renderQuestionCard();
+    document.getElementById('questionCounter').innerText = questionCards.length;
+    document.getElementById('questionProgress').innerText = questionCards.length ? `1 / ${questionCards.length}` : '0 / 0';
+  };
 }
-
-
-function loadGrammarFromDB(){
-
-const t = db.transaction("grammar","readonly")
-const store = t.objectStore("grammar")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-grammarCards = req.result
-
-renderGrammar()
-
+function deleteQuestion(id){ if(!confirm('Usunąć pytanie?')) return; db.transaction('questions','readwrite').objectStore('questions').delete(id).oncomplete = ()=>renderQuestionList(); }
+function editQuestion(id){ editingQuestionId = id; const req = db.transaction('questions','readonly').objectStore('questions').get(id); req.onsuccess = ()=>{ const q = req.result; document.getElementById('questionInput').value = q.question; document.getElementById('answerInput').value = q.answer; setView('addQuestion'); }; }
+function deleteFolder(id){ if(!confirm('Usunąć folder i wszystkie pytania?')) return; const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').delete(id); const t2 = db.transaction('questions','readwrite'); const req = t2.objectStore('questions').getAll(); req.onsuccess = ()=>{ (req.result || []).forEach(q=>{ if(q.folderId === id) t2.objectStore('questions').delete(q.id); }); renderFolders(); }; }
+function exportQuestions(){
+  const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
+  const t2 = db.transaction('questions','readonly').objectStore('questions').getAll();
+  Promise.all([new Promise(res=>t1.onsuccess=()=>res(t1.result||[])), new Promise(res=>t2.onsuccess=()=>res(t2.result||[]))]).then(([folders,questions])=>{ const blob = new Blob([JSON.stringify({folders,questions})], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='questions-backup.json'; a.click(); });
 }
-
+function importQuestions(file){
+  const reader = new FileReader(); reader.onload = e=>{
+    let data; try{ data = JSON.parse(e.target.result); }catch{ showPopup('Błędny plik'); return; }
+    const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').clear();
+    const t2 = db.transaction('questions','readwrite'); t2.objectStore('questions').clear();
+    t2.oncomplete = ()=>{
+      const folderMap = {};
+      const tf = db.transaction('questionFolders','readwrite'); const sf = tf.objectStore('questionFolders');
+      (data.folders || []).forEach(oldFolder=>{ const oldId = oldFolder.id; delete oldFolder.id; const req = sf.add(oldFolder); req.onsuccess = ()=>{ folderMap[oldId] = req.result; }; });
+      tf.oncomplete = ()=>{
+        const tq = db.transaction('questions','readwrite'); const sq = tq.objectStore('questions');
+        (data.questions || []).forEach(q=>{ delete q.id; q.folderId = folderMap[q.folderId]; sq.add(q); });
+        tq.oncomplete = ()=>{ currentFolderId = null; questionCards = []; questionIndex = 0; renderFolders(); setView('questions', false); showPopup('Import zakończony'); };
+      };
+    };
+  };
+  reader.readAsText(file);
 }
-
-
-/* ===============================
-   SPEECH
-================================ */
-
-function speakWord(text){
-
-if(!text)return
-
-const speech=new SpeechSynthesisUtterance(text)
-
-speech.lang="en-US"
-
-speech.rate=0.9
-
-speechSynthesis.speak(speech)
-
-}
-
-
-/* ===============================
-   RECORD AUDIO
-================================ */
+document.getElementById('importQuestions').addEventListener('change', function(e){ const file = e.target.files[0]; if(file) importQuestions(file); });
 
 async function startRecording(){
-
-// sprawdzenie obsługi
-if(!navigator.mediaDevices || !window.MediaRecorder){
-showPopup("Twoja przeglądarka nie obsługuje nagrywania audio")
-return
-}
-
-try{
-
-const stream = await navigator.mediaDevices.getUserMedia({audio:true})
-
-mediaRecorder = new MediaRecorder(stream)
-
-audioChunks = []
-
-let seconds = 0
-
-document.getElementById("recordUI").style.display = "block"
-
-const timer = setInterval(()=>{
-seconds++
-document.getElementById("recordTimer").innerText = seconds + " s"
-},1000)
-
-mediaRecorder.ondataavailable = event=>{
-audioChunks.push(event.data)
-}
-
-mediaRecorder.onstop = () => {
-
-clearInterval(timer)
-
-document.getElementById("recordUI").style.display = "none"
-
-const blob = new Blob(audioChunks,{type:"audio/mp4"});
-
-if(blob.size === 0){
-showPopup("Nagranie jest puste")
-return
-}
-
-const reader = new FileReader()
-
-reader.onloadend = function(){
-
-recordedAudioBase64 = reader.result
-
-console.log("Audio zapisane:", recordedAudioBase64)
-
-showPopup("Nagranie zapisane 🎤")
-
-}
-
-reader.readAsDataURL(blob)
-
-stream.getTracks().forEach(track => track.stop())
-
-}
-
-// start nagrywania
-mediaRecorder.start();
-
-// zatrzymanie po 3 sekundach
-setTimeout(()=>{
-if(mediaRecorder && mediaRecorder.state !== "inactive"){
-mediaRecorder.stop()
-}
-},3000)
-
-}catch(err){
-
-console.error(err)
-
-if(err.name === "NotAllowedError"){
-showPopup("Nie udzielono dostępu do mikrofonu")
-}
-else{
-showPopup("Nie można uruchomić nagrywania")
-}
-
-}
-
-}
-
-
-/* ===============================
-   PLAY AUDIO
-================================ */
-
-function playRecording(){
-
-// jeśli nagranie właśnie nagrane (przed zapisem fiszki)
-if(recordedAudioBase64){
-
-console.log("Odtwarzam nagranie tymczasowe")
-
-const audio = new Audio(recordedAudioBase64)
-
-audio.play().catch(err=>{
-console.error(err)
-showPopup("Nie można odtworzyć nagrania")
-})
-
-return
-}
-
-// jeśli brak kart
-if(!dueCards || dueCards.length === 0){
-showPopup("Brak fiszek")
-return
-}
-
-const card = dueCards[currentIndex]
-
-if(!card){
-showPopup("Błąd odczytu fiszki")
-return
-}
-
-// jeśli karta ma audio
-if(card.audio){
-
-console.log("Odtwarzam nagranie z fiszki")
-
-const audio = new Audio(card.audio)
-
-audio.play().catch(err=>{
-console.error(err)
-showPopup("Nie można odtworzyć nagrania")
-})
-
-return
-}
-
-// jeśli brak audio
-showPopup("Ta fiszka nie ma nagrania")
-
-}
-
-/* ===============================
-   EXPORT
-================================ */
-
-function exportBackup(){
-
-const data=JSON.stringify(cards)
-
-const blob=new Blob([data],{type:"application/json"})
-
-const url=URL.createObjectURL(blob)
-
-const a=document.createElement("a")
-
-a.href=url
-
-a.download="fiszki-backup.json"
-
-a.click()
-
-}
-
-
-/* ===============================
-   IMPORT
-================================ */
-
-document.getElementById("importFile").addEventListener("change", function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-const reader = new FileReader()
-
-reader.onload = function(ev){
-
-  let imported
-
+  if(!navigator.mediaDevices || !window.MediaRecorder){ showPopup('Twoja przeglądarka nie obsługuje nagrywania audio'); return; }
   try{
-    imported = JSON.parse(ev.target.result)
-  }
-  catch(e){
-    showPopup("Błędny plik backup")
-    return
-  }
-
-  const transaction = db.transaction("cards","readwrite")
-  const store = transaction.objectStore("cards")
-
- imported.forEach(card=>{
-
-delete card.id
-
-// jeśli brak level
-if(card.level === undefined){
-  card.level = 0
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    let seconds = 0;
+    document.getElementById('recordUI').style.display = 'block';
+    const timer = setInterval(()=>{ seconds++; document.getElementById('recordTimer').innerText = seconds + ' s'; }, 1000);
+    mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+    mediaRecorder.onstop = ()=>{
+      clearInterval(timer);
+      document.getElementById('recordUI').style.display = 'none';
+      const blob = new Blob(audioChunks, {type:'audio/mp4'});
+      if(blob.size === 0){ showPopup('Nagranie jest puste'); return; }
+      const reader = new FileReader();
+      reader.onloadend = ()=>{ recordedAudioBase64 = reader.result; showPopup('Nagranie zapisane 🎤'); };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }, 3000);
+  }catch(err){ showPopup(err.name === 'NotAllowedError' ? 'Nie udzielono dostępu do mikrofonu' : 'Nie można uruchomić nagrywania'); }
 }
-
-// jeśli brak nextReview
-if(!card.nextReview){
-  card.nextReview = Date.now()
+function playRecording(){
+  if(recordedAudioBase64){ const audio = new Audio(recordedAudioBase64); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
+  if(!dueCards || dueCards.length === 0){ showPopup('Brak fiszek'); return; }
+  const card = dueCards[currentIndex]; if(!card){ showPopup('Błąd odczytu fiszki'); return; }
+  if(card.audio){ const audio = new Audio(card.audio); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
+  showPopup('Ta fiszka nie ma nagrania');
 }
-
-store.add(card)
-
-})
-
-transaction.oncomplete = function(){
-currentIndex = 0
-
-  loadCardsFromDB(() => {
-    renderCard()
-    renderList()
-  })
-showPopup("Import OK")
-}
-
-}
-
-reader.readAsText(file)
-
-})   // ← TEGO NAWIASU BRAKOWAŁO
-
-document.getElementById("startScreen").addEventListener("click",function(){
-
-this.style.display = "none"
-
-// ukryj górny pasek na starcie
-
-
-})
-	if (window.navigator.standalone) {
-console.log("PWA mode")
-} else {
-console.log("Safari mode")
-}
-
-
-
-	function updateStreak(){
-
-const today = new Date().toDateString()
-
-if(lastStudy !== today){
-
-const yesterday = new Date(Date.now() - 86400000).toDateString()
-
-if(lastStudy === yesterday){
-streak++
-}else{
-streak = 1
-}
-
-lastStudy = today
-
-localStorage.setItem("streak",streak)
-localStorage.setItem("lastStudy",today)
-
-}
-
-updateCounter()
-
-}
-	function updateCounter(){
-document.getElementById("counter").innerText = cards.length
-document.getElementById("streakUI").innerText = streak
-}
-
-	function openQuestions(){
-
-setView("questions")
-
-renderFolders()
-
-}
-
-	function renderFolders(){
-
-const container = document.getElementById("questionFolders")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questionFolders","readonly")
-const store = transaction.objectStore("questionFolders")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const folders = req.result
-
-folders.forEach(folder=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text">
-<b>${folder.name}</b>
-<span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
-</div>
-
-<div>
- <button class="actionBtn" onclick="deleteFolder(${folder.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-</div>
-
-`
-
-div.onclick = () => openFolder(folder.id)
-
-container.appendChild(div)
-
-})
-
-/* LICZNIK PYTAŃ */
-
-const qTransaction = db.transaction("questions","readonly")
-const qStore = qTransaction.objectStore("questions")
-const qReq = qStore.getAll()
-
-qReq.onsuccess = function(){
-
-const allQuestions = qReq.result
-
-folders.forEach(folder=>{
-
-const count = allQuestions.filter(q => q.folderId === folder.id).length
-
-const el = document.getElementById("count-"+folder.id)
-
-if(el){
-el.innerText = " (" + count + ")"
-}
-
-})
-
-}
-
-}
-
-}
-
-	function addFolder(){
-
-const name = prompt("Nazwa folderu")
-
-if(!name) return
-
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = renderFolders
-
-}
-
-	function openFolder(id){
-
-currentFolderId = id
-
-openQuestionCards()
-
-}
-function renderQuestionList(){
-
-const container = document.getElementById("questionList")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const questions = req.result.filter(q => q.folderId === currentFolderId)
-
-questions.forEach(q=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${q.question}</b></div>
-
-<div>
-<button class="smallBtn primary" onclick="editQuestion(${q.id})">✏️</button>
-<button class="smallBtn secondary" onclick="deleteQuestion(${q.id})">🗑️</button>
-</div>
-`
-
-container.appendChild(div)
-
-})
-
-}
-
-}
-
-	function renderQuestionList(){
-
-const container = document.getElementById("questionList")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const questions = req.result.filter(q => q.folderId === currentFolderId)
-
-questions.forEach(q=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${q.question}</b></div>
-
-<div style="display:flex; gap:8px">
-
-<button class="actionBtn" onclick="editQuestion(${q.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-<button class="actionBtn" onclick="deleteQuestion(${q.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-
-</div>
-`
-
-container.appendChild(div)
-
-})
-
-}
-
-}
-
-	function saveQuestion(){
-
-const question = document.getElementById("questionInput").value.trim()
-const answer = document.getElementById("answerInput").value.trim()
-
-if(!question || !answer){
-showPopup("Wpisz pytanie i odpowiedź")
-return
-}
-
-const transaction = db.transaction("questions","readwrite")
-
-const store = transaction.objectStore("questions")
-
-if(editingQuestionId){
-
-store.put({
-id: editingQuestionId,
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-editingQuestionId = null
-
-}else{
-
-store.add({
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-}
-
-transaction.oncomplete = () => {
-
-document.getElementById("questionInput").value=""
-document.getElementById("answerInput").value=""
-
-setView("questionFolder")
-
-renderQuestionList()
-
-}
-
-}
-	let questionCards = []
-let questionIndex = 0
-let questionAnswerVisible = false
-
-function renderQuestionCard(){
-
-if(questionCards.length === 0) return
-
-const card = questionCards[questionIndex]
-
-const el = document.getElementById("questionCardText")
-
-el.innerHTML = questionAnswerVisible
-? `<b style="margin-bottom:10px">💬 Answer</b><div>${card.answer}</div>`
-: `<b style="margin-bottom:10px">❓ Question</b><div>${card.question}</div>`
-
-}
-
-
-
-	function deleteQuestion(id){
-
-if(!confirm("Usunąć pytanie?")) return
-
-const transaction = db.transaction("questions","readwrite")
-
-const store = transaction.objectStore("questions")
-
-store.delete(id)
-
-transaction.oncomplete = () => {
-renderQuestionList()
-}
-
-}
-
-	let editingQuestionId = null
-
-	function editQuestion(id){
-
-editingQuestionId = id
-
-const transaction = db.transaction("questions","readonly")
-
-const store = transaction.objectStore("questions")
-
-const req = store.get(id)
-
-req.onsuccess = function(){
-
-const q = req.result
-
-document.getElementById("questionInput").value = q.question
-document.getElementById("answerInput").value = q.answer
-
-setView("addQuestion")
-
-}
-
-}
-
-
-	function openFolderPopup(){
-document.getElementById("folderNameInput").value=""
-document.getElementById("folderPopup").classList.add("show")
-}
-
-function closeFolderPopup(){
-document.getElementById("folderPopup").classList.remove("show")
-}
-
-function saveFolder(){
-
-const name = document.getElementById("folderNameInput").value.trim()
-
-if(!name){
-showPopup("Podaj nazwę folderu")
-return
-}
-
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = function(){
-
-renderFolders()
-
-closeFolderPopup()
-
-}
-
-}
-
-
-
-	function exportQuestions(){
-
-const t1 = db.transaction("questionFolders","readonly")
-const s1 = t1.objectStore("questionFolders")
-const r1 = s1.getAll()
-
-const t2 = db.transaction("questions","readonly")
-const s2 = t2.objectStore("questions")
-const r2 = s2.getAll()
-
-Promise.all([
-new Promise(res => r1.onsuccess = () => res(r1.result)),
-new Promise(res => r2.onsuccess = () => res(r2.result))
-]).then(data => {
-
-const backup = {
-folders:data[0],
-questions:data[1]
-}
-
-const blob = new Blob([JSON.stringify(backup)],{type:"application/json"})
-const url = URL.createObjectURL(blob)
-
-const a = document.createElement("a")
-a.href = url
-a.download = "questions-backup.json"
-a.click()
-
-})
-
-}
-
-	
-	document.getElementById("importQuestions").addEventListener("change",function(e){
-
-const file = e.target.files[0]
-
-if(!file) return
-
-importQuestions(file)
-
-})
-
-	function deleteFolder(id){
-
-if(!confirm("Usunąć folder i wszystkie pytania?")) return
-
-const t1 = db.transaction("questionFolders","readwrite")
-const s1 = t1.objectStore("questionFolders")
-
-s1.delete(id)
-
-const t2 = db.transaction("questions","readwrite")
-const s2 = t2.objectStore("questions")
-
-const req = s2.getAll()
-
-req.onsuccess = function(){
-
-req.result.forEach(q=>{
-if(q.folderId === id){
-s2.delete(q.id)
-}
-})
-
-renderFolders()
-
-}
-
-}
-
-	function importQuestions(file){
-
-const reader = new FileReader()
-
-reader.onload = function(e){
-
-let data
-
-try{
-data = JSON.parse(e.target.result)
-}catch{
-showPopup("Błędny plik")
-return
-}
-
-/* wyczyść bazę */
-
-const t1 = db.transaction("questionFolders","readwrite")
-t1.objectStore("questionFolders").clear()
-
-const t2 = db.transaction("questions","readwrite")
-t2.objectStore("questions").clear()
-
-t2.oncomplete = function(){
-
-/* MAPA ID */
-
-const folderMap = {}
-
-const tf = db.transaction("questionFolders","readwrite")
-const sf = tf.objectStore("questionFolders")
-
-data.folders.forEach(oldFolder=>{
-
-const oldId = oldFolder.id
-
-delete oldFolder.id
-
-const req = sf.add(oldFolder)
-
-req.onsuccess = function(){
-
-folderMap[oldId] = req.result
-
-}
-
-})
-
-tf.oncomplete = function(){
-
-/* IMPORT PYTAŃ */
-
-const tq = db.transaction("questions","readwrite")
-const sq = tq.objectStore("questions")
-
-data.questions.forEach(q=>{
-
-delete q.id
-
-q.folderId = folderMap[q.folderId]
-
-sq.add(q)
-
-})
-
-tq.oncomplete = function(){
-
-  currentFolderId = null
-  questionCards = []
-  questionIndex = 0
-
-  renderFolders()
-
-  setView("questions", false) // 🔥 reset widoku
-
-  showPopup("Import zakończony")
-}
-
-}
-
-}
-
-}
-
-reader.readAsText(file)
-
-}
-
-
-	
+function exportBackup(){ const blob = new Blob([JSON.stringify(cards)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fiszki-backup.json'; a.click(); }
+document.getElementById('importFile').addEventListener('change', function(e){ const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(ev){ let imported; try{ imported = JSON.parse(ev.target.result); }catch{ showPopup('Błędny plik backup'); return; } const tx = db.transaction('cards','readwrite'); const store = tx.objectStore('cards'); store.clear(); (imported || []).forEach(card=>{ delete card.id; if(card.level === undefined) card.level = 0; if(!card.nextReview) card.nextReview = Date.now(); store.add(card); }); tx.oncomplete = function(){ currentIndex = 0; loadCardsFromDB(()=>{ renderCard(); renderList(); }); showPopup('Import OK'); }; }; reader.readAsText(file); });
+
+function showPopup(text){ document.getElementById('popupText').innerText = text; document.getElementById('popup').classList.add('show'); }
+function closePopup(){ document.getElementById('popup').classList.remove('show'); }
+function openFolderPopup(){ document.getElementById('folderNameInput').value=''; document.getElementById('folderPopup').classList.add('show'); }
+function closeFolderPopup(){ document.getElementById('folderPopup').classList.remove('show'); }
+function closeConfirm(){ document.getElementById('confirmPopup').classList.remove('show'); }
+function refreshUI(){ if(document.getElementById('list').classList.contains('active')) renderList(); if(document.getElementById('homeStudy').classList.contains('active')) renderCard(); if(document.getElementById('questions').classList.contains('active')) renderFolders(); if(document.getElementById('grammarList').classList.contains('active')) renderGrammar(); }
+function escapeHtml(str){ return String(str || '').replace(/[&<>"]'/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[m])); }
+
+if('serviceWorker' in navigator){ console.log('SW wyłączony'); }
+if(window.navigator.standalone){ console.log('PWA mode'); } else { console.log('Safari mode'); }
+document.getElementById('startScreen').addEventListener('click', function(){ this.style.display='none'; });
+document.getElementById('btnBack').onclick = goBack;
+document.getElementById('btnHome').onclick = goHome;
 </script>
-
-<script>
-if ("serviceWorker" in navigator) {
-  console.log("SW wyłączony")
-}
-
-function showPopup(text){
-
-document.getElementById("popupText").innerText=text
-
-document.getElementById("popup").classList.add("show")
-
-}
-
-function closePopup(){
-
-document.getElementById("popup").classList.remove("show")
-
-}
-
-function speakCurrentCard(){
-  if(!dueCards.length) return
-  const card = dueCards[currentIndex]
-  speakWord(card.front)
-}
-
-document.getElementById("btnBack").onclick = goBack
-document.getElementById("btnHome").onclick = goHome
-
-function refreshUI(){
-
-  if(document.getElementById("list").classList.contains("active")){
-    renderList()
-  }
-
-  if(document.getElementById("homeStudy").classList.contains("active")){
-    renderCard()
-  }
-
-  if(document.getElementById("questions").classList.contains("active")){
-    renderFolders()
-  }
-
-}
-
-</script>
-
-
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
