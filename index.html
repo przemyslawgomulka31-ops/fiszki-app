@@ -15,7 +15,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <meta name="apple-mobile-web-app-title" content="Fiszki">
-
+<link rel="apple-touch-icon" href="icon.png">
 <title>Fiszki - poprawione UI</title>
 <style>
 /* ---------- BODY / GRADIENT ---------- */
@@ -44,7 +44,7 @@ body{
 min-height:100dvh;
 font-family: "Segoe UI", Roboto, Arial, sans-serif;
 color:#111;
-
+  overscroll-behavior: none;
 background: linear-gradient(
 180deg,
 var(--accent1) 0%,
@@ -66,6 +66,7 @@ touch-action: manipulation;
   min-height:100vh;
   margin:0 auto;
   padding: calc(env(safe-area-inset-top) + 48px) 22px 160px;
+	padding-bottom: calc(160px + env(safe-area-inset-bottom));
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
@@ -98,6 +99,11 @@ rgba(230,227,255,0)
 );
 
 backdrop-filter:blur(10px);
+}
+	svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 /* ---------- HEADER ---------- */
 .header{
@@ -665,7 +671,7 @@ margin:auto;
 .fab{
   width: 68px;
   height: 69px;
-
+bottom: max(20px, env(safe-area-inset-bottom));
   border-radius: 50%;
 
   background: rgba(30, 20, 100, 0.28);
