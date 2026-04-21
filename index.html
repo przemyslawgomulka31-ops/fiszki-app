@@ -34,7 +34,7 @@ html, body{
 margin:0;
 padding:0;
 height:100%;
-	overflow:hidden;
+	
 	overscroll-behavior:none;
 background:#8f7bff;
 }
@@ -53,7 +53,6 @@ var(--accent3) 55%,
 var(--accent4) 80%,
 var(--white) 100%
 );
-
 -webkit-font-smoothing:antialiased;
 -moz-osx-font-smoothing:grayscale;
 }
@@ -63,18 +62,21 @@ touch-action: manipulation;
 }
 /* ---------- APP LAYOUT ---------- */
 .app{
-max-width:420px;
-margin:0 auto;
-padding:22px;
-padding-bottom:160px;
-
-height:100dvh;
-
-position:relative;
-
-overflow-y:auto;
--webkit-overflow-scrolling:touch;
+  max-width:420px;
+  margin:0 auto;
+	 
+  padding:22px 22px 160px;
+  height:100dvh;
+  position:relative;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+ overscroll-behavior: none;
 }
+button, .actionBtn, .iconBtn, .bigTile {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .bottomControls{
 position:fixed;
 
@@ -104,36 +106,14 @@ backdrop-filter:blur(10px);
   font-size:20px;
   font-weight:600;
   text-align:center;
-  margin:50px 0 14px;
+  margin:0px 0 14px;
+padding-top:50px;
+
   color:#1b1635;
 }
 
 /* ---------- STATS ---------- */
-.stats{
-  background: rgba(255,255,255,0.12);
-  backdrop-filter: blur(6px);
-  padding:12px 14px;
-  border-radius:14px;
-  margin-bottom:18px;
-  font-size:14px;
-  color: #14121a;
-  display:flex;
-  gap:12px;
-  align-items:center;
-  justify-content:space-between;
-}
-.stats .left{display:flex;gap:10px;align-items:center}
-.stats .stat{
-  background: rgba(255,255,255,0.25);
-  padding:6px 10px;
-  border-radius:10px;
-  display:flex;
-  gap:8px;
-  align-items:center;
-  font-size:13px;
-  color:#0b0720;
-  box-shadow: 0 6px 18px rgba(43,24,120,0.06);
-}
+
 
 /* ---------- CARD ---------- */
 .card{
@@ -205,43 +185,80 @@ margin-top: 10px;
   font-weight:600;
 }
 .topButtons{
-position:absolute;
-top:12px;
-left:22px;
-right:22px;
-display:none;
-justify-content:space-between;
-gap:12px;
-z-index:20;
+  position: fixed;
+ background: rgba(123,92,255,0.25);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+ box-shadow:
+    0 20px 50px rgba(50,30,120,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.6);
+  top: 0;
+  left: 0;
+  right: 0;
+
+  display: none; /* 🔥 ważne */
+
+  justify-content: space-between;
+  gap: 12px;
+
+  padding: 5px 22px;
+
+  z-index: 1000;
+
+  
 }
+
 
 .iconBtn{
+  width:50px;
+  height:50px;
 
-width:42px;
-height:42px;
-border-radius:12px;
-border:none;
-font-size:22px;
-background:rgba(255,255,255,0.25);
-backdrop-filter: blur(6px);
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
+  border-radius:16px;
+
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  border:1px solid rgba(255,255,255,0.25);
+
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.3),
+    0 6px 20px rgba(0,0,0,0.1);
+
+  transition: all 0.2s ease;
 }
 
+.iconBtn:active{
+  transform: scale(0.92);
+}
 /* ---------- LIST ---------- */
 .listItem{
-  background:#fff;
-  color:#222;
-  border-radius:14px;
-  padding:12px;
-  margin-bottom:10px;
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(12px);
+
+  border-radius:20px;
+
+  padding:14px 16px;
+  margin-bottom:12px;
+
   display:flex;
   align-items:center;
   justify-content:space-between;
-  gap:10px;
-  box-shadow: 0 8px 22px rgba(31,20,100,0.04);
+
+  border:1px solid rgba(255,255,255,0.3);
+
+  box-shadow:
+    0 12px 30px rgba(50,30,120,0.12),
+    inset 0 1px 1px rgba(255,255,255,0.7);
+
+  transition: all 0.2s ease;
+}
+
+.listItem:active{
+  transform: scale(0.98);
 }
 .listItem .text { flex:1 }
 .smallBtn{
@@ -299,12 +316,7 @@ input{
   .stats{ font-size:13px }
 }
 
-.card{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  gap:10px;
-}
+
 
 .speak{
   cursor:pointer;
@@ -337,12 +349,30 @@ object-fit:cover;
 border-radius:16px;
 margin-bottom:10px;
 }
+
 .modeBtn{
-padding:8px 14px;
-border-radius:12px;
-border:none;
-background:rgba(255,255,255,0.3);
-font-weight:600;
+
+  width:auto;
+  padding:8px 18px;
+  border-radius:999px;
+
+  background: rgba(255,255,255,0.15);
+  color:#2d1f80 ;
+
+  font-weight:600;
+  font-size:13px;
+  letter-spacing:0.5px;
+align-items:center;
+  justify-content:center;
+  backdrop-filter: blur(10px);
+
+  border:1px solid rgba(255,255,255,0.25);
+
+  box-shadow:
+    inset 0 1px 1px rgba(255,255,255,0.3),
+    0 6px 20px rgba(0,0,0,0.08);
+
+  transition: all 0.2s ease;
 }
 	#startScreen{
 
@@ -368,9 +398,10 @@ color:white;
 text-align:center;
 }
 
-.startContent h1{
-font-size:38px;
-margin:0;
+.startContent p{
+  opacity:0.8;
+  font-size:15px;
+  letter-spacing:0.5px;
 }
 
 .tapText{
@@ -383,10 +414,13 @@ font-size:20px;
 		max-width:90px;
 }
 .logoFish{
-width:80px;
-height:auto;
-display:block;
-margin:auto;
+  width:100px;
+  animation: float 2s ease-in-out infinite;
+}
+
+@keyframes float{
+  0%,100%{ transform: translateY(0); }
+  50%{ transform: translateY(-6px); }
 }
 .tap{
 margin-top:20px;
@@ -399,58 +433,85 @@ display:none;
 }
 
 	.tiles{
-display:grid;
-grid-template-columns:1fr;
-gap:16px;
-margin-top:30px;
+  display: grid;
+  grid-template-columns: 1fr ; /* 🔥 DWIE OBOK SIEBIE */
+  gap: 16px;
+  margin-top: 20px;
 }
+
 
 .bigTile{
+  height:120px;
+  width:75%;
 
-height:140px;
-width:70%;
+  margin:auto;
 
-margin:auto;
+  border-radius:26px;
 
-border-radius:20px;
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.65),
+    rgba(255,255,255,0.35)
+  );
 
-background:rgba(255,255,255,0.3);
-backdrop-filter:blur(6px);
+  backdrop-filter: blur(16px);
 
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
+  display:flex;
+  flex-direction:row;
 
-font-size:36px;
-font-weight:600;
+  align-items:center;
+  justify-content:center; /* 🔥 CENTROWANIE */
 
-box-shadow:0 12px 30px rgba(0,0,0,0.08);
+  gap:14px;
 
-cursor:pointer;
+  box-shadow:
+    0 20px 60px rgba(50,30,120,0.25),
+    inset 0 2px 2px rgba(255,255,255,0.8);
+
+  transition: all 0.2s ease;
+}
+.bigTile{
+  transform: translateY(0);
 }
 
+.bigTile:active{
+  transform: translateY(4px) scale(0.97);
+}
 .bigTile span{
-font-size:16px;
-margin-top:6px;
-letter-spacing:1px;
+  font-size:15px;
+  font-weight:600;
+
+  color:#1b1635;
+
+  letter-spacing:2px;
+
+  line-height:1; /* 🔥 KLUCZ */
+  display:flex;
+  align-items:center;
 }
 	.menuTitle{
 text-align:center;
-font-size:18px;
+font-size:26px;
 font-weight:700;
-margin-top:40px;
-margin-bottom:24px;
+margin-top:20px;
+
+margin-bottom:20px;
 color:#1b1635;
 letter-spacing:3px;
 opacity:0.7;
 }
+.tileIcon{
+  width:64px;
+  height:64px;
 
+  flex-shrink:0;
 
+  display:block; /* 🔥 fix Android */
+}
 
 	.questionCard{
 
-margin-top:80px;
+margin-top:20px;
 
 margin-left:12px;
 margin-right:auto;
@@ -534,7 +595,255 @@ resize:none;        /* blokuje rozciąganie palcem */
 #addGrammar{
 max-width:420px;
 margin:auto;
-}	
+}
+
+
+.bottomCorners{
+  position:fixed;
+   bottom: calc(100px + env(safe-area-inset-bottom));
+
+  left:50%;
+  transform:translateX(-50%);
+
+  width:100%;
+  max-width:420px;
+
+  z-index:999;
+  pointer-events:none;
+}
+
+/* wspólne */
+.cornerBtn{
+  position:absolute;
+
+  width: clamp(50px, 18vw, 90px);
+  height: clamp(50px, 18vw, 90px);
+
+  background: linear-gradient(135deg,#7b5cff,#9f7bff);
+  color:white;
+
+  font-size: clamp(20px, 5vw, 28px);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 10px 30px rgba(123,92,255,0.4);
+
+  pointer-events:auto;
+  border:none;
+}
+
+.cornerBtn.left{
+  left:20px;
+}
+
+.cornerBtn.right{
+  right:20px;
+}
+/* klik efekt */
+.cornerBtn:active{
+  transform:scale(0.92);
+}
+.fabContainer{
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+
+  max-width: 420px;
+  margin: auto;
+
+  display: flex;
+  justify-content: space-between;
+
+  padding: 0 20px;
+
+  z-index: 999;
+  pointer-events: none;
+}
+
+.fab{
+  width: 68px;
+  height: 69px;
+
+  border-radius: 50%;
+
+  background: rgba(30, 20, 100, 0.28);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #2d1f80;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+  transition: transform 0.2s ease, background 0.2s ease;
+  pointer-events: auto;
+  padding: 0;
+}
+
+.fab:active{
+  transform: scale(0.92);
+}
+
+.fab svg{
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.audioButtons{
+  display:flex;
+  justify-content:center;
+  gap:14px;
+  margin-top:10px;
+}
+
+.audioButtons button{
+  width:48px;
+  height:48px;
+
+  border-radius:50%;
+  border:none;
+
+  background: linear-gradient(135deg,#7b5cff,#9f7bff);
+  color:white;
+
+  font-size:20px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:0 6px 16px rgba(0,0,0,0.2);
+
+  cursor:pointer;
+}
+
+.audioItem{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+
+  font-size:22px;
+  cursor:pointer;
+}
+
+.audioItem span{
+  font-size:11px;
+  opacity:0.6;
+}
+#imageUpload{
+  display:none;
+}
+.uploadBtn{
+  display:block;
+
+  text-align:center;
+
+  padding:10px;
+  border-radius:14px;
+
+  background:rgba(255,255,255,0.25);
+  backdrop-filter:blur(6px);
+
+  font-size:14px;
+  font-weight:600;
+
+  color:#2d1f80;
+
+  margin-bottom:12px;
+}
+
+#cardText{
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.actionBtn{
+  width:42px;
+  height:42px;
+
+  border-radius:12px;
+
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+
+  border:1px solid rgba(255,255,255,0.3);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  box-shadow:
+    0 6px 16px rgba(0,0,0,0.1);
+
+  transition: all 0.2s ease;
+}
+
+.actionBtn:active{
+  transform: scale(0.9);
+}
+
+.actionBtn svg{
+  width:20px;
+  height:20px;
+}
+
+.stats{
+  display:flex;
+  gap:10px;
+
+  margin-bottom:18px;
+}
+
+.stat{
+  flex:1;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  padding:10px 12px;
+
+  border-radius:14px;
+
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+
+  border:1px solid rgba(255,255,255,0.3);
+
+  box-shadow:
+    0 6px 18px rgba(50,30,120,0.12),
+    inset 0 1px 1px rgba(255,255,255,0.6);
+
+  font-size:13px;
+  font-weight:600;
+
+  color:#1b1635;
+}
+.stat strong,
+.stat span{
+  margin-left:6px;
+  font-weight:700;
+}
+.stat:nth-child(1) strong{
+  color:#2d1f80; /* cards */
+}
+
+.stat:nth-child(2) strong{
+  color:#ff7a00; /* streak 🔥 */
+}
+
+.stat:nth-child(3){
+  opacity:0.8;
+}
 </style>
 </head>
 <body>
@@ -545,8 +854,8 @@ margin:auto;
 <img src="fishki-logo.png" class="logoFish">
 </div>
 <h1>Fishki</h1>
-<p>Learn faster with flashcards</p>
-<div class="tapText">Dotknij aby rozpocząć</div>
+<p>Train your brain daily</p>
+<div class="tapText">Let’s go</div>
 </div>
 </div>
 
@@ -555,10 +864,34 @@ margin:auto;
 <div class="header"></div>
 
 <div class="topButtons">
-<button class="iconBtn" onclick="goHome()">🏠</button>
-<button class="iconBtn" onclick="goBack()">⬅️</button>
-<button id="btnList" class="iconBtn left" onclick="goToList()">📋</button>
-<button id="btnAdd" class="iconBtn right" onclick="goToAdd()">➕</button>
+<button id="btnBack" class="iconBtn">
+<svg viewBox="0 0 24 24" fill="none">
+<path d="M14 6L8 12L14 18" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+</button>
+
+<button id="btnHome" class="iconBtn">
+<svg viewBox="0 0 24 24" fill="none">
+<path d="M3 10L12 3L21 10V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V10Z" stroke="#2d1f80" stroke-width="2"/>
+<path d="M9 21V12H15V21" stroke="#2d1f80" stroke-width="2"/>
+</svg>
+</button>
+
+<button id="btnList" class="iconBtn">
+<svg viewBox="0 0 24 24" fill="none">
+<path d="M9 6H20M9 12H20M9 18H20" stroke="#2d1f80" stroke-width="2"/>
+<circle cx="4" cy="6" r="1.5" fill="#2d1f80"/>
+<circle cx="4" cy="12" r="1.5" fill="#2d1f80"/>
+<circle cx="4" cy="18" r="1.5" fill="#2d1f80"/>
+</svg>
+</button>
+
+<button id="btnAdd" class="iconBtn">
+<svg viewBox="0 0 24 24" fill="none">
+<path d="M12 5V19M5 12H19" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round"/>
+</svg>
+</button>
+
 <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
 <button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
 
@@ -571,18 +904,35 @@ margin:auto;
 <div class="menuTitle">MENU</div>
 <div class="tiles">
 
-<div class="tile bigTile" onclick="openAll()">
-📚
-<span>FISZKI</span>
+<div class="bigTile" onclick="openAll()">
+
+<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
+  <rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/>
+  <rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/>
+</svg>
+
+<span>FLASHCARDS</span>
 </div>
 
-<div class="tile bigTile" onclick="openQuestions()">
-❓
+<div class="bigTile" onclick="openQuestions()">
+
+<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
+  <path d="M9 9C9 7.5 10.2 6.5 12 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.2 10.8 13.3 11.3C12.5 11.8 12 12.3 12 13.5" 
+        stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="12" cy="17" r="1" fill="#2d1f80"/>
+</svg>
+
 <span>QUESTION</span>
 </div>
-<div class="tile bigTile" onclick="openGrammar()">
-📖
-<span>GRAMA</span>
+<div class="bigTile" onclick="openGrammar()">
+
+<svg viewBox="0 0 24 24" fill="none" class="tileIcon">
+  <path d="M4 6H10V18H4Z" stroke="#2d1f80" stroke-width="2"/>
+  <path d="M14 6H20V18H14Z" stroke="#2d1f80" stroke-width="2"/>
+  <path d="M10 6C10 6 12 7 14 6" stroke="#2d1f80" stroke-width="2"/>
+</svg>
+
+<span>GRAMMAR</span>
 </div>
 
 </div>
@@ -594,33 +944,54 @@ margin:auto;
 
 <div id="homeStudy" class="view">
 
-<div class="stats">
-<div class="left">
-<div class="stat">🔥 Liczba: <strong id="counter">0</strong></div>
+
+
+
+  <div class="stats">
+
+  <div class="stat">📚 <strong id="counter">0</strong></div>
+
+  <div class="stat">🔥 <strong id="streakUI">0</strong></div>
+
+  <div class="stat">📊 <span id="progress-mini">—</span></div>
+
 </div>
 
-<div style="font-size:13px;color:rgba(11,8,16,0.6)">
-Progres: <span id="progress-mini">—</span>
-</div>
-</div>
+
 
 <div class="card" id="flashcard">
 
 <img id="cardImage">
 
-<span id="cardText">Dodaj pierwszą fiszkę</span>
+<span id="cardText">Add flashcard</span>
 
-<span class="speak" onclick="dueCards.length && speakWord(dueCards[currentIndex].front)">🔊</span>
 
-<span class="play" onclick="playRecording()">▶️</span>
 
 </div>
 
 <div id="reviewButtons">
 
-<button onclick="reviewCard(0)">❌ Nie pamiętam</button>
-<button onclick="reviewCard(1)">🙂 Średnio</button>
-<button onclick="reviewCard(2)">✅ Łatwe</button>
+<button onclick="reviewCard(0)">❌ I don't remember</button>
+<button onclick="reviewCard(1)">🙂 Average</button>
+<button onclick="reviewCard(2)">✅ Easy</button>
+
+</div>
+
+<div class="fabContainer">
+
+ <button class="fab fab-left" onclick="playRecording()">
+  <svg viewBox="0 0 24 24" fill="#2d1f80">
+    <path d="M8 5L19 12L8 19V5Z"/>
+  </svg>
+</button>
+
+  <button class="fab fab-right" onclick="speakCurrentCard()">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M5 9V15H9L14 20V4L9 9H5Z" stroke="#2d1f80" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M16 9C17.5 10.5 17.5 13.5 16 15" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
+    <path d="M18.5 7C21 9.5 21 14.5 18.5 17" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
 
 </div>
 
@@ -630,23 +1001,12 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="questions" class="view">
 
-<h3>Foldery</h3>
+<h3>Folders</h3>
 
 <div id="questionFolders"></div>
 
-<button class="primary" onclick="openFolderPopup()">➕ Nowy folder</button>
+<button class="primary" onclick="openFolderPopup()">➕ New folder</button>
 
-<div style="display:flex;gap:10px">
-
-<button class="secondary" onclick="exportQuestions()">⬇ Export</button>
-
-<button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
-
-</div>
-
-<input type="file" id="importQuestions" accept=".json" style="display:none">
-
-<button class="secondary" onclick="goHome()">Powrót</button>
 
 </div>
 
@@ -654,7 +1014,7 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="questionFolder" class="view">
 
-<h3>Pytania</h3>
+<h3>Questions</h3>
 
 <div id="questionList"></div>
 
@@ -664,7 +1024,13 @@ Progres: <span id="progress-mini">—</span>
 <!-- QUESTION CARDS -->
 
 <div id="questionCards" class="view">
+<div class="stats">
 
+  <div class="stat">❓ <strong id="questionCounter">0</strong></div>
+
+  <div class="stat">📊 <span id="questionProgress">—</span></div>
+
+</div>
 <div class="questionCard" id="questionCardText"></div>
 
 </div>
@@ -678,17 +1044,17 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="addQuestion" class="view">
 
-<h3>Nowe pytanie</h3>
+<h3>New question</h3>
 
-<label>Pytanie</label>
+<label>Question</label>
 <textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
 
-<label>Odpowiedź</label>
-<textarea class="answerField" id="answerInput" placeholder="Twoja odpowiedź (może być nawet 80 słów)"></textarea>
+<label>Answer</label>
+<textarea class="answerField" id="answerInput" placeholder="Your answer"></textarea>
 
-<button class="primary" onclick="saveQuestion()">Zapisz</button>
+<button class="primary" onclick="saveQuestion()">Save</button>
 
-<button class="secondary" onclick="setView('questionFolder', false)">Powrót</button>
+<button class="secondary" onclick="setView('questionFolder', false)">Back</button>
 
 </div>
 
@@ -699,27 +1065,31 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="grammarList" class="view">
 
-  <h3>Gramatyka</h3>
+  <h3>Grammar</h3>
 
   <!-- LISTA -->
   <div id="grammarItems"></div>
 
-  <!-- BUTTONY -->
-  <div style="display:flex;gap:10px;margin-top:15px">
-    <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
-    <button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
-  </div>
 
-  <!-- UKRYTY INPUT -->
-  <input type="file" id="importGrammar" accept=".json" style="display:none">
 
+</div>
+
+<div id="grammarStudy" class="view">
+<div class="stats">
+
+  <div class="stat">📖 <strong id="grammarCounter">0</strong></div>
+
+  <div class="stat">📊 <span id="grammarProgress">—</span></div>
+
+</div>
+  <div class="questionCard" id="grammarCardText"></div>
 </div>
 
 <!-- ADD GRAMMAR -->
 
 <div id="addGrammar" class="view">
 
-<h3>Nowa gramatyka</h3>
+<h3>New grammar</h3>
 
 <input id="gTitle" placeholder="Topic np. Passive Voice">
 
@@ -730,32 +1100,25 @@ Progres: <span id="progress-mini">—</span>
 <textarea id="gPractice" placeholder="✏️ Practice"></textarea>
 <textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
 
-<button class="primary" onclick="saveGrammar()">Zapisz</button>
+<button class="primary" onclick="saveGrammar()">Save</button>
 
 </div>
 <!-- LIST -->
 
 <div id="list" class="view">
 
-<h3>Lista słówek</h3>
+<h3>Vocabulary List</h3>
 
 <div style="margin:8px 0 12px">
-<input id="searchBox" placeholder="Szukaj..." oninput="renderList()" />
+<input id="searchBox" placeholder="Search..." oninput="renderList()" />
 </div>
 
 <div id="wordsList"></div>
 
 <div style="display:flex;gap:10px">
 
-<button class="secondary" onclick="toggleSort()">Sortuj A→Z</button>
+<button class="secondary" onclick="toggleSort()">Sort A→Z</button>
 
-<button class="secondary" onclick="goHome()">Powrót</button>
-
-<button class="secondary" onclick="exportBackup()">Eksportuj kopię zapasową</button>
-
-<input type="file" id="importFile" accept=".json" style="display:none">
-
-<button class="secondary" onclick="document.getElementById('importFile').click()">Importuj</button>
 
 </div>
 
@@ -766,35 +1129,53 @@ Progres: <span id="progress-mini">—</span>
 
 <div id="add" class="view">
 
-<h3>Dodaj fiszkę</h3>
+<h3>Add flashcard</h3>
 
-<input type="text" id="frontInput" placeholder="Słowo po angielsku">
-
-<input type="text" id="backInput" placeholder="Tłumaczenie">
+<input type="text" id="frontInput" placeholder="The word in English">
+<input type="text" id="backInput" placeholder="Translation">
 
 <input type="file" id="imageUpload" accept="image/*">
 
-<label for="imageUpload">📷 Dodaj własne zdjęcie</label>
+<label for="imageUpload" class="uploadBtn">
+  📷 Add photo
+</label>
 
 <div id="imageResults"></div>
 
-<button class="secondary" onclick="startRecording()">🎤 Nagraj wymowę</button>
-
-<button class="secondary" onclick="playRecording()">▶️ Odsłuch nagrania</button>
+<div class="audioButtons">
+  <div class="audioItem" onclick="startRecording()">
+    🎤
+    <span>Record</span>
+  </div>
+  <div class="audioItem" onclick="playRecording()">
+    ▶️
+    <span>Play</span>
+  </div>
+</div>
 
 <div id="recordUI" style="display:none;text-align:center;margin-top:10px">
 
-<div style="font-size:22px">🎤 Nagrywanie...</div>
+<div style="font-size:22px">🎤 Recording...</div>
 
 <div style="font-size:28px;color:red">● REC</div>
 
 <div id="recordTimer">0</div>
+</div>
+
+<button class="primary" onclick="addCard()">Add flashcard</button>
+
+  <div style="
+  text-align:center;
+  font-size:11px;
+  opacity:0.5;
+  margin-top:30px;
+  padding-bottom:20px;
+  ">
+  Photos by Unsplash
+  </div>
 
 </div>
 
-<button class="primary" onclick="addCard()">Dodaj fiszkę</button>
-
-<button class="secondary" onclick="goHome()">Powrót</button>
 
 </div>
 
@@ -805,21 +1186,21 @@ Progres: <span id="progress-mini">—</span>
 
 <div class="modal">
 
-<h3>Edytuj słówko</h3>
+<h3>Edit word</h3>
 
 <div class="row">
-<input id="editFront" placeholder="Słowo po angielsku" />
+<input id="editFront" placeholder="The word in English" />
 </div>
 
 <div class="row">
-<input id="editBack" placeholder="Tłumaczenie" />
+<input id="editBack" placeholder="Translation" />
 </div>
 
 <div style="display:flex;gap:10px;justify-content:flex-end">
 
-<button class="secondary" onclick="closeModal()">Anuluj</button>
+<button class="secondary" onclick="closeModal()">Cancel</button>
 
-<button class="primary" onclick="saveModal()">Zapisz</button>
+<button class="primary" onclick="saveModal()">Save</button>
 
 </div>
 
@@ -842,27 +1223,38 @@ Progres: <span id="progress-mini">—</span>
 
 </div>
 
-</div>
 
-	<div id="folderPopup" class="modal-backdrop">
+
+<div id="folderPopup" class="modal-backdrop">
 
 <div class="modal">
 
-<h3>Nazwa folderu</h3>
+<h3>Name folder</h3>
 
 <input id="folderNameInput" placeholder="Np. Interview">
 
 <div style="display:flex;gap:10px;justify-content:flex-end">
 
-<button class="secondary" onclick="closeFolderPopup()">Anuluj</button>
+<button class="secondary" onclick="closeFolderPopup()">Cancel</button>
 
-<button class="primary" onclick="saveFolder()">Zapisz</button>
-
-</div>
+<button class="primary" onclick="saveFolder()">Save</button>
 
 </div>
 
 </div>
+
+</div>
+</div>
+<div id="confirmPopup" class="modal-backdrop">
+  <div class="modal">
+    <h3 id="confirmText">Are you sure?</h3>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="secondary" onclick="closeConfirm()">Cancel</button>
+      <button class="primary" id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
 
 
 <script>
