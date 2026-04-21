@@ -65,8 +65,7 @@ touch-action: manipulation;
   max-width:420px;
   min-height:100vh;
   margin:0 auto;
-  padding:22px 22px 160px;
-  height:100dvh;
+  padding: calc(env(safe-area-inset-top) + 72px) 22px 160px;
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
@@ -185,29 +184,29 @@ margin-top: 10px;
 }
 .topButtons{
   position: fixed;
-	  top: env(safe-area-inset-top); /* 🔥 jedyna ważna zmiana */
-  left: 0;
-  right: 0;
- background: rgba(123,92,255,0.25);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(255,255,255,0.2);
- box-shadow:
-    0 20px 50px rgba(50,30,120,0.15),
-    inset 0 1px 0 rgba(255,255,255,0.6);
   top: 0;
   left: 0;
   right: 0;
 
-  display: none; /* 🔥 ważne */
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 8px;
 
+  display: none;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
 
-  padding: 5px 22px;
+  background: rgba(123,92,255,0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  box-shadow:
+    0 10px 30px rgba(50,30,120,0.12),
+    inset 0 1px 0 rgba(255,255,255,0.35);
 
   z-index: 1000;
-
-  
 }
 
 
