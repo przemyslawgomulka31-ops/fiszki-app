@@ -63,15 +63,18 @@ touch-action: manipulation;
 /* ---------- APP LAYOUT ---------- */
 .app{
   max-width:420px;
-	min-height:100vh;
   margin:0 auto;
-	 
-  padding:22px 22px 160px;
-  height:100dvh;
+
+  padding:
+    calc(env(safe-area-inset-top) + 70px)  /* 🔥 miejsce na pasek */
+    22px
+    calc(160px + env(safe-area-inset-bottom));
+
+  min-height:100vh;
+
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
- 
 }
 button, .actionBtn, .iconBtn, .bigTile {
   outline: none;
