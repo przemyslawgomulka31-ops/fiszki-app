@@ -40,21 +40,29 @@ background:#8f7bff;
 }
 
 body{
+  min-height:100dvh;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color:#111;
 
-min-height:100dvh;
-font-family: "Segoe UI", Roboto, Arial, sans-serif;
-color:#111;
-  overscroll-behavior: none;
-background: linear-gradient(
-180deg,
-var(--accent1) 0%,
-var(--accent2) 25%,
-var(--accent3) 55%,
-var(--accent4) 80%,
-var(--white) 100%
-);
--webkit-font-smoothing:antialiased;
--moz-osx-font-smoothing:grayscale;
+  background:#8f7bff; /* tylko kolor, bez gradientu */
+}
+	body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+
+  background: linear-gradient(
+    180deg,
+    #8f7bff 0%,
+    #a89bff 25%,
+    #c9c2ff 55%,
+    #e6e3ff 80%,
+    #ffffff 100%
+  );
+
+  z-index:-1;
+
+  transform: translateZ(0); /* 🔥 fix iOS */
 }
 
 html{
