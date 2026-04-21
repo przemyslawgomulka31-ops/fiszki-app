@@ -1768,6 +1768,14 @@ btnAll.onclick = () => {
       }
     }
 refreshUI();
+
+/* 🔥 FIX iOS SCROLL BUG */
+window.scrollTo(0, 0)
+
+document.body.style.transform = "translateZ(0)";
+setTimeout(() => {
+  document.body.style.transform = "";
+}, 10);
   }
 	function goToAddQuestion(){
 setView("addQuestion")
