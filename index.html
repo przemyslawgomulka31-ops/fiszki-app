@@ -909,6 +909,13 @@ if(window.navigator.standalone){ console.log('PWA mode'); } else { console.log('
 document.getElementById('startScreen').addEventListener('click', function(){ this.style.display='none'; });
 document.getElementById('btnBack').onclick = goBack;
 document.getElementById('btnHome').onclick = goHome;
+
+  function refreshAll(){
+  loadCardsFromDB(() => {
+    renderList();
+    renderCard();
+  });
+}
 </script>
 </body>
 </html>
