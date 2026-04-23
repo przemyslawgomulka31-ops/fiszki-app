@@ -20,48 +20,49 @@
         --muted: 
           rgba(0,0,0,0.55); }
   *{box-sizing:border-box} html, 
-html, body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
-  overscroll-behavior: none;
-  background: transparent;
+*{box-sizing:border-box}
+html, body{
+margin:0;
+padding:0;
+height:100%;
+	
+	overscroll-behavior:none;
+background:#8f7bff;
 }
 
-body {
-  min-height: 100vh;
-  font-family: "Segoe UI", Roboto, Arial, sans-serif;
-  color: #111;
-  position: relative;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+body{
+padding-top: env(safe-area-inset-top);
+min-height:100dvh;
+font-family: "Segoe UI", Roboto, Arial, sans-serif;
+color:#111;
+
+background: linear-gradient(
+180deg,
+var(--accent1) 0%,
+var(--accent2) 25%,
+var(--accent3) 55%,
+var(--accent4) 80%,
+var(--white) 100%
+);
+-webkit-font-smoothing:antialiased;
+-moz-osx-font-smoothing:grayscale;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: linear-gradient(
-    180deg,
-    #8f7bff 0%,
-    #a89bff 25%,
-    #c9c2ff 55%,
-    #e6e3ff 80%,
-    #ffffff 100%
-  );
+html{
+touch-action: manipulation;
 }
-  /* ---------- APP LAYOUT ---------- */ 
-  .app{ max-width:420px; 
-       min-height:100dvh;
-       margin:0 auto; 
-       padding: calc(env(safe-area-inset-top) + 100px) 22px 160px; 
-       padding-bottom: calc(160px + env(safe-area-inset-bottom)); 
-       position:relative;
-       overflow-y:auto; 
-       -webkit-overflow-scrolling:touch; 
-       //transform: translateZ(0); /* 🔥 */ } 
+/* ---------- APP LAYOUT ---------- */
+.app{
+  max-width:420px;
+  margin:0 auto;
+	 
+  padding:22px 22px 160px;
+  height:100dvh;
+  position:relative;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+ overscroll-behavior: none;
+}
   button, 
   .actionBtn, 
   .iconBtn, 
