@@ -401,6 +401,7 @@ let currentFolderId = null;
 let grammarCards = [];
 let grammarIndex = 0;
 let grammarStep = 0;
+let grammarAnswer = false;
 let questionCards = [];
 let questionIndex = 0;
 let questionAnswerVisible = false;
@@ -442,7 +443,15 @@ function handleGesture(){
   if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
     if(document.getElementById('homeStudy').classList.contains('active')) showAnswer();
     if(document.getElementById('questionCards').classList.contains('active')){ questionAnswerVisible = !questionAnswerVisible; renderQuestionCard(); }
-    if(document.getElementById('grammarStudy').classList.contains('active')){ grammarStep++; if(grammarStep > 6){ grammarStep = 0; grammarIndex = (grammarIndex + 1) % grammarCards.length; } renderGrammarCard(); }
+    if(document.getElementById('grammarStudy').classList.contains('active')){
+      if(grammarStep < 6){
+        grammarStep++;
+      } else {
+        grammarStep = 0;
+        grammarIndex = (grammarIndex + 1) % grammarCards.length;
+      }
+      renderGrammarCard();
+    }
     return;
   }
   if(Math.abs(diffX) > Math.abs(diffY)){
@@ -560,11 +569,40 @@ function prevCard(){ if(dueCards.length === 0) return; currentIndex = (currentIn
 function showAnswer(){ if(cards.length === 0) return; showingAnswer = !showingAnswer; renderCard(); }
 function reviewCard(score){
   updateStreak();
-  const card = dueCards[currentIndex]; if(!card) return;
+
+  const card = dueCards[currentIndex];
+  if(!card) return;
+
   const intervals = [1,3,7,14,30];
-  if(score === 0) card.level = 0; else card.level = Math.min((card.level || 0) + 1, intervals.length - 1);
+
+  if(score === 0){
+    card.level = 0;
+  } else {
+    card.level = Math.min((card.level || 0) + 1, intervals.length - 1);
+  }
+
+  // 🔥 KLUCZ: ustaw przyszłość + usuń z aktualnej sesji
   card.nextReview = Date.now() + intervals[card.level] * 24*60*60*1000;
-  db.transaction('cards','readwrite').objectStore('cards').put(card).oncomplete = ()=>nextCard();
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').put(card);
+
+  tx.oncomplete = () => {
+    // 🔥 PRZELICZ SRS
+    dueCards = dueCards.filter(c => c.id !== card.id);
+
+    if(dueCards.length === 0){
+      renderCard();
+      return;
+    }
+
+    if(currentIndex >= dueCards.length){
+      currentIndex = 0;
+    }
+
+    showingAnswer = false;
+    renderCard();
+  };
 }
 function updateStreak(){
   const today = new Date().toDateString();
@@ -594,7 +632,7 @@ async function addCard(){
     recordedAudioBase64 = null; imageURL = null;
     document.getElementById('frontInput').value=''; document.getElementById('backInput').value=''; document.getElementById('imageResults').innerHTML='';
     currentIndex = 0;
-    loadCardsFromDB(()=>{ renderCard(); renderList(); });
+    refreshAll();
     showPopup('Fiszka dodana ✅');
   };
 }
@@ -621,12 +659,19 @@ async function searchImages(){
     const res = await fetch(url); if(!res.ok){ container.innerHTML='Błąd API Unsplash'; return; }
     const data = await res.json(); container.innerHTML = '';
     if(!data.results || data.results.length === 0){ const img = document.createElement('img'); img.src='https://picsum.photos/300'; container.appendChild(img); return; }
-    data.results.forEach(photo=>{ const img = document.createElement('img'); img.src = photo.urls.small; img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll('#imageResults img').forEach(i=>i.style.border='none'); img.style.border='3px solid #7b5cff'; }; container.appendChild(img); });
+    data.results.slice(0,6).forEach(photo=>{ const img = document.createElement('img'); img.src = photo.urls.small; img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll('#imageResults img').forEach(i=>i.style.border='none'); img.style.border='3px solid #7b5cff'; }; container.appendChild(img); });
   }catch(err){ container.innerHTML='Błąd pobierania obrazów'; }
 }
 document.getElementById('imageUpload').addEventListener('change', async function(e){ const file = e.target.files[0]; if(!file) return; imageURL = await compressImage(file, 0.6); const container = document.getElementById('imageResults'); container.innerHTML=''; const img = document.createElement('img'); img.src = imageURL; img.style.border = '3px solid #7b5cff'; container.appendChild(img); });
 
-function deleteCard(index){ if(!confirm('Usunąć fiszkę?')) return; const id = cards[index].id; db.transaction('cards','readwrite').objectStore('cards').delete(id).oncomplete = ()=>{ if(currentIndex >= cards.length) currentIndex = 0; loadCardsFromDB(renderList); }; }
+function deleteCard(id){
+  if(!confirm('Usunąć fiszkę?')) return;
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').delete(id);
+
+  tx.oncomplete = refreshAll;
+}
 function renderList(){
   const list = document.getElementById('wordsList');
   const search = document.getElementById('searchBox').value.trim().toLowerCase();
@@ -640,22 +685,49 @@ function renderList(){
     div.innerHTML = `
       <div class="text"><b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}</div>
       <div style="display:flex;gap:8px">
-        <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
-        <button class="actionBtn" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
+        <button class="actionBtn" onclick=editCard(${card.id}) aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
+        <button class="actionBtn"onclick="deleteCard(${card.id})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
       </div>`;
     list.appendChild(div);
   });
 }
 function toggleSort(){ sortAZ = !sortAZ; renderList(); }
-function editCard(index){ editingIndex = index; document.getElementById('editFront').value = cards[index].front; document.getElementById('editBack').value = cards[index].back; document.getElementById('modal').classList.add('show'); }
+function editCard(id){
+  const card = cards.find(c => c.id === id);
+  if(!card) return;
+
+  editingIndex = id;
+
+  document.getElementById('editFront').value = card.front;
+  document.getElementById('editBack').value = card.back;
+
+  document.getElementById('modal').classList.add('show');
+}
 function saveModal(){
   const newFront = document.getElementById('editFront').value.trim();
   const newBack = document.getElementById('editBack').value.trim();
-  if(!newFront || !newBack){ showPopup('Wypełnij pola'); return; }
-  const original = cards[editingIndex];
-  const updatedCard = { id: original.id, front:newFront, back:newBack, audio:original.audio, image:original.image, level:original.level, nextReview:original.nextReview };
-  db.transaction('cards','readwrite').objectStore('cards').put(updatedCard).oncomplete = ()=>{ loadCardsFromDB(renderList); };
-  closeModal();
+
+  if(!newFront || !newBack){
+    showPopup('Wypełnij pola');
+    return;
+  }
+
+  const original = cards.find(c => c.id === editingIndex);
+  if(!original) return;
+
+  const updatedCard = {
+    ...original,
+    front: newFront,
+    back: newBack
+  };
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').put(updatedCard);
+
+  tx.oncomplete = () => {
+    closeModal();
+    refreshAll();
+  };
 }
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
 
@@ -671,8 +743,10 @@ function renderGrammar(){
       <div class="text"><b>${escapeHtml(g.title)}</b></div>
       <div style="display:flex;gap:8px">
         <button class="actionBtn" onclick="studyGrammar(${g.id})" aria-label="Study"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M8 5L19 12L8 19V5Z" fill="currentColor"/></svg></button>
-        <button class="actionBtn" onclick="editGrammar(${g.id})" aria-label="Edit"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M4 20H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="actionBtn" onclick="deleteGrammar(${g.id})" aria-label="Delete"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 6H21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M8 6V4H16V6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6L18 20H6L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="actionBtn" onclick="editGrammar(${g.id})" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
+        <button class="actionBtn" onclick="deleteGrammar(${g.id})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
+       
+       
       </div>`;
     container.appendChild(div);
   });
@@ -686,7 +760,8 @@ function renderGrammarCard(){
   const step = steps[grammarStep - 1];
   el.innerHTML = `<div style="text-align:left;font-size:16px"><b>${step.label}</b><br><br>${escapeHtml(step.value || 'Brak danych')}</div>`;
 }
-function deleteGrammar(id){ if(!confirm('Usunąć?')) return; db.transaction('grammar','readwrite').objectStore('grammar').delete(id).oncomplete = renderGrammar; }
+function deleteGrammar(id){ if(!confirm('Usunąć?')) return; const tx = db.transaction('grammar','readwrite'); tx.objectStore('grammar').delete(id); tx.oncomplete = ()=>loadGrammarFromDB(); }
+function editGrammar(id){ const g = grammarCards.find(x => x.id === id); if(!g) return; document.getElementById('gTitle').value = g.title || ''; document.getElementById('gExplanation').value = g.explanation || ''; document.getElementById('gStructure').value = g.structure || ''; document.getElementById('gUsage').value = g.usage || ''; document.getElementById('gExamples').value = g.examples || ''; document.getElementById('gPractice').value = g.practice || ''; document.getElementById('gMistakes').value = g.mistakes || ''; setView('addGrammar'); }
 function saveGrammar(){
   if(!db){ showPopup('Baza danych jeszcze się ładuje'); return; }
   const btn = document.querySelector('#addGrammar .primary'); btn.disabled = true; btn.innerText = 'Zapisywanie...';
