@@ -57,21 +57,22 @@
   { outline: none; 
    -webkit-tap-highlight-color: transparent; }
   
-  .bottomControls{ position:fixed; 
-                  left:0; 
-                  right:0; 
-                  bottom:0; 
-                  padding:16px; 
-                  display:flex; 
-                  flex-direction:column; 
-                  gap:12px; 
-                  max-width:420px; 
-                  margin:auto; 
-                  background:linear-gradient( to top, rgba(230,227,255,0.95), rgba(230,227,255,0) 
-                                             backdrop-filter: none; 
-                  -webkit-backdrop-filter: none; 
-                  background: rgba(230,227,255,0.95); /* stały kolor */ ); 
-                  backdrop-filter:blur(10px); } svg { width: 100%; height: 100%; display: block; } 
+  .bottomControls{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-width:420px;
+  margin:auto;
+
+  background: linear-gradient(to top, rgba(230,227,255,0.95), rgba(230,227,255,0));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
   /* ---------- HEADER ---------- */ 
   .header{ font-size:20px; font-weight:600; text-align:center; margin:0px 0 14px; padding-top:50px; color:#1b1635; } 
   /* ---------- STATS ---------- */ 
@@ -665,7 +666,19 @@ async function searchImages(){
 }
 document.getElementById('imageUpload').addEventListener('change', async function(e){ const file = e.target.files[0]; if(!file) return; imageURL = await compressImage(file, 0.6); const container = document.getElementById('imageResults'); container.innerHTML=''; const img = document.createElement('img'); img.src = imageURL; img.style.border = '3px solid #7b5cff'; container.appendChild(img); });
 
-function deleteCard(index){ if(!confirm('Usunąć fiszkę?')) return; const id = cards[index].id; db.transaction('cards','readwrite').objectStore('cards').delete(id).oncomplete = ()=>{ if(currentIndex >= cards.length) currentIndex = 0; loadCardsFromDB(renderList); }; }
+function deleteCard(id){
+  if(!confirm('Usunąć fiszkę?')) return;
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').delete(id);
+
+  tx.oncomplete = () => {
+    loadCardsFromDB(() => {
+      renderList();
+      renderCard();
+    });
+  };
+}
 function renderList(){
   const list = document.getElementById('wordsList');
   const search = document.getElementById('searchBox').value.trim().toLowerCase();
@@ -679,22 +692,49 @@ function renderList(){
     div.innerHTML = `
       <div class="text"><b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}</div>
       <div style="display:flex;gap:8px">
-        <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
-        <button class="actionBtn" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
+        <button class="actionBtn" onclick=editCard(${card.id}) aria-label="Edit"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg></button>
+        <button class="actionBtn"onclick="deleteCard(${card.id})" aria-label="Delete"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button>
       </div>`;
     list.appendChild(div);
   });
 }
 function toggleSort(){ sortAZ = !sortAZ; renderList(); }
-function editCard(index){ editingIndex = index; document.getElementById('editFront').value = cards[index].front; document.getElementById('editBack').value = cards[index].back; document.getElementById('modal').classList.add('show'); }
+function editCard(id){
+  const card = cards.find(c => c.id === id);
+  if(!card) return;
+
+  editingIndex = id;
+
+  document.getElementById('editFront').value = card.front;
+  document.getElementById('editBack').value = card.back;
+
+  document.getElementById('modal').classList.add('show');
+}
 function saveModal(){
   const newFront = document.getElementById('editFront').value.trim();
   const newBack = document.getElementById('editBack').value.trim();
-  if(!newFront || !newBack){ showPopup('Wypełnij pola'); return; }
-  const original = cards[editingIndex];
-  const updatedCard = { id: original.id, front:newFront, back:newBack, audio:original.audio, image:original.image, level:original.level, nextReview:original.nextReview };
-  db.transaction('cards','readwrite').objectStore('cards').put(updatedCard).oncomplete = ()=>{ loadCardsFromDB(renderList); };
-  closeModal();
+
+  if(!newFront || !newBack){
+    showPopup('Wypełnij pola');
+    return;
+  }
+
+  const original = cards.find(c => c.id === editingIndex);
+  if(!original) return;
+
+  const updatedCard = {
+    ...original,
+    front: newFront,
+    back: newBack
+  };
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').put(updatedCard);
+
+  tx.oncomplete = () => {
+    closeModal();
+    refreshAll();
+  };
 }
 function closeModal(){ document.getElementById('modal').classList.remove('show'); }
 
@@ -875,6 +915,13 @@ if(window.navigator.standalone){ console.log('PWA mode'); } else { console.log('
 document.getElementById('startScreen').addEventListener('click', function(){ this.style.display='none'; });
 document.getElementById('btnBack').onclick = goBack;
 document.getElementById('btnHome').onclick = goHome;
+
+  function refreshAll(){
+  loadCardsFromDB(() => {
+    renderList();
+    renderCard();
+  });
+}
 </script>
 </body>
 </html>
