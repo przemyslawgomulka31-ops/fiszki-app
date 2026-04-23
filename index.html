@@ -1271,7 +1271,6 @@ function renderList(){
 
   let arr = [...cards]
 
-  /* 🔎 FILTR */
   if(search){
     arr = arr.filter(card =>
       card.front.toLowerCase().includes(search) ||
@@ -1279,36 +1278,35 @@ function renderList(){
     )
   }
 
-  /* 🔤 SORT */
   if(sortAZ){
     arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
   }
 
-  const MAX_RENDER = 30
-
-  arr.slice(0, MAX_RENDER).forEach((card)=>{
+  arr.slice(0,30).forEach((card)=>{
 
     const div = document.createElement("div")
     div.className = "listItem"
 
+    // 🔥 ICON osobno (zero bugów)
+    const eyeIcon = card.hidden
+      ? `<svg viewBox="0 0 24 24"><path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/></svg>`
+      : `<svg viewBox="0 0 24 24"><path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/></svg>`
+
     div.innerHTML = `
       <div class="text">
-        <b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}
-        ${card.hidden ? '🙈' : ''}
+        <b>${escapeHtml(card.front)}</b> ${card.hidden ? '🙈' : ''}
       </div>
 
       <div style="display:flex; gap:8px">
 
-        <!-- EDIT -->
-        <button class="actionBtn" onclick="editCard(${card.id})" aria-label="Edit">
+        <button class="actionBtn" onclick="editCard(${card.id})">
           <svg viewBox="0 0 24 24" fill="none">
             <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
             <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
           </svg>
         </button>
 
-        <!-- DELETE -->
-        <button class="actionBtn delete" onclick="deleteCard(${card.id})" aria-label="Delete">
+        <button class="actionBtn" onclick="deleteCard(${card.id})">
           <svg viewBox="0 0 24 24" fill="none">
             <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
             <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
@@ -1316,28 +1314,23 @@ function renderList(){
           </svg>
         </button>
 
-        <!-- HIDE / SHOW -->
-        <button class="actionBtn" 
-          onclick="event.stopPropagation(); toggleHidden(${card.id})" 
-          aria-label="Toggle hidden">
-
-          <svg viewBox="0 0 24 24" fill="none">
-            ${
-              card.hidden
-              ? `<path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/>`
-              : `<path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/>`
-            }
-          </svg>
-
+        <button class="actionBtn hideBtn">
+          ${eyeIcon}
         </button>
 
       </div>
     `
 
+    // 🔥 EVENT zamiast inline JS (mega stabilne)
+    div.querySelector(".hideBtn").onclick = (e)=>{
+      e.stopPropagation()
+      toggleHidden(card.id)
+    }
+
     list.appendChild(div)
+
   })
 }
-
 function toggleSort(){
 
 sortAZ=!sortAZ
