@@ -229,8 +229,9 @@
         <span id="cardText">Add flashcard</span>
       </div>
 		<div id="hideBox" style="display:none; margin:10px 0; text-align:center;">
-  <label style="font-size:14px;">
-    <input type="checkbox" id="hideCheckbox" onchange="toggleHideCard()" /> Ukryj tę fiszkę
+  <label style="font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px;">
+    <input type="checkbox" id="hideCheckbox" onchange="toggleHideCard()" />
+    <span>Ukryj tę fiszkę</span>
   </label>
 </div>
       <div id="reviewButtons">
@@ -471,11 +472,17 @@ db.createObjectStore("grammar",{keyPath:"id",autoIncrement:true})
 }
 
 request.onsuccess = function(event){
+  db = event.target.result
 
-db = event.target.result
+  loadCardsFromDB(() => {
 
-loadCardsFromDB(renderCard)
+    // 🔥 TU DODAJ
+    cards.forEach(c => {
+      if(c.hidden === undefined) c.hidden = false;
+    });
 
+    renderCard();
+  })
 }
 
 /* ===============================
