@@ -1755,27 +1755,36 @@ async function startRecordingNative() {
   }
 }
 
-async function startRecording() {
-  try {
-    await startRecordingNative();
-  } catch (e) {
-    console.error(e);
-    isRecording = false;
-    showPopup("Recording failed or permission denied");
-  }
+async function startRecording(){
+  if(!navigator.mediaDevices || !window.MediaRecorder){ showPopup('Twoja przeglądarka nie obsługuje nagrywania audio'); return; }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    let seconds = 0;
+    document.getElementById('recordUI').style.display = 'block';
+    const timer = setInterval(()=>{ seconds++; document.getElementById('recordTimer').innerText = seconds + ' s'; }, 1000);
+    mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+    mediaRecorder.onstop = ()=>{
+      clearInterval(timer);
+      document.getElementById('recordUI').style.display = 'none';
+      const blob = new Blob(audioChunks, {type:'audio/mp4'});
+      if(blob.size === 0){ showPopup('Nagranie jest puste'); return; }
+      const reader = new FileReader();
+      reader.onloadend = ()=>{ recordedAudioBase64 = reader.result; showPopup('Nagranie zapisane 🎤'); };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(track => track.stop());
+    };
+    mediaRecorder.start();
+    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }, 3000);
+  }catch(err){ showPopup(err.name === 'NotAllowedError' ? 'Nie udzielono dostępu do mikrofonu' : 'Nie można uruchomić nagrywania'); }
 }
-
-function playAddRecording() {
-  if (!recordedAudioBase64) {
-    showPopup("No recording yet");
-    return;
-  }
-
-  const audio = new Audio(recordedAudioBase64);
-  audio.play().catch(err => {
-    console.error(err);
-    showPopup("The recording cannot be played");
-  });
+function playRecording(){
+  if(recordedAudioBase64){ const audio = new Audio(recordedAudioBase64); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
+  if(!dueCards || dueCards.length === 0){ showPopup('Brak fiszek'); return; }
+  const card = dueCards[currentIndex]; if(!card){ showPopup('Błąd odczytu fiszki'); return; }
+  if(card.audio){ const audio = new Audio(card.audio); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
+  showPopup('Ta fiszka nie ma nagrania');
 }
 
 function playCurrentCardRecording() {
