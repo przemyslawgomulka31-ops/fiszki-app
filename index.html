@@ -453,6 +453,8 @@ function handleGesture(){
 
   renderGrammarCard();
 }
+      return; // 🔥 WAŻNE – kończymy TAP
+}
   if(Math.abs(diffX) > Math.abs(diffY)){
     if(diffX > 80){
       if(document.getElementById('homeStudy').classList.contains('active')) prevCard();
