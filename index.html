@@ -897,20 +897,21 @@ function deleteFolder(id){
 
   folderStore.delete(id);
 
-  const req = questionStore.getAll();
+  const req = questionStore.openCursor();
 
-  req.onsuccess = ()=>{
-    (req.result || []).forEach(q=>{
-      if(q.folderId === id){
-        questionStore.delete(q.id);
+  req.onsuccess = (e)=>{
+    const cursor = e.target.result;
+    if(cursor){
+      if(cursor.value.folderId === id){
+        cursor.delete();
       }
-    });
+      cursor.continue();
+    }
   };
 
   tx.oncomplete = ()=>{
-  setView('questions', false); // 🔥 KLUCZ
-  renderFolders();
-};
+    setView('questions', false);
+  };
 }
 function exportQuestions(){
   const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
