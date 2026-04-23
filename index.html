@@ -828,23 +828,75 @@ document.getElementById('importGrammar').addEventListener('change', function(e){
 function importGrammar(file){ const reader=new FileReader(); reader.onload=e=>{ let data; try{ data = JSON.parse(e.target.result); }catch{ showPopup('Błędny plik'); return; } const t = db.transaction('grammar','readwrite'); const store = t.objectStore('grammar'); store.clear(); t.oncomplete = ()=>{ const t2 = db.transaction('grammar','readwrite'); const store2 = t2.objectStore('grammar'); data.forEach(g=>{ delete g.id; store2.add(g); }); t2.oncomplete = ()=>{ loadGrammarFromDB(); showPopup('Import zakończony'); }; }; }; reader.readAsText(file); }
 
 function renderFolders(){
-  const container = document.getElementById('questionFolders'); container.innerHTML='';
-  const req = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
-  req.onsuccess = ()=>{
-    const folders = req.result || [];
-    const qReq = db.transaction('questions','readonly').objectStore('questions').getAll();
-    qReq.onsuccess = ()=>{
-      const allQuestions = qReq.result || [];
-      folders.forEach(folder=>{
-        const div = document.createElement('div'); div.className = 'listItem';
-        div.innerHTML = `<div class="text"><b>${escapeHtml(folder.name)}</b><span style="opacity:.6;font-size:12px" id="count-${folder.id}"></span></div><div><button class="actionBtn" onclick="deleteFolder(${folder.id})"><svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg></button></div>`;
-        div.onclick = ()=>openFolder(folder.id);
-        container.appendChild(div);
-        const count = allQuestions.filter(q => q.folderId === folder.id).length;
-        setTimeout(()=>{ const el = document.getElementById('count-'+folder.id); if(el) el.innerText = ` (${count})`; },0);
-      });
-    };
-  };
+
+const container = document.getElementById("questionFolders")
+
+container.innerHTML = ""
+
+const transaction = db.transaction("questionFolders","readonly")
+const store = transaction.objectStore("questionFolders")
+const req = store.getAll()
+
+req.onsuccess = function(){
+
+const folders = req.result
+
+folders.forEach(folder=>{
+
+const div = document.createElement("div")
+
+div.className = "listItem"
+
+div.innerHTML = `
+<div class="text">
+<b>${folder.name}</b>
+<span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
+</div>
+
+<div>
+ <button class="actionBtn" onclick="deleteFolder(${folder.id})">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
+      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
+      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
+    </svg>
+  </button>
+</div>
+
+`
+
+div.onclick = () => openFolder(folder.id)
+
+container.appendChild(div)
+
+})
+
+/* LICZNIK PYTAŃ */
+
+const qTransaction = db.transaction("questions","readonly")
+const qStore = qTransaction.objectStore("questions")
+const qReq = qStore.getAll()
+
+qReq.onsuccess = function(){
+
+const allQuestions = qReq.result
+
+folders.forEach(folder=>{
+
+const count = allQuestions.filter(q => q.folderId === folder.id).length
+
+const el = document.getElementById("count-"+folder.id)
+
+if(el){
+el.innerText = " (" + count + ")"
+}
+
+})
+
+}
+
+}
+
 }
 function openFolderPopup(){ document.getElementById('folderNameInput').value=''; document.getElementById('folderPopup').classList.add('show'); }
 function closeFolderPopup(){ document.getElementById('folderPopup').classList.remove('show'); }
@@ -889,30 +941,25 @@ function openQuestionCards(){
 function deleteQuestion(id){ if(!confirm('Usunąć pytanie?')) return; db.transaction('questions','readwrite').objectStore('questions').delete(id).oncomplete = ()=>renderQuestionList(); }
 function editQuestion(id){ editingQuestionId = id; const req = db.transaction('questions','readonly').objectStore('questions').get(id); req.onsuccess = ()=>{ const q = req.result; document.getElementById('questionInput').value = q.question; document.getElementById('answerInput').value = q.answer; setView('addQuestion'); }; }
 function deleteFolder(id){
-  if(!confirm('Usunąć folder i wszystkie pytania?')) return;
 
-  const tx = db.transaction(['questionFolders','questions'], 'readwrite');
-  const folderStore = tx.objectStore('questionFolders');
-  const questionStore = tx.objectStore('questions');
+  showConfirm("Delete folder and all questions?", () => {
 
-  folderStore.delete(id);
+    const t = db.transaction(["questionFolders","questions"], "readwrite")
 
-  const req = questionStore.openCursor();
+    const folderStore = t.objectStore("questionFolders")
+    const questionStore = t.objectStore("questions")
 
-  req.onsuccess = (e)=>{
-    const cursor = e.target.result;
-    if(cursor){
-      if(cursor.value.folderId === id){
-        cursor.delete();
-      }
-      cursor.continue();
+    folderStore.delete(id)
+
+    const req = questionStore.getAll()
+
+    req.onsuccess = function () {
+      req.result.forEach(q => {
+        if(q.folderId === id){
+          questionStore.delete(q.id)
+        }
+      })
     }
-  };
-
-  tx.oncomplete = ()=>{
-    setView('questions', false);
-  };
-}
 function exportQuestions(){
   const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
   const t2 = db.transaction('questions','readonly').objectStore('questions').getAll();
