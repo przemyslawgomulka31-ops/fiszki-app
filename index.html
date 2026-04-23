@@ -11,16 +11,17 @@
 <link rel="apple-touch-icon" href="icon.png" />
 <title>Fiszki - poprawione UI</title> <style> 
   /* ---------- BODY / GRADIENT ---------- */ 
- :root{ --accent1: #8f7bff; 
-        --accent2: #a89bff; 
-        --accent3: #c9c2ff; 
-        --accent4: #e6e3ff; 
-        --white: #ffffff; 
-        --card-bg: #ffffff; 
-        --muted: 
-          rgba(0,0,0,0.55); }
-  *{box-sizing:border-box} html, 
- *{box-sizing:border-box}
+
+	:root{
+  --accent1: #8f7bff;
+  --accent2: #a89bff;
+  --accent3: #c9c2ff;
+  --accent4: #e6e3ff;
+  --white: #ffffff;
+  --card-bg: #ffffff;
+  --muted: rgba(0,0,0,0.55);
+}
+*{box-sizing:border-box}
 html, body{
 margin:0;
 padding:0;
@@ -32,7 +33,7 @@ background:#8f7bff;
 
 body{
 padding-top: env(safe-area-inset-top);
-min-height:100vh;
+min-height:100dvh;
 font-family: "Segoe UI", Roboto, Arial, sans-serif;
 color:#111;
 
@@ -44,10 +45,6 @@ var(--accent3) 55%,
 var(--accent4) 80%,
 var(--white) 100%
 );
-background-size: 100% 100vh;
-background-repeat: no-repeat;
-	 overscroll-behavior: none;
- overflow-x: hidden;
 -webkit-font-smoothing:antialiased;
 -moz-osx-font-smoothing:grayscale;
 }
@@ -61,7 +58,7 @@ touch-action: manipulation;
   margin:0 auto;
 	 
   padding:22px 22px 160px;
-  height:100vh;
+  height:100dvh;
   position:relative;
   overflow-y:auto;
   -webkit-overflow-scrolling:touch;
