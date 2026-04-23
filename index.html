@@ -410,6 +410,7 @@ let editingQuestionId = null;
 let dueCards = [];
 let startX = 0, startY = 0, endX = 0, endY = 0;
 let _backLocked = false;
+  let editingGrammarId = null;
 const viewLevels = { home:0, homeStudy:1, questions:1, grammarStudy:1, list:2, add:2, questionFolder:2, questionCards:2, addQuestion:2, grammarList:2, addGrammar:2 };
 
 const request = indexedDB.open('FlashcardsDB', 4);
@@ -535,15 +536,23 @@ function setView(view, saveHistory=true){
 }
 function goBack(){
   if(_backLocked) return;
-  _backLocked = true; setTimeout(()=>_backLocked = false, 300);
-  const current = document.querySelector('.view.active');
-  while(viewHistory.length > 0){
-    const last = viewHistory[viewHistory.length - 1];
-    if(!last || last === (current && current.id) || !document.getElementById(last)){ viewHistory.pop(); continue; }
-    break;
+
+  _backLocked = true;
+  setTimeout(()=>_backLocked = false, 250);
+
+  if(viewHistory.length === 0){
+    setView('home', false);
+    return;
   }
-  if(viewHistory.length === 0){ setView('home', false); return; }
-  setView(viewHistory.pop(), false);
+
+  const prev = viewHistory.pop();
+
+  if(!prev || !document.getElementById(prev)){
+    setView('home', false);
+    return;
+  }
+
+  setView(prev, false);
 }
 function openAll(){ setMode('ALL'); setView('homeStudy'); }
 function openQuestions(){ setView('questions'); renderFolders(); }
@@ -761,15 +770,58 @@ function renderGrammarCard(){
   el.innerHTML = `<div style="text-align:left;font-size:16px"><b>${step.label}</b><br><br>${escapeHtml(step.value || 'Brak danych')}</div>`;
 }
 function deleteGrammar(id){ if(!confirm('Usunąć?')) return; const tx = db.transaction('grammar','readwrite'); tx.objectStore('grammar').delete(id); tx.oncomplete = ()=>loadGrammarFromDB(); }
-function editGrammar(id){ const g = grammarCards.find(x => x.id === id); if(!g) return; document.getElementById('gTitle').value = g.title || ''; document.getElementById('gExplanation').value = g.explanation || ''; document.getElementById('gStructure').value = g.structure || ''; document.getElementById('gUsage').value = g.usage || ''; document.getElementById('gExamples').value = g.examples || ''; document.getElementById('gPractice').value = g.practice || ''; document.getElementById('gMistakes').value = g.mistakes || ''; setView('addGrammar'); }
+function editGrammar(id){
+  const g = grammarCards.find(x => x.id === id);
+  if(!g) return;
+
+  editingGrammarId = id;
+
+  document.getElementById('gTitle').value = g.title || '';
+  document.getElementById('gExplanation').value = g.explanation || '';
+  document.getElementById('gStructure').value = g.structure || '';
+  document.getElementById('gUsage').value = g.usage || '';
+  document.getElementById('gExamples').value = g.examples || '';
+  document.getElementById('gPractice').value = g.practice || '';
+  document.getElementById('gMistakes').value = g.mistakes || '';
+
+  setView('addGrammar');
+}
 function saveGrammar(){
   if(!db){ showPopup('Baza danych jeszcze się ładuje'); return; }
-  const btn = document.querySelector('#addGrammar .primary'); btn.disabled = true; btn.innerText = 'Zapisywanie...';
-  const title = document.getElementById('gTitle').value.trim(); if(!title){ showPopup('Podaj temat'); btn.disabled=false; btn.innerText='Save'; return; }
-  const data = { title, explanation:document.getElementById('gExplanation').value, structure:document.getElementById('gStructure').value, usage:document.getElementById('gUsage').value, examples:document.getElementById('gExamples').value, practice:document.getElementById('gPractice').value, mistakes:document.getElementById('gMistakes').value };
-  const t = db.transaction('grammar','readwrite'); const req = t.objectStore('grammar').add(data);
-  req.onerror = ()=>{ showPopup('Nie udało się zapisać'); btn.disabled=false; btn.innerText='Save'; };
-  t.oncomplete = ()=>{ ['gTitle','gExplanation','gStructure','gUsage','gExamples','gPractice','gMistakes'].forEach(id=>document.getElementById(id).value=''); loadGrammarFromDB(); setView('grammarList'); showPopup('Zapisano temat'); btn.disabled=false; btn.innerText='Save'; };
+
+  const title = document.getElementById('gTitle').value.trim();
+  if(!title){ showPopup('Podaj temat'); return; }
+
+  const data = {
+    title,
+    explanation: document.getElementById('gExplanation').value,
+    structure: document.getElementById('gStructure').value,
+    usage: document.getElementById('gUsage').value,
+    examples: document.getElementById('gExamples').value,
+    practice: document.getElementById('gPractice').value,
+    mistakes: document.getElementById('gMistakes').value
+  };
+
+  const tx = db.transaction('grammar','readwrite');
+  const store = tx.objectStore('grammar');
+
+  if(editingGrammarId){
+    data.id = editingGrammarId;
+    store.put(data); // 🔥 UPDATE
+  } else {
+    store.add(data); // 🔥 NOWY
+  }
+
+  tx.oncomplete = ()=>{
+    editingGrammarId = null;
+
+    ['gTitle','gExplanation','gStructure','gUsage','gExamples','gPractice','gMistakes']
+      .forEach(id=>document.getElementById(id).value='');
+
+    loadGrammarFromDB();
+    setView('grammarList');
+    showPopup('Zapisano ✅');
+  };
 }
 function exportGrammar(){ const req = db.transaction('grammar','readonly').objectStore('grammar').getAll(); req.onsuccess = ()=>{ const blob = new Blob([JSON.stringify(req.result)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='grammar-backup.json'; a.click(); }; }
 document.getElementById('importGrammar').addEventListener('change', function(e){ const file=e.target.files[0]; if(!file) return; importGrammar(file); });
@@ -836,7 +888,29 @@ function openQuestionCards(){
 }
 function deleteQuestion(id){ if(!confirm('Usunąć pytanie?')) return; db.transaction('questions','readwrite').objectStore('questions').delete(id).oncomplete = ()=>renderQuestionList(); }
 function editQuestion(id){ editingQuestionId = id; const req = db.transaction('questions','readonly').objectStore('questions').get(id); req.onsuccess = ()=>{ const q = req.result; document.getElementById('questionInput').value = q.question; document.getElementById('answerInput').value = q.answer; setView('addQuestion'); }; }
-function deleteFolder(id){ if(!confirm('Usunąć folder i wszystkie pytania?')) return; const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').delete(id); const t2 = db.transaction('questions','readwrite'); const req = t2.objectStore('questions').getAll(); req.onsuccess = ()=>{ (req.result || []).forEach(q=>{ if(q.folderId === id) t2.objectStore('questions').delete(q.id); }); renderFolders(); }; }
+function deleteFolder(id){
+  if(!confirm('Usunąć folder i wszystkie pytania?')) return;
+
+  const tx = db.transaction(['questionFolders','questions'], 'readwrite');
+  const folderStore = tx.objectStore('questionFolders');
+  const questionStore = tx.objectStore('questions');
+
+  folderStore.delete(id);
+
+  const req = questionStore.getAll();
+
+  req.onsuccess = ()=>{
+    (req.result || []).forEach(q=>{
+      if(q.folderId === id){
+        questionStore.delete(q.id);
+      }
+    });
+  };
+
+  tx.oncomplete = ()=>{
+    renderFolders();
+  };
+}
 function exportQuestions(){
   const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
   const t2 = db.transaction('questions','readonly').objectStore('questions').getAll();
