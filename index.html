@@ -908,8 +908,9 @@ function deleteFolder(id){
   };
 
   tx.oncomplete = ()=>{
-    renderFolders();
-  };
+  setView('questions', false); // 🔥 KLUCZ
+  renderFolders();
+};
 }
 function exportQuestions(){
   const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
