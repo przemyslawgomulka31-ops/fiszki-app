@@ -879,23 +879,10 @@ function renderCard(){
 
   // filtrujemy fiszki do powtórki
  if(studyMode === "ALL"){
-
-  dueCards = cards
-
-}else{
-
-  dueCards = []
-
-  const now = Date.now()
-
-  for(let i = 0; i < cards.length; i++){
-    const c = cards[i]
-
-    if(!c.nextReview || c.nextReview <= now){
-      dueCards.push(c)
-    }
-  }
-
+  dueCards = cards.filter(c => !c.hidden);
+} else {
+  const now = Date.now();
+  dueCards = cards.filter(c => !c.hidden && (!c.nextReview || c.nextReview <= now));
 }
 
   // jeśli brak wszystkich fiszek
@@ -1248,76 +1235,94 @@ function deleteCard(index){
    LIST
 ================================ */
 
+function getVisibleCards(){
+  return cards.filter(c => !c.hidden);
+}
+
+function toggleHidden(id){
+  const card = cards.find(c => c.id === id);
+  if(!card) return;
+
+  card.hidden = !card.hidden;
+
+  const tx = db.transaction("cards","readwrite");
+  tx.objectStore("cards").put(card);
+
+  tx.oncomplete = () => {
+    renderList();
+    renderCard();
+  };
+}
+
 function renderList(){
+  const list = document.getElementById("wordsList");
+  if(!list) return;
 
-const list = document.getElementById("wordsList")
+  const search = document.getElementById("searchBox").value.trim().toLowerCase();
+  let arr = [...cards];
 
-const search = document
-.getElementById("searchBox")
-.value
-.trim()
-.toLowerCase()
+  if(search){
+    arr = arr.filter(card =>
+      (card.front || "").toLowerCase().includes(search) ||
+      (card.back || "").toLowerCase().includes(search)
+    );
+  }
 
-list.innerHTML = ""
+  if(sortAZ){
+    arr.sort((a,b) => (a.front || "").localeCompare((b.front || ""), "pl"));
+  }
 
-let arr = [...cards]
+  list.innerHTML = "";
 
-/* FILTR WYSZUKIWANIA */
+  const items = arr.slice(0, 30);
 
-if(search){
+  if(items.length === 0){
+    const empty = document.createElement("div");
+    empty.className = "listItem";
+    empty.innerHTML = `<div class="text">Brak słówek</div>`;
+    list.appendChild(empty);
+    return;
+  }
 
-arr = arr.filter(card =>
-card.front.toLowerCase().includes(search) ||
-card.back.toLowerCase().includes(search)
-)
+  items.forEach(card => {
+    const div = document.createElement("div");
+    div.className = "listItem";
 
-}
+    div.innerHTML = `
+      <div class="text">
+        <b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)} ${card.hidden ? '🙈' : ''}
+      </div>
 
-/* SORTOWANIE */
+      <div style="display:flex; gap:8px">
+        <button class="actionBtn" onclick="editCard(${cards.findIndex(c => c.id === card.id)})" aria-label="Edit">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
+            <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
+          </svg>
+        </button>
 
-if(sortAZ){
-arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
-}
+        <button class="actionBtn" onclick="deleteCard(${cards.findIndex(c => c.id === card.id)})" aria-label="Delete">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
+            <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
+            <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
+          </svg>
+        </button>
 
-/* RENDER */
+        <button class="actionBtn" onclick="event.stopPropagation(); toggleHidden(${card.id})" aria-label="Hide">
+          <svg viewBox="0 0 24 24" fill="none">
+            ${
+              card.hidden
+                ? '<path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/>'
+                : '<path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/>'
+            }
+          </svg>
+        </button>
+      </div>
+    `;
 
-const MAX_RENDER = 30
-
-arr.slice(0, MAX_RENDER).forEach((card,index)=>{
-
-const div=document.createElement("div")
-
-div.className="listItem"
-
-div.innerHTML=`
-
-<div class="text"><b>${card.front}</b> - ${card.back}</div>
-
-<div style="display:flex; gap:8px">
-
-  <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn delete" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-
-</div>
-
-`
-
-list.appendChild(div)
-
-})
-
+    list.appendChild(div);
+  });
 }
 
 
