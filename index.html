@@ -29,11 +29,14 @@
   html, body{ margin:0; 
              padding:0; 
              height:100%; 
-             overscroll-behavior:none; } 
+             overscroll-behavior:none;
+			} 
   /* 🔥 GRADIENT NA HTML (nie na body) */
   html{ 
     background: linear-gradient( 180deg, #8f7bff 0%, #a89bff 25%, #c9c2ff 55%, #e6e3ff 80%, #ffffff 100% ); 
-    background-attachment: fixed; 
+    background-attachment: fixed;
+	  background-size: 100% 100vh;
+background-repeat: no-repeat;
     /* 🔥 klucz na iOS */ } /* 🔥 BODY BEZ TŁA */ 
   body{ min-height:100vh; 
        font-family: "Segoe UI", Roboto, Arial, sans-serif; 
