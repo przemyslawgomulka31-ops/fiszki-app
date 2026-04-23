@@ -877,56 +877,64 @@ const cardEl = document.getElementById("cardText")
 let dueCards = [];
 function renderCard(){
 
-  // filtrujemy fiszki do powtórki
- if(studyMode === "ALL"){
+  // 🔥 filtrujemy fiszki + hidden
+  if(studyMode === "ALL"){
 
-  dueCards = cards
+    dueCards = []
 
-}else{
+    for(let i = 0; i < cards.length; i++){
+      const c = cards[i]
 
-  dueCards = []
-
-  const now = Date.now()
-
-  for(let i = 0; i < cards.length; i++){
-    const c = cards[i]
-
-    if(!c.nextReview || c.nextReview <= now){
-      dueCards.push(c)
+      if(!c.hidden){ // 🔥 KLUCZ
+        dueCards.push(c)
+      }
     }
-  }
 
-}
+  }else{
+
+    dueCards = []
+
+    const now = Date.now()
+
+    for(let i = 0; i < cards.length; i++){
+      const c = cards[i]
+
+      if(!c.hidden && (!c.nextReview || c.nextReview <= now)){ // 🔥 KLUCZ
+        dueCards.push(c)
+      }
+    }
+
+  }
 
   // jeśli brak wszystkich fiszek
   if(cards.length === 0){
-currentIndex = 0;
+    currentIndex = 0;
 
-cardEl.innerText = "➕ Add flashcard";
+    cardEl.innerText = "➕ Add flashcard";
 
-document.getElementById("counter").innerText = 0;
-document.getElementById("progress-mini").innerText = "—";
+    document.getElementById("counter").innerText = 0;
+    document.getElementById("progress-mini").innerText = "—";
 
-document.getElementById("cardImage").style.display = "none";
+    document.getElementById("cardImage").style.display = "none";
 
-return;
-}
+    return;
+  }
 
   // jeśli brak fiszek do powtórki
- if(dueCards.length === 0){
+  if(dueCards.length === 0){
 
-currentIndex = 0;
+    currentIndex = 0;
 
-cardEl.innerText = studyMode === "ALL"
-? "➕ Add flashcard"
-: "🎉 Lack of flashcards for review";
+    cardEl.innerText = studyMode === "ALL"
+      ? "➕ Add flashcard"
+      : "🎉 Lack of flashcards for review";
 
-document.getElementById("progress-mini").innerText = "0 / 0";
+    document.getElementById("progress-mini").innerText = "0 / 0";
 
-document.getElementById("cardImage").style.display = "none";
+    document.getElementById("cardImage").style.display = "none";
 
-return;
-}
+    return;
+  }
 
   // zabezpieczenie indexu
   if(currentIndex >= dueCards.length){
@@ -939,7 +947,7 @@ return;
   cardEl.innerText = showingAnswer ? card.back : card.front;
 
   // licznik
- updateCounter()
+  updateCounter()
 
   // progres
   document.getElementById("progress-mini").innerText =
@@ -954,16 +962,16 @@ return;
   } else {
     img.style.display = "none";
   }
-const reviewUI = document.getElementById("reviewButtons")
 
-if(studyMode === "ALL"){
-reviewUI.style.display = "none"
-}
-else{
-reviewUI.style.display = "block"
-}
-}
+  const reviewUI = document.getElementById("reviewButtons")
 
+  if(studyMode === "ALL"){
+    reviewUI.style.display = "none"
+  }
+  else{
+    reviewUI.style.display = "block"
+  }
+}
 function reviewCard(score){
 	updateStreak()
   const card = dueCards[currentIndex];
@@ -1055,14 +1063,15 @@ if(!front || !back){
   return
 }
 
-const newCard = {
-  front: front,
-  back: back,
-  audio: recordedAudioBase64 || recordedFilePath || null,
-  image: imageURL || null,
-  level: 0,
-  nextReview: Date.now()
-}
+const newCard = { 
+  front, 
+  back, 
+  audio: recordedAudioBase64 || null, 
+  image: imageURL || null, 
+  level:0, 
+  nextReview: Date.now(),
+  hidden: false // 🔥 NOWE
+};
 
 const transaction = db.transaction("cards","readwrite")
 const store = transaction.objectStore("cards")
@@ -1250,76 +1259,84 @@ function deleteCard(index){
 
 function renderList(){
 
-const list = document.getElementById("wordsList")
+  const list = document.getElementById("wordsList")
 
-const search = document
-.getElementById("searchBox")
-.value
-.trim()
-.toLowerCase()
+  const search = document
+    .getElementById("searchBox")
+    .value
+    .trim()
+    .toLowerCase()
 
-list.innerHTML = ""
+  list.innerHTML = ""
 
-let arr = [...cards]
+  let arr = [...cards]
 
-/* FILTR WYSZUKIWANIA */
+  /* 🔎 FILTR */
+  if(search){
+    arr = arr.filter(card =>
+      card.front.toLowerCase().includes(search) ||
+      card.back.toLowerCase().includes(search)
+    )
+  }
 
-if(search){
+  /* 🔤 SORT */
+  if(sortAZ){
+    arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
+  }
 
-arr = arr.filter(card =>
-card.front.toLowerCase().includes(search) ||
-card.back.toLowerCase().includes(search)
-)
+  const MAX_RENDER = 30
 
+  arr.slice(0, MAX_RENDER).forEach((card)=>{
+
+    const div = document.createElement("div")
+    div.className = "listItem"
+
+    div.innerHTML = `
+      <div class="text">
+        <b>${escapeHtml(card.front)}</b> - ${escapeHtml(card.back)}
+        ${card.hidden ? '🙈' : ''}
+      </div>
+
+      <div style="display:flex; gap:8px">
+
+        <!-- EDIT -->
+        <button class="actionBtn" onclick="editCard(${card.id})" aria-label="Edit">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
+            <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
+          </svg>
+        </button>
+
+        <!-- DELETE -->
+        <button class="actionBtn delete" onclick="deleteCard(${card.id})" aria-label="Delete">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
+            <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
+            <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
+          </svg>
+        </button>
+
+        <!-- HIDE / SHOW -->
+        <button class="actionBtn" 
+          onclick="event.stopPropagation(); toggleHidden(${card.id})" 
+          aria-label="Toggle hidden">
+
+          <svg viewBox="0 0 24 24" fill="none">
+            ${
+              card.hidden
+              ? `<path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/>`
+              : `<path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/>`
+            }
+          </svg>
+
+        </button>
+
+      </div>
+    `
+
+    list.appendChild(div)
+  })
 }
-
-/* SORTOWANIE */
-
-if(sortAZ){
-arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"))
-}
-
-/* RENDER */
-
-const MAX_RENDER = 30
-
-arr.slice(0, MAX_RENDER).forEach((card,index)=>{
-
-const div=document.createElement("div")
-
-div.className="listItem"
-
-div.innerHTML=`
-
-<div class="text"><b>${card.front}</b> - ${card.back}</div>
-
-<div style="display:flex; gap:8px">
-
-  <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn delete" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-
-</div>
-
-`
-
-list.appendChild(div)
-
-})
-
-}
-
 
 function toggleSort(){
 
@@ -2448,6 +2465,21 @@ function importQuestions(file){
 }
 document.getElementById('importQuestions').addEventListener('change', function(e){ const file = e.target.files[0]; if(file) importQuestions(file); });
 
+
+	function toggleHidden(id){
+  const card = cards.find(c => c.id === id);
+  if(!card) return;
+
+  card.hidden = !card.hidden;
+
+  const tx = db.transaction('cards','readwrite');
+  tx.objectStore('cards').put(card);
+
+  tx.oncomplete = ()=>{
+    renderList();
+    renderCard();
+  };
+}
 </script>
 
 
