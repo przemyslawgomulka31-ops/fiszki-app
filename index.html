@@ -57,23 +57,19 @@
   { outline: none; 
    -webkit-tap-highlight-color: transparent; }
   
-  .bottomControls{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  padding:16px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  max-width:420px;
-  margin:auto;
-
-  background: linear-gradient(to top, rgba(230,227,255,0.95), rgba(230,227,255,0));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-  /* ---------- HEADER ---------- */ 
+  .bottomControls{ position:fixed; 
+                  left:0; 
+                  right:0; 
+                  bottom:0; 
+                  padding:16px; 
+                  display:flex; 
+                  flex-direction:column; 
+                  gap:12px; 
+                  max-width:420px; 
+                  margin:auto; 
+                  background:linear-gradient( to top, rgba(230,227,255,0.95), rgba(230,227,255,0) );
+                  backdrop-filter:blur(10px); 
+                  -webkit-backdrop-filter:blur(10px); }  /* ---------- HEADER ---------- */ 
   .header{ font-size:20px; font-weight:600; text-align:center; margin:0px 0 14px; padding-top:50px; color:#1b1635; } 
   /* ---------- STATS ---------- */ 
   /* ---------- CARD ---------- */ 
@@ -402,6 +398,7 @@ let currentFolderId = null;
 let grammarCards = [];
 let grammarIndex = 0;
 let grammarStep = 0;
+let grammarAnswer = false;
 let questionCards = [];
 let questionIndex = 0;
 let questionAnswerVisible = false;
@@ -443,19 +440,17 @@ function handleGesture(){
   if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
     if(document.getElementById('homeStudy').classList.contains('active')) showAnswer();
     if(document.getElementById('questionCards').classList.contains('active')){ questionAnswerVisible = !questionAnswerVisible; renderQuestionCard(); }
-   if(document.getElementById('grammarStudy').classList.contains('active')){
-  if(grammarStep < 6){
-    grammarStep++;
-  } else {
-    // 🔥 dopiero po końcu → nowa karta
-    grammarStep = 0;
-    grammarIndex = (grammarIndex + 1) % grammarCards.length;
+    if(document.getElementById('grammarStudy').classList.contains('active')){
+      if(grammarStep < 6){
+        grammarStep++;
+      } else {
+        grammarStep = 0;
+        grammarIndex = (grammarIndex + 1) % grammarCards.length;
+      }
+      renderGrammarCard();
+    }
+    return;
   }
-
-  renderGrammarCard();
-}
-      return; // 🔥 WAŻNE – kończymy TAP
-}
   if(Math.abs(diffX) > Math.abs(diffY)){
     if(diffX > 80){
       if(document.getElementById('homeStudy').classList.contains('active')) prevCard();
@@ -634,7 +629,7 @@ async function addCard(){
     recordedAudioBase64 = null; imageURL = null;
     document.getElementById('frontInput').value=''; document.getElementById('backInput').value=''; document.getElementById('imageResults').innerHTML='';
     currentIndex = 0;
-    loadCardsFromDB(()=>{ renderCard(); renderList(); });
+    refreshAll();
     showPopup('Fiszka dodana ✅');
   };
 }
@@ -657,11 +652,11 @@ async function searchImages(){
   const container = document.getElementById('imageResults');
   container.innerHTML = 'Ładowanie...';
   try{
-    const url = 'https://api.unsplash.com/search/photos?query=' + encodeURIComponent(word) + '&per_page=3&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w';
+    const url = 'https://api.unsplash.com/search/photos?query=' + encodeURIComponent(word) + '&per_page=6&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w';
     const res = await fetch(url); if(!res.ok){ container.innerHTML='Błąd API Unsplash'; return; }
     const data = await res.json(); container.innerHTML = '';
     if(!data.results || data.results.length === 0){ const img = document.createElement('img'); img.src='https://picsum.photos/300'; container.appendChild(img); return; }
-    data.results.forEach(photo=>{ const img = document.createElement('img'); img.src = photo.urls.small; img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll('#imageResults img').forEach(i=>i.style.border='none'); img.style.border='3px solid #7b5cff'; }; container.appendChild(img); });
+    data.results.slice(0,6).forEach(photo=>{ const img = document.createElement('img'); img.src = photo.urls.small; img.onclick = ()=>{ imageURL = photo.urls.small; document.querySelectorAll('#imageResults img').forEach(i=>i.style.border='none'); img.style.border='3px solid #7b5cff'; }; container.appendChild(img); });
   }catch(err){ container.innerHTML='Błąd pobierania obrazów'; }
 }
 document.getElementById('imageUpload').addEventListener('change', async function(e){ const file = e.target.files[0]; if(!file) return; imageURL = await compressImage(file, 0.6); const container = document.getElementById('imageResults'); container.innerHTML=''; const img = document.createElement('img'); img.src = imageURL; img.style.border = '3px solid #7b5cff'; container.appendChild(img); });
@@ -672,12 +667,7 @@ function deleteCard(id){
   const tx = db.transaction('cards','readwrite');
   tx.objectStore('cards').delete(id);
 
-  tx.oncomplete = () => {
-    loadCardsFromDB(() => {
-      renderList();
-      renderCard();
-    });
-  };
+  tx.oncomplete = refreshAll;
 }
 function renderList(){
   const list = document.getElementById('wordsList');
@@ -767,7 +757,8 @@ function renderGrammarCard(){
   const step = steps[grammarStep - 1];
   el.innerHTML = `<div style="text-align:left;font-size:16px"><b>${step.label}</b><br><br>${escapeHtml(step.value || 'Brak danych')}</div>`;
 }
-function deleteGrammar(id){ if(!confirm('Usunąć?')) return; db.transaction('grammar','readwrite').objectStore('grammar').delete(id).oncomplete = renderGrammar; }
+function deleteGrammar(id){ if(!confirm('Usunąć?')) return; const tx = db.transaction('grammar','readwrite'); tx.objectStore('grammar').delete(id); tx.oncomplete = ()=>loadGrammarFromDB(); }
+function editGrammar(id){ const g = grammarCards.find(x => x.id === id); if(!g) return; document.getElementById('gTitle').value = g.title || ''; document.getElementById('gExplanation').value = g.explanation || ''; document.getElementById('gStructure').value = g.structure || ''; document.getElementById('gUsage').value = g.usage || ''; document.getElementById('gExamples').value = g.examples || ''; document.getElementById('gPractice').value = g.practice || ''; document.getElementById('gMistakes').value = g.mistakes || ''; setView('addGrammar'); }
 function saveGrammar(){
   if(!db){ showPopup('Baza danych jeszcze się ładuje'); return; }
   const btn = document.querySelector('#addGrammar .primary'); btn.disabled = true; btn.innerText = 'Zapisywanie...';
@@ -840,9 +831,9 @@ function openQuestionCards(){
     document.getElementById('questionProgress').innerText = questionCards.length ? `1 / ${questionCards.length}` : '0 / 0';
   };
 }
-function deleteQuestion(id){ if(!confirm('Usunąć pytanie?')) return; db.transaction('questions','readwrite').objectStore('questions').delete(id).oncomplete = ()=>renderQuestionList(); }
+function deleteQuestion(id){ if(!confirm('Usunąć pytanie?')) return; const tx = db.transaction('questions','readwrite'); tx.objectStore('questions').delete(id); tx.oncomplete = ()=>renderQuestionList(); }
 function editQuestion(id){ editingQuestionId = id; const req = db.transaction('questions','readonly').objectStore('questions').get(id); req.onsuccess = ()=>{ const q = req.result; document.getElementById('questionInput').value = q.question; document.getElementById('answerInput').value = q.answer; setView('addQuestion'); }; }
-function deleteFolder(id){ if(!confirm('Usunąć folder i wszystkie pytania?')) return; const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').delete(id); const t2 = db.transaction('questions','readwrite'); const req = t2.objectStore('questions').getAll(); req.onsuccess = ()=>{ (req.result || []).forEach(q=>{ if(q.folderId === id) t2.objectStore('questions').delete(q.id); }); renderFolders(); }; }
+function deleteFolder(id){ if(!confirm('Usunąć folder i wszystkie pytania?')) return; const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').delete(id); const t2 = db.transaction('questions','readwrite'); const req = t2.objectStore('questions').getAll(); req.onsuccess = ()=>{ (req.result || []).forEach(q=>{ if(q.folderId === id) t2.objectStore('questions').delete(q.id); }); }; t2.oncomplete = ()=>renderFolders(); }
 function exportQuestions(){
   const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
   const t2 = db.transaction('questions','readonly').objectStore('questions').getAll();
@@ -916,7 +907,7 @@ document.getElementById('startScreen').addEventListener('click', function(){ thi
 document.getElementById('btnBack').onclick = goBack;
 document.getElementById('btnHome').onclick = goHome;
 
-  function refreshAll(){
+function refreshAll(){
   loadCardsFromDB(() => {
     renderList();
     renderCard();
