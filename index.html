@@ -745,7 +745,18 @@ viewHistory = []
 setView("home", false)
 }
 
-function goToList(){ setView("list"); renderList() }
+function goToList(){
+
+  loadLimit = Number.MAX_SAFE_INTEGER;
+
+  loadCardsFromDB(() => {
+
+    setView("list");
+    renderList();
+
+  });
+
+}
 function goToAdd(){ setView("add") }
 
 // ------ STABILNY goBack (z debounce i sanity-checkami) ------
@@ -1371,9 +1382,9 @@ function renderList(){
     arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"));
   }
 
-  const MAX_RENDER = 30;
 
-  arr.slice(0, MAX_RENDER).forEach((card)=>{
+
+  arr.forEach((card)=>{
     const div = document.createElement("div");
     div.className = "listItem";
 
