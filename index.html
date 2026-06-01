@@ -61,21 +61,27 @@ background-repeat: no-repeat;
   { outline: none; 
    -webkit-tap-highlight-color: transparent; }
   
-  .bottomControls{ position:fixed; 
-                  left:0; 
-                  right:0; 
-                  bottom:0; 
-                  padding:16px; 
-                  display:flex; 
-                  flex-direction:column; 
-                  gap:12px; 
-                  max-width:420px; 
-                  margin:auto; 
-                  background:linear-gradient( to top, rgba(230,227,255,0.95), rgba(230,227,255,0) 
-                                             backdrop-filter: none; 
-                  -webkit-backdrop-filter: none; 
-                  background: rgba(230,227,255,0.95); /* stały kolor */ ); 
-                  backdrop-filter:blur(10px); } svg { width: 100%; height: 100%; display: block; } 
+.bottomControls{
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  max-width:420px;
+  margin:auto;
+
+  background: linear-gradient(
+    to top,
+    rgba(230,227,255,0.95),
+    rgba(230,227,255,0)
+  );
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+} 
   /* ---------- HEADER ---------- */ 
   .header{ font-size:20px; font-weight:600; text-align:center; margin:0px 0 14px; padding-top:50px; color:#1b1635; } 
   /* ---------- STATS ---------- */ 
@@ -173,6 +179,22 @@ background-repeat: no-repeat;
                 display: flex; 
                 justify-content: space-between; padding: 0 40px; z-index: 999; pointer-events: none; } 
   .fab{ width: 68px; height: 69px; bottom: max(20px, env(safe-area-inset-bottom)+20px); border-radius: 50%; background: rgba(30, 20, 100, 0.28); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; color: #2d1f80; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, background 0.2s ease; pointer-events: auto; padding: 0; } .fab:active{ transform: scale(0.92); } .fab svg{ width: 24px; height: 24px; display: block; } .audioButtons{ display:flex; justify-content:center; gap:14px; margin-top:10px; } .audioButtons button{ width:48px; height:48px; border-radius:50%; border:none; background: linear-gradient(135deg,#7b5cff,#9f7bff); color:white; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.2); cursor:pointer; } .audioItem{ display:flex; flex-direction:column; align-items:center; font-size:22px; cursor:pointer; } .audioItem span{ font-size:11px; opacity:0.6; } #imageUpload{ display:none; } .uploadBtn{ display:block; text-align:center; padding:10px; border-radius:14px; background:rgba(255,255,255,0.25); backdrop-filter:blur(6px); font-size:14px; font-weight:600; color:#2d1f80; margin-bottom:12px; } #cardText{ font-size: 26px; font-weight: 700; letter-spacing: 1px; } .actionBtn{ width:42px; height:42px; color:#2d1f80; border-radius:12px; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: all 0.2s ease; } .actionBtn:active{ transform: scale(0.9); } .actionBtn svg{ width:20px; height:20px; } .stats{ display:flex; gap:10px; margin-bottom:18px; } .stat{ flex:1; display:flex; align-items:center; justify-content:center; padding:10px 12px; border-radius:14px; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); box-shadow: 0 6px 18px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.6); font-size:13px; font-weight:600; color:#1b1635; } .stat strong, .stat span{ margin-left:6px; font-weight:700; } .stat:nth-child(1) strong{ color:#2d1f80; /* cards */ } .stat:nth-child(2) strong{ color:#ff7a00; /* streak 🔥 */ } .stat:nth-child(3){ opacity:0.8; }
+.flashcardField{
+  width:100%;
+  min-height:64px;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  margin-bottom:10px;
+  font-size:15px;
+  resize:vertical;
+  box-shadow:0 8px 16px rgba(17,12,30,0.03);
+}
+#cardText, #questionCardText, #grammarCardText, .listItem .text{
+  white-space: pre-wrap;
+}
+
+
 </style>
 </head>
 <body>
@@ -323,8 +345,8 @@ background-repeat: no-repeat;
 
     <div id="add" class="view">
       <h3>Add flashcard</h3>
-      <input type="text" id="frontInput" placeholder="The word in English" />
-      <input type="text" id="backInput" placeholder="Translation" />
+     <textarea id="frontInput" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
+<textarea id="backInput" class="flashcardField" placeholder="Translation" rows="2"></textarea>
       <input type="file" id="imageUpload" accept="image/*" />
       <label for="imageUpload" class="uploadBtn">📷 Add photo</label>
       <div id="imageResults"></div>
@@ -347,8 +369,8 @@ background-repeat: no-repeat;
 <div id="modal" class="modal-backdrop">
   <div class="modal">
     <h3>Edit word</h3>
-    <div class="row"><input id="editFront" placeholder="The word in English" /></div>
-    <div class="row"><input id="editBack" placeholder="Translation" /></div>
+    <textarea id="editFront" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
+<textarea id="editBack" class="flashcardField" placeholder="Translation" rows="2"></textarea>
     <div class="bottomActionRow">
       <button class="secondary" onclick="closeModal()">Cancel</button>
       <button class="primary" onclick="saveModal()">Save</button>
@@ -608,6 +630,66 @@ return
 /* ===============================
    mood
 ================================ */
+function resetTransientUI() {
+  document.querySelectorAll(".modal-backdrop.show").forEach(el => el.classList.remove("show"));
+
+  closePopup();
+  closeConfirm();
+  closeModal();
+  closeFolderPopup();
+
+  const grammarBtn = document.querySelector("#addGrammar .primary");
+  if (grammarBtn) {
+    grammarBtn.disabled = false;
+    grammarBtn.innerText = "Save";
+  }
+
+  const questionBtn = document.querySelector("#addQuestion .primary");
+  if (questionBtn) {
+    questionBtn.disabled = false;
+    questionBtn.innerText = "Save";
+  }
+
+  const flashBtn = document.querySelector("#add .primary");
+  if (flashBtn) {
+    flashBtn.disabled = false;
+    flashBtn.innerText = "Add flashcard";
+  }
+}
+
+function restoreAfterResume() {
+  resetTransientUI();
+
+  if (!db) return;
+
+  loadCardsFromDB(() => {
+    cards.forEach(c => {
+      if (c.hidden === undefined) c.hidden = false;
+    });
+    refreshUI();
+  });
+
+  loadGrammarFromDB();
+
+  if (currentFolderId !== null) {
+    renderQuestionList();
+  }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible") {
+    restoreAfterResume();
+  }
+});
+
+window.addEventListener("focus", restoreAfterResume);
+window.addEventListener("pageshow", restoreAfterResume);
+document.addEventListener("resume", restoreAfterResume);
+
+
+
+
+	
 function setMode(mode){
 
 studyMode = mode
@@ -1009,22 +1091,23 @@ renderCard()
 
 }
 function nextCard(){
+  if(dueCards.length === 0) return;
 
-  if(dueCards.length === 0) return
+  const targetIndex = currentIndex + 1;
 
-  // jeśli jesteśmy na końcu i są jeszcze dane w DB → doładuj
   if(currentIndex === dueCards.length - 1 && !allCardsLoaded){
-    loadLimit += 50
+    loadLimit += 50;
     loadCardsFromDB(() => {
-  currentIndex = 0
-  renderCard()
-})
-return
+      showingAnswer = false;
+      currentIndex = targetIndex;
+      renderCard();
+    });
+    return;
   }
 
-  currentIndex = (currentIndex + 1) % dueCards.length
-  showingAnswer = false
-  renderCard()
+  currentIndex = (currentIndex + 1) % dueCards.length;
+  showingAnswer = false;
+  renderCard();
 }
 
 /* ===============================
@@ -1055,8 +1138,8 @@ if(isRecording){
   return
 }
 
-const front = document.getElementById("frontInput").value.trim()
-const back = document.getElementById("backInput").value.trim()
+const front = document.getElementById("frontInput").value.replace(/\r\n/g, "\n").trim()
+const back = document.getElementById("backInput").value.replace(/\r\n/g, "\n").trim()
 
 if(!front || !back){
   showPopup("Please fill in the fields")
@@ -1093,11 +1176,11 @@ transaction.oncomplete = function(){
 }
 
 
-async function compressImage(file, quality = 0.4){
+async function compressImage(file, quality = 0.9){
   const imageBitmap = await createImageBitmap(file);
   const canvas = document.createElement('canvas');
 
-  const maxWidth = 500;
+  const maxWidth = 1600;
   let width = imageBitmap.width;
   let height = imageBitmap.height;
 
@@ -1112,8 +1195,10 @@ async function compressImage(file, quality = 0.4){
   const ctx = canvas.getContext('2d');
   ctx.drawImage(imageBitmap, 0, 0, width, height);
 
+  const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+
   const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, 'image/jpeg', quality)
+    canvas.toBlob(resolve, outputType, outputType === 'image/jpeg' ? quality : undefined)
   );
 
   return new Promise(res => {
@@ -1176,7 +1261,7 @@ img.src = photo.urls.small
 
 img.onclick = ()=>{
 
-imageURL = photo.urls.small
+imageURL = photo.urls.regular
 
 document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
 
@@ -1204,7 +1289,7 @@ const file = e.target.files[0]
 if(!file) return
 
 // kompresujemy obraz
-imageURL = await compressImage(file, 0.6)
+imageURL = await compressImage(file, 0.9)
 
 const container = document.getElementById("imageResults")
 
@@ -1255,7 +1340,19 @@ function deleteCard(index){
 /* ===============================
    LIST
 ================================ */
+function escapeHtml(str = "") {
+  return String(str).replace(/[&<>"']/g, s => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    "\"": "&quot;",
+    "'": "&#39;"
+  })[s]);
+}
 
+function nl2br(str = "") {
+  return escapeHtml(str).replace(/\n/g, "<br>");
+}
 function renderList(){
   const list = document.getElementById("wordsList");
 
@@ -1288,7 +1385,7 @@ function renderList(){
 
     div.innerHTML = `
       <div class="text">
-        <b>${card.front}</b> - ${card.back} ${card.hidden ? '🙈' : ''}
+        <b>${nl2br(card.front)}</b> - ${nl2br(card.back)} ${card.hidden ? '🙈' : ''}
       </div>
 
       <div style="display:flex; gap:8px">
@@ -1558,87 +1655,87 @@ function deleteGrammar(id){
 
 function saveGrammar(){
 
-if(!db){
-showPopup("Loading...")
-return
+  if(!db){
+    showPopup("Loading...")
+    return
+  }
+
+  const btn = document.querySelector("#addGrammar .primary")
+
+  const finish = () => {
+    btn.disabled = false
+    btn.innerText = "Save"
+  }
+
+  btn.disabled = true
+  btn.innerText = "Saving..."
+
+  const title = document.getElementById("gTitle").value.trim()
+
+  if(!title){
+    showPopup("Enter a topic")
+    finish()
+    return
+  }
+
+  const data = {
+    title: title,
+    explanation: document.getElementById("gExplanation").value,
+    structure: document.getElementById("gStructure").value,
+    usage: document.getElementById("gUsage").value,
+    examples: document.getElementById("gExamples").value,
+    practice: document.getElementById("gPractice").value,
+    mistakes: document.getElementById("gMistakes").value
+  }
+
+  const t = db.transaction("grammar","readwrite")
+  const store = t.objectStore("grammar")
+
+  let req
+
+  if(editingGrammarId){
+    data.id = editingGrammarId
+    req = store.put(data)
+  }else{
+    req = store.add(data)
+  }
+
+  req.onerror = function(){
+    console.error("Błąd zapisu:", req.error)
+    showPopup("Failed to save")
+    finish()
+  }
+
+  t.onerror = function(){
+    console.error("Transaction error:", t.error)
+    showPopup("Failed to save")
+    finish()
+  }
+
+  t.onabort = function(){
+    console.error("Transaction aborted:", t.error)
+    showPopup("Failed to save")
+    finish()
+  }
+
+  t.oncomplete = function(){
+    document.getElementById("gTitle").value=""
+    document.getElementById("gExplanation").value=""
+    document.getElementById("gStructure").value=""
+    document.getElementById("gUsage").value=""
+    document.getElementById("gExamples").value=""
+    document.getElementById("gPractice").value=""
+    document.getElementById("gMistakes").value=""
+
+    loadGrammarFromDB(() => {
+      setView("grammarList");
+      refreshUI();
+    })
+
+    finish()
+    editingGrammarId = null
+  }
 }
-
-const btn = document.querySelector("#addGrammar .primary")
-btn.disabled = true
-btn.innerText = "Saving..."
-
-const title = document.getElementById("gTitle").value.trim()
-
-if(!title){
-showPopup("Enter a topic")
-btn.disabled = false
-btn.innerText = "Save"
-return
-}
-
-const data = {
-title:title,
-explanation:document.getElementById("gExplanation").value,
-structure:document.getElementById("gStructure").value,
-usage:document.getElementById("gUsage").value,
-examples:document.getElementById("gExamples").value,
-practice:document.getElementById("gPractice").value,
-mistakes:document.getElementById("gMistakes").value
-}
-
-// TRANSAKCJA
-const t = db.transaction("grammar","readwrite")
-const store = t.objectStore("grammar")
-
-let req
-
-if(editingGrammarId){
-
-data.id = editingGrammarId
-req = store.put(data)
-
-}else{
-
-req = store.add(data)
-
-}
-
-req.onerror = function(){
-console.error("Błąd zapisu:", req.error)
-showPopup("Failed to save")
-
-btn.disabled = false
-btn.innerText = "Save"
-}
-
-t.oncomplete = function(){
-
-// wyczyść formularz
-document.getElementById("gTitle").value=""
-document.getElementById("gExplanation").value=""
-document.getElementById("gStructure").value=""
-document.getElementById("gUsage").value=""
-document.getElementById("gExamples").value=""
-document.getElementById("gPractice").value=""
-document.getElementById("gMistakes").value=""
-
-loadGrammarFromDB(() => {
-  setView("grammarList");
-  refreshUI();
-})
-
-
-
-
-
-
-btn.disabled = false
-btn.innerText = "Save"
-editingGrammarId = null
-}
-
-}
-
 
 
 
