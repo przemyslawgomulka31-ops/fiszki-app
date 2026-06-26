@@ -1195,14 +1195,7 @@ async function compressImage(file, quality = 0.9){
 let unsplashImages = [];
 
 
-let searchTimer
 
-document.getElementById("frontInput").addEventListener("input", () => {
-
-clearTimeout(searchTimer)
-searchTimer = setTimeout(searchImages, 500)
-
-})
 
 let searchTimer;
 
