@@ -424,7 +424,7 @@ let grammarAnswer = false
 let grammarStep = 0
 let editingGrammarId = null
 
-let imageURL = null;
+
 
 let uploadedImage = null;
 let selectedImage = null;
@@ -1211,7 +1211,7 @@ const word = document.getElementById("frontInput").value.trim().split(" ")[0]
 if(word.length < 2) return
 
 const container = document.getElementById("imageResults")
-
+onst data = await res.json();
 unsplashImages = data.results
 
 renderImages()
@@ -1252,11 +1252,11 @@ imageURL = photo.urls.regular
 
 document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
 
-img.style.border = "3px solid #7b5cff"
+
 
 }
 
-container.appendChild(img)
+
 
 })
 
