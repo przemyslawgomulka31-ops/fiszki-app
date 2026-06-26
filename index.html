@@ -187,7 +187,29 @@ background-repeat: no-repeat;
 #cardText, #questionCardText, #grammarCardText, .listItem .text{
   white-space: pre-wrap;
 }
+.fabContainer{
+    position: fixed;
+    left: 0;
+    right: 0;
 
+    bottom: calc(env(safe-area-inset-bottom) + 22px);
+
+    max-width: 420px;
+    margin: auto;
+
+    display: flex;
+    justify-content: space-between;
+
+    padding: 0 36px;
+
+    z-index: 9999;
+
+    pointer-events: none;
+}
+
+.fab{
+    pointer-events: auto;
+}
 
 </style>
 </head>
@@ -254,7 +276,9 @@ background-repeat: no-repeat;
         <button onclick="reviewCard(1)">🙂 Average</button>
         <button onclick="reviewCard(2)">✅ Easy</button>
       </div>
-      <div class="fabContainer">
+     
+    </div>
+ <div class="fabContainer">
         <button class="fab fab-left" onclick="playRecording()" aria-label="Play recording">
           <svg viewBox="0 0 24 24" fill="#2d1f80"><path d="M8 5L19 12L8 19V5Z"/></svg>
         </button>
@@ -262,8 +286,6 @@ background-repeat: no-repeat;
           <svg viewBox="0 0 24 24" fill="none"><path d="M5 9V15H9L14 20V4L9 9H5Z" stroke="#2d1f80" stroke-width="2" stroke-linejoin="round"/><path d="M16 9C17.5 10.5 17.5 13.5 16 15" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/><path d="M18.5 7C21 9.5 21 14.5 18.5 17" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/></svg>
         </button>
       </div>
-    </div>
-
     <div id="questions" class="view">
       <h3>Folders</h3>
       <div id="questionFolders"></div>
