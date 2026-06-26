@@ -324,50 +324,51 @@ background-repeat: no-repeat;
       </div>
     </div>
 
-    <div id="homeStudy" class="view">
-      <div class="stats">
+   <div id="homeStudy" class="view">
+
+    <div class="stats">
         <div class="stat">📚 <strong id="counter">0</strong></div>
         <div class="stat">🔥 <strong id="streakUI">0</strong></div>
         <div class="stat">📊 <span id="progress-mini">—</span></div>
-      </div>
-      <div class="card" id="flashcard">
-        <img id="cardImage" alt="card image" />
+    </div>
+
+    <div class="card" id="flashcard">
+        <img id="cardImage" alt="card image">
         <span id="cardText">Add flashcard</span>
-      </div>
-		
-      <div id="reviewButtons">
+    </div>
+
+    <div id="reviewButtons">
         <button onclick="reviewCard(0)">❌ I don't remember</button>
         <button onclick="reviewCard(1)">🙂 Average</button>
         <button onclick="reviewCard(2)">✅ Easy</button>
-      </div>
-     <div class="bottomPlayer">
-    <button class="playerBtn" onclick="playRecording()">
-        <svg viewBox="0 0 24 24" fill="#2d1f80">
-            <path d="M8 5L19 12L8 19V5Z"/>
-        </svg>
-    </button>
-
-    <button class="playerBtn" onclick="speakCurrentCard()">
-        <svg viewBox="0 0 24 24" fill="none">
-            <path d="M5 9V15H9L14 20V4L9 9H5Z"
-                  stroke="#2d1f80"
-                  stroke-width="2"
-                  stroke-linejoin="round"/>
-            <path d="M16 9C17.5 10.5 17.5 13.5 16 15"
-                  stroke="#2d1f80"
-                  stroke-width="2"
-                  stroke-linecap="round"/>
-            <path d="M18.5 7C21 9.5 21 14.5 18.5 17"
-                  stroke="#2d1f80"
-                  stroke-width="2"
-                  stroke-linecap="round"/>
-        </svg>
-    </button>
-</div>
-        </button>
-      </div>
     </div>
- 
+
+    <div class="bottomPlayer">
+        <button class="playerBtn" onclick="playRecording()">
+            <svg viewBox="0 0 24 24" fill="#2d1f80">
+                <path d="M8 5L19 12L8 19V5Z"/>
+            </svg>
+        </button>
+
+        <button class="playerBtn" onclick="speakCurrentCard()">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M5 9V15H9L14 20V4L9 9H5Z"
+                      stroke="#2d1f80"
+                      stroke-width="2"
+                      stroke-linejoin="round"/>
+                <path d="M16 9C17.5 10.5 17.5 13.5 16 15"
+                      stroke="#2d1f80"
+                      stroke-width="2"
+                      stroke-linecap="round"/>
+                <path d="M18.5 7C21 9.5 21 14.5 18.5 17"
+                      stroke="#2d1f80"
+                      stroke-width="2"
+                      stroke-linecap="round"/>
+            </svg>
+        </button>
+    </div>
+
+</div>
     <div id="questions" class="view">
       <h3>Folders</h3>
       <div id="questionFolders"></div>
