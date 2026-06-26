@@ -424,9 +424,10 @@ let grammarAnswer = false
 let grammarStep = 0
 let editingGrammarId = null
 
+let imageURL = null;
 
-
-
+let uploadedImage = null;
+let selectedImage = null;
 
 
 
@@ -1132,7 +1133,7 @@ const newCard = {
   front: front,
   back: back,
   audio: recordedAudioBase64 || recordedFilePath || null,
-  image: imageURL || null,
+ image: selectedImage,
   level: 0,
   nextReview: Date.now(),
   hidden: false
@@ -1148,7 +1149,9 @@ transaction.oncomplete = function(){
   document.getElementById("backInput").value=""
   document.getElementById("imageResults").innerHTML=""
 
-  imageURL = null;
+  uploadedImage = null;
+selectedImage = null;
+unsplashImages = [];
 
   loadCardsFromDB(() => refreshUI());
 
@@ -1189,7 +1192,7 @@ async function compressImage(file, quality = 0.9){
     reader.readAsDataURL(blob);
   });
 }
-
+let unsplashImages = [];
 
 
 let searchTimer
@@ -1209,7 +1212,9 @@ if(word.length < 2) return
 
 const container = document.getElementById("imageResults")
 
-container.innerHTML = "Loading..."
+unsplashImages = data.results
+
+renderImages()
 
 try{
 
@@ -1273,13 +1278,12 @@ if(!file) return
 // kompresujemy obraz
 imageURL = await compressImage(file, 0.9)
 
+uploadedImage = await compressImage(file, 0.9)
+selectedImage = uploadedImage
+
 const container = document.getElementById("imageResults")
 
-container.innerHTML = ""
-
-const img = document.createElement("img")
-
-img.src = imageURL
+renderImages()
 img.style.border = "3px solid #7b5cff"
 
 container.appendChild(img)
@@ -1724,7 +1728,71 @@ function saveGrammar(){
 /* ===============================
    Nowe
 ================================ */
+function renderImages(){
 
+    const container = document.getElementById("imageResults");
+    container.innerHTML = "";
+
+    // Własne zdjęcie
+    if(uploadedImage){
+
+        const title = document.createElement("div");
+        title.innerHTML = "<b>📷 Your photo</b>";
+        title.style.gridColumn = "1 / -1";
+
+        container.appendChild(title);
+
+        const img = document.createElement("img");
+        img.src = uploadedImage;
+
+        if(selectedImage === uploadedImage){
+            img.style.border = "3px solid #7b5cff";
+        }
+
+        img.onclick = function(){
+
+            selectedImage = uploadedImage;
+            renderImages();
+
+        }
+
+        container.appendChild(img);
+
+    }
+
+    // Zdjęcia z Unsplasha
+    if(unsplashImages.length){
+
+        const title = document.createElement("div");
+        title.innerHTML = "<b>Suggested images</b>";
+        title.style.gridColumn = "1 / -1";
+        title.style.marginTop = "10px";
+
+        container.appendChild(title);
+
+        unsplashImages.forEach(photo=>{
+
+            const img = document.createElement("img");
+            img.src = photo.urls.small;
+
+            if(selectedImage === photo.urls.regular){
+                img.style.border = "3px solid #7b5cff";
+            }
+
+            img.onclick = function(){
+
+                selectedImage = photo.urls.regular;
+                renderImages();
+
+            }
+
+            container.appendChild(img);
+
+        });
+
+    }
+
+}
 /* ===============================
    RECORD AUDIO
 ================================ */
