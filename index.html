@@ -1248,7 +1248,8 @@ img.src = photo.urls.small
 
 img.onclick = ()=>{
 
-imageURL = photo.urls.regular
+selectedImage = photo.urls.regular;
+renderImages();
 
 document.querySelectorAll("#imageResults img").forEach(i=>i.style.border="none")
 
