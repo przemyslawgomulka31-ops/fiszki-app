@@ -423,8 +423,7 @@ let grammarIndex = 0
 let grammarAnswer = false
 let grammarStep = 0
 let editingGrammarId = null
-let loadLimit = 50
-let allCardsLoaded = false
+
 
 
 
@@ -703,37 +702,15 @@ RECORDING
 ================================ */
 
 function loadCardsFromDB(callback){
+  const transaction = db.transaction("cards","readonly");
+  const store = transaction.objectStore("cards");
 
-const transaction = db.transaction("cards","readonly")
-const store = transaction.objectStore("cards")
+  const req = store.getAll();
 
-const req = store.openCursor()
-
-if(loadLimit === 50){ cards = []}
-allCardsLoaded = true
-
-req.onsuccess = function(e){
-
-const cursor = e.target.result
-
-if(cursor && cards.length < loadLimit){
-if(!cards.find(c => c.id === cursor.value.id)){
-  cards.push(cursor.value)
-}
-cursor.continue()
-}else{
-
-if(cursor){
-allCardsLoaded = false // są jeszcze dane
-}
-
-
-if(callback) callback()
-
-}
-
-}
-
+  req.onsuccess = function(){
+    cards = req.result || [];
+    if(callback) callback();
+  };
 }
 
 /* ===============================
