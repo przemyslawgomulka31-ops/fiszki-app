@@ -1204,42 +1204,63 @@ searchTimer = setTimeout(searchImages, 500)
 
 })
 
-async function searchImages(){
+let searchTimer;
 
-const word = document.getElementById("frontInput").value.trim().split(" ")[0]
+document.getElementById("frontInput").addEventListener("input", () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(searchImages, 500);
+});
 
-if(word.length < 2) return
+async function searchImages() {
 
-const container = document.getElementById("imageResults")
+  const word = document
+    .getElementById("frontInput")
+    .value
+    .trim()
+    .split(" ")[0];
 
+  const container = document.getElementById("imageResults");
 
-try{
+  // czyścimy wyniki
+  container.innerHTML = "";
 
-const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=3&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w"
+  if (word.length < 2) {
+    unsplashImages = [];
+    renderImages();
+    return;
+  }
 
-const res = await fetch(url)
+  try {
 
-if(!res.ok){
-container.innerHTML = "Unsplash API error"
-return
+    const url =
+      "https://api.unsplash.com/search/photos?query=" +
+      encodeURIComponent(word) +
+      "&per_page=3&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w";
+
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      console.error("Unsplash:", res.status);
+      unsplashImages = [];
+      renderImages();
+      return;
+    }
+
+    const data = await res.json();
+
+    unsplashImages = data.results || [];
+
+    renderImages();
+
+  } catch (err) {
+
+    console.error("Image search error:", err);
+
+    unsplashImages = [];
+    renderImages();
+
+  }
 }
-
-const data = await res.json()
-
-unsplashImages = data.results
-
-renderImages()
-
-if(!data.results || data.results.length === 0){
-
-const img = document.createElement("img")
-img.src = "https://picsum.photos/300"
-
-container.appendChild(img)
-return
-
-}
-
 
 
 
