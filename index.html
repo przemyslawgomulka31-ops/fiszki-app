@@ -9,285 +9,507 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Fiszki" />
 <link rel="apple-touch-icon" href="icon.png" />
-<title>Fiszki - poprawione UI</title> <style> 
-  /* ---------- BODY / GRADIENT ---------- */ 
-
-	 :root{ --accent1: #8f7bff; 
-        --accent2: #a89bff; 
-        --accent3: #c9c2ff; 
-        --accent4: #e6e3ff; 
-        --white: #ffffff; 
-        --card-bg: #ffffff; 
-        --muted: 
-          rgba(0,0,0,0.55); }
-  *{box-sizing:border-box} html, 
-  body{ margin:0; 
-       padding:0; 
-       height:100%; 
-       overscroll-behavior:none; 
-       background:#8f7bff; } 
-  html, body{ margin:0; 
-             padding:0; 
-             height:100%; 
-             overscroll-behavior:none;
-			} 
-  /* 🔥 GRADIENT NA HTML (nie na body) */
-  html{ 
-    background: linear-gradient( 180deg, #8f7bff 0%, #a89bff 25%, #c9c2ff 55%, #e6e3ff 80%, #ffffff 100% ); 
-    background-attachment: fixed;
-	  background-size: 100% 100vh;
-background-repeat: no-repeat;
-    /* 🔥 klucz na iOS */ } /* 🔥 BODY BEZ TŁA */ 
-  body{ min-height:100vh; 
-       font-family: "Segoe UI", Roboto, Arial, sans-serif; 
-       color:#111; 
-       background: transparent; /* 🔥 bardzo ważne */ 
-       -webkit-font-smoothing:antialiased; 
-       -moz-osx-font-smoothing:grayscale; } 
-  /* ---------- APP LAYOUT ---------- */ 
-  .app{ max-width:420px; 
-       min-height:100vh;
-       margin:0 auto; 
-       padding: calc(env(safe-area-inset-top) + 100px) 22px 160px; 
-       padding-bottom: calc(160px + env(safe-area-inset-bottom)); 
-       position:relative;
-       overflow-y:auto; 
-       -webkit-overflow-scrolling:touch; 
-       transform: translateZ(0); /* 🔥 */ } 
-  button, 
-  .actionBtn, 
-  .iconBtn, 
-  .bigTile 
-  { outline: none; 
-   -webkit-tap-highlight-color: transparent; }
-  
-.bottomControls{ position:fixed; 
-                  left:0; 
-                  right:0; 
-                  bottom:0; 
-                  padding:16px; 
-                  display:flex; 
-                  flex-direction:column; 
-                  gap:12px; 
-                  max-width:420px; 
-                  margin:auto; 
-                  background:linear-gradient( to top, rgba(230,227,255,0.95), rgba(230,227,255,0) 
-                                             backdrop-filter: none; 
-                  -webkit-backdrop-filter: none; 
-                  background: rgba(230,227,255,0.95); /* stały kolor */ ); 
-                  backdrop-filter:blur(10px); } svg { width: 100%; height: 100%; display: block; } 
-  /* ---------- HEADER ---------- */ 
-  .header{ font-size:20px; font-weight:600; text-align:center; margin:0px 0 14px; padding-top:50px; color:#1b1635; } 
-  /* ---------- STATS ---------- */ 
-  /* ---------- CARD ---------- */ 
-  .card{ background: var(--card-bg); 
-        color:#222; 
-        border-radius:20px; 
-        padding:20px; 
-        text-align:center; 
-        font-size:28px; 
-        font-weight:600; 
-        margin-bottom:18px; 
-        box-shadow:0 18px 40px rgba(51,41,112,0.08); 
-        display:flex; 
-        flex-direction:column; 
-        align-items:center; 
-        justify-content:center; gap:10px; } 
-  /* animation helper (apply when switching card) */ 
-  .card.animate { transform: translateY(-8px); opacity: 0.85; } 
-  /* ---------- NAV BUTTONS (Prev/Next) ---------- */ 
-  .navButtons{ display:flex; gap:12px; } .navButtons button{ flex:1; min-height:48px; border-radius:28px; font-size:14px; margin-top: 10px; } 
-  /* ---------- BUTTONS ---------- */ 
-  button{ width:100%; padding:12px 14px; border:none; border-radius:28px; margin-top:10px; font-size:15px; cursor:pointer; 
-         transition: transform .12s ease, box-shadow .12s ease; box-shadow: 0 6px 18px rgba(99,58,255,0.08); } button:active{ transform: translateY(1px); } 
-  .bigButton{ min-height:60px; font-size:18px; } 
-  .primary{ background: linear-gradient(135deg,#7b5cff,#9f7bff); color:white; font-weight:600; margin-top: 10px; } 
-  .secondary{ background: #ffffff; color: #6a4bff; font-weight:600; } 
-  .topButtons{ position: fixed; top: 0; left: 0; right: 0; padding-top: calc(env(safe-area-inset-top) + 9px); 
-              padding-left: 12px; padding-right: 12px; padding-bottom: 8px; display: none; justify-content: space-between; gap: 10px; 
-              background: rgba(123,92,255,0.72); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); 
-              border-bottom: 1px solid rgba(255,255,255,0.18); box-shadow: 0 10px 30px rgba(50,30,120,0.12), inset 0 1px 0 rgba(255,255,255,0.35); z-index: 1000; }
-  .iconBtn{ width:50px; height:50px; border-radius:16px; background: rgba(255,255,255,0.18); 
-           backdrop-filter: blur(10px); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,0.25); 
-           box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.1); transition: all 0.2s ease; } 
-  .iconBtn:active{ transform: scale(0.92); } 
-  /* ---------- LIST ---------- */ 
-  .listItem{ background: rgba(255,255,255,0.35); backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(255,255,255,0.75); 
-            /* zamiast blur */ border-radius:20px; padding:14px 16px; margin-bottom:12px; display:flex; align-items:center; justify-content:space-between; 
-            border:1px solid rgba(255,255,255,0.3); box-shadow: 0 12px 30px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.7);
-            transition: all 0.2s ease; } .listItem:active{ transform: scale(0.98); } .listItem .text { flex:1 } 
-  .smallBtn{ width:auto; padding:8px 12px; font-size:13px; border-radius:10px; margin-left:6px; } 
-  /* ---------- INPUT ---------- */ input{ width:100%; padding:12px; border-radius:12px; border:none; margin-bottom:10px; font-size:15px; 
-                                          box-shadow: 0 8px 16px rgba(17,12,30,0.03); } 
-  /* ---------- VIEW CONTROL ---------- */ 
-  .view{ display:none; transform: translateZ(0);} .active{ display:block; } 
-  /* ---------- MODAL (EDIT) ---------- */ .modal-backdrop{ position:fixed; inset:0; background:rgba(10,8,20,0.45); 
-                                                           display:none; align-items:center; justify-content:center; z-index:50; } 
-  .modal-backdrop.show{ display:flex; } .modal{ width:90%; max-width:420px; background: #fff; color:#111; border-radius:14px; padding:16px; 
-                                               box-shadow: 0 18px 50px rgba(14,9,40,0.4); } .modal h3{ margin:0 0 8px 0 } .modal .row{ margin-bottom:8px } 
-  /* small responsive tweaks */
-  @media (max-width:420px){ .card{ padding:36px 14px; font-size:22px } .header{ font-size:18px } .stats{ font-size:13px } } 
-  .speak{ cursor:pointer; font-size:26px; } .record, .play{ cursor:pointer; font-size:24px; } 
-  #imageResults{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:10px 0; } 
-  #imageResults img { width:100%; border-radius:10px; cursor:pointer; } #imageResults img:hover { transform:scale(1.05); }
-  #cardImage{ width:100%; max-height:auto; object-fit:cover; border-radius:16px; margin-bottom:10px; } 
-  .modeBtn{ width:auto; padding:8px 18px; border-radius:999px; background: rgba(255,255,255,0.15); color:#2d1f80 ; font-weight:600; font-size:13px; 
-           letter-spacing:0.5px; align-items:center; justify-content:center; backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.25);
-           box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.08); transition: all 0.2s ease; } 
-  #startScreen{ position:fixed; top:0; left:0; right:0; bottom:0; display:flex; justify-content:center; align-items:center; 
-               background:linear-gradient( 180deg, #8f7bff, #c9c2ff ); z-index:9999; color:white; text-align:center; } 
-  .startContent p{ opacity:0.8; font-size:15px; letter-spacing:0.5px; } .tapText{ margin-top:20px; opacity:0.8; font-size:14px; } 
-  .logo{ font-size:20px; max-width:90px; } 
-  .logoFish{ width:100px; animation: float 2s ease-in-out infinite; } 
-  @keyframes float{ 0%,100%{ transform: translateY(0); } 50%{ transform: translateY(-6px); } } .tap{ margin-top:20px; opacity:0.6; font-size:14px; } 
-  .studyOnly{ display:none; } 
-  .tiles{ display: grid; grid-template-columns: 1fr ; 
-                                     /* 🔥 DWIE OBOK SIEBIE */ gap: 16px; margin-top: 20px; } 
-  .bigTile{ height:120px; width:75%; margin:auto; border-radius:26px; 
-           background: linear-gradient( 180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.35) ); backdrop-filter: blur(16px); display:flex; 
-           flex-direction:row; align-items:center; justify-content:center; 
-           
-           /* 🔥 CENTROWANIE */ 
-           gap:14px; box-shadow: 0 20px 60px rgba(50,30,120,0.25), inset 0 2px 2px rgba(255,255,255,0.8); transition: all 0.2s ease; } 
-  
-  .bigTile{ transform: translateY(0); } .bigTile:active{ transform: translateY(4px) scale(0.97); } 
-  .bigTile span{ font-size:15px; font-weight:600; color:#1b1635; letter-spacing:2px; line-height:1; /* 🔥 KLUCZ */ display:flex; align-items:center; } 
-  .menuTitle{ text-align:center; font-size:26px; font-weight:700; margin-top:20px; margin-bottom:20px; color:#1b1635; letter-spacing:3px; opacity:0.7; } 
-  .tileIcon{ width:64px; height:64px; flex-shrink:0; display:block; /* 🔥 fix Android */ } 
-  .questionCard{ margin-top:20px; margin-left:12px; margin-right:auto; background:#fff; border-radius:20px; padding:20px; font-size:clamp(18px,4vw,28px); line-height:1.4; word-break:break-word; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start; text-align:left; min-height:200px; box-shadow:0 18px 40px rgba(51,41,112,0.08); } .questionSpacer{ height:20px; } .questionField, .answerField{ width:100%; font-size:18px; line-height:1.5; padding:14px; border-radius:14px; border:none; box-shadow:0 8px 20px rgba(0,0,0,0.05); resize:none; } /* pytanie mniejsze */ .questionField{ min-height:80px; margin-bottom:12px; } /* odpowiedź większa */ .answerField{ min-height:160px; margin-bottom:20px; } #addGrammar textarea{ width:100%; height:80px; font-size:14px; border-radius:12px; border:none; padding:12px; margin-bottom:12px; box-shadow:0 6px 12px rgba(0,0,0,0.05); resize:none; /* blokuje rozciąganie palcem */ } #addGrammar{ max-width:420px; margin:auto; } .bottomCorners{ position:fixed; bottom: calc(100px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:100%; max-width:420px; z-index:999; pointer-events:none; } /* wspólne */ 
-  .cornerBtn{ 
-    position:absolute; 
-    width: clamp(50px, 18vw, 90px); 
-    height: clamp(50px, 18vw, 90px);
-    background: linear-gradient(135deg,#7b5cff,#9f7bff); 
-    color:white; font-size: clamp(20px, 5vw, 28px); 
-    display:flex; align-items:center; 
-    justify-content:center; box-shadow:0 10px 30px rgba(123,92,255,0.4); pointer-events:auto; border:none; } 
-  .cornerBtn.left{ left:20px; } .cornerBtn.right{ right:20px; } /* klik efekt */ .cornerBtn:active{ transform:scale(0.92); }
-  
-  .fabContainer{ position: fixed; 
-                bottom: max(10px, env(safe-area-inset-bottom)+ 70px); 
-                left: 0; right: 0; 
-                max-width: 420px;
-                margin: auto; 
-                display: flex; 
-                justify-content: space-between; padding: 0 40px; z-index: 999; pointer-events: none; } 
-  .fab{ width: 68px; height: 69px; bottom: max(20px, env(safe-area-inset-bottom)+20px); border-radius: 50%; background: rgba(30, 20, 100, 0.28); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; color: #2d1f80; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, background 0.2s ease; pointer-events: auto; padding: 0; } .fab:active{ transform: scale(0.92); } .fab svg{ width: 24px; height: 24px; display: block; } .audioButtons{ display:flex; justify-content:center; gap:14px; margin-top:10px; } .audioButtons button{ width:48px; height:48px; border-radius:50%; border:none; background: linear-gradient(135deg,#7b5cff,#9f7bff); color:white; font-size:20px; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 16px rgba(0,0,0,0.2); cursor:pointer; } .audioItem{ display:flex; flex-direction:column; align-items:center; font-size:22px; cursor:pointer; } .audioItem span{ font-size:11px; opacity:0.6; } #imageUpload{ display:none; } .uploadBtn{ display:block; text-align:center; padding:10px; border-radius:14px; background:rgba(255,255,255,0.25); backdrop-filter:blur(6px); font-size:14px; font-weight:600; color:#2d1f80; margin-bottom:12px; } #cardText{ font-size: 26px; font-weight: 700; letter-spacing: 1px; } .actionBtn{ width:42px; height:42px; color:#2d1f80; border-radius:12px; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); display:flex; align-items:center; justify-content:center; box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: all 0.2s ease; } .actionBtn:active{ transform: scale(0.9); } .actionBtn svg{ width:20px; height:20px; } .stats{ display:flex; gap:10px; margin-bottom:18px; } .stat{ flex:1; display:flex; align-items:center; justify-content:center; padding:10px 12px; border-radius:14px; background: rgba(255,255,255,0.25); backdrop-filter: blur(10px); border:1px solid rgba(255,255,255,0.3); box-shadow: 0 6px 18px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.6); font-size:13px; font-weight:600; color:#1b1635; } .stat strong, .stat span{ margin-left:6px; font-weight:700; } .stat:nth-child(1) strong{ color:#2d1f80; /* cards */ } .stat:nth-child(2) strong{ color:#ff7a00; /* streak 🔥 */ } .stat:nth-child(3){ opacity:0.8; }
-.flashcardField{
-  width:100%;
-  min-height:64px;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin-bottom:10px;
-  font-size:15px;
-  resize:vertical;
-  box-shadow:0 8px 16px rgba(17,12,30,0.03);
+<title>Fiszki</title>
+<style>
+/* ---------- RESET / ROOT ---------- */
+:root {
+  --accent1: #8f7bff;
+  --accent2: #a89bff;
+  --accent3: #c9c2ff;
+  --accent4: #e6e3ff;
+  --white: #ffffff;
+  --card-bg: #ffffff;
+  --muted: rgba(0,0,0,0.55);
 }
-#cardText, #questionCardText, #grammarCardText, .listItem .text{
-  white-space: pre-wrap;
-}
-.fabContainer{
-    position: fixed;
-    left: 0;
-    right: 0;
+* { box-sizing: border-box; }
 
-    bottom: calc(env(safe-area-inset-bottom) + 22px);
-
-    max-width: 420px;
-    margin: auto;
-
-    display: flex;
-    justify-content: space-between;
-
-    padding: 0 36px;
-
-    z-index: 9999;
-
-    pointer-events: none;
+/* ---------- GRADIENT BG ---------- */
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overscroll-behavior: none;
+  background: linear-gradient(180deg, #8f7bff 0%, #a89bff 25%, #c9c2ff 55%, #e6e3ff 80%, #ffffff 100%);
+  background-attachment: fixed;
+  background-size: 100% 100vh;
+  background-repeat: no-repeat;
 }
 
-.fab{
-    pointer-events: auto;
-}
-.bottomPlayer{
-
-    position:fixed;
-
-    left:50%;
-    transform:translateX(-50%);
-
-    bottom:calc(env(safe-area-inset-bottom) + 18px);
-
-    width:calc(100% - 36px);
-    max-width:380px;
-
-    height:78px;
-
-    border-radius:30px;
-
-    display:flex;
-    justify-content:space-evenly;
-    align-items:center;
-
-    background:rgba(255,255,255,.18);
-
-    backdrop-filter:blur(22px);
-    -webkit-backdrop-filter:blur(22px);
-
-    border:1px solid rgba(255,255,255,.25);
-
-    box-shadow:
-        0 18px 40px rgba(0,0,0,.15),
-        inset 0 1px 1px rgba(255,255,255,.45);
-
-    z-index:99999;
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  overscroll-behavior: none;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #111;
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.playerBtn{
-
-    width:58px;
-    height:58px;
-
-    border-radius:50%;
-
-    border:none;
-
-    background:rgba(255,255,255,.22);
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
-
-    transition:.18s;
+/* ---------- APP LAYOUT ---------- */
+.app {
+  max-width: 420px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 100px) 22px calc(160px + env(safe-area-inset-bottom));
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  transform: translateZ(0);
 }
 
-.playerBtn svg{
-
-    width:26px;
-    height:26px;
+button, .actionBtn, .iconBtn, .bigTile {
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.playerBtn:active{
+/* ---------- HEADER ---------- */
+.header {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0 0 14px;
+  padding-top: 50px;
+  color: #1b1635;
+}
 
-    transform:scale(.9);
+/* ---------- TOP BUTTONS ---------- */
+.topButtons {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding-top: calc(env(safe-area-inset-top) + 9px);
+  padding-left: 12px;
+  padding-right: 12px;
+  padding-bottom: 8px;
+  display: none;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(123,92,255,0.72);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 10px 30px rgba(50,30,120,0.12), inset 0 1px 0 rgba(255,255,255,0.35);
+  z-index: 1000;
+}
 
+.iconBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+.iconBtn:active { transform: scale(0.92); }
+
+svg { width: 100%; height: 100%; display: block; }
+
+/* ---------- STATS ---------- */
+.stats {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.stat {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 6px 18px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.6);
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b1635;
+}
+.stat strong, .stat span { margin-left: 6px; font-weight: 700; }
+.stat:nth-child(1) strong { color: #2d1f80; }
+.stat:nth-child(2) strong { color: #ff7a00; }
+.stat:nth-child(3) { opacity: 0.8; }
+
+/* ---------- CARD ---------- */
+.card {
+  background: var(--card-bg);
+  color: #222;
+  border-radius: 20px;
+  padding: 20px;
+  text-align: center;
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  box-shadow: 0 18px 40px rgba(51,41,112,0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.card.animate { transform: translateY(-8px); opacity: 0.85; }
+
+/* ---------- BUTTONS ---------- */
+button {
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 28px;
+  margin-top: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease;
+  box-shadow: 0 6px 18px rgba(99,58,255,0.08);
+}
+button:active { transform: translateY(1px); }
+
+.bigButton { min-height: 60px; font-size: 18px; }
+.primary { background: linear-gradient(135deg,#7b5cff,#9f7bff); color: white; font-weight: 600; margin-top: 10px; }
+.secondary { background: #ffffff; color: #6a4bff; font-weight: 600; }
+
+.modeBtn {
+  width: auto;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  color: #2d1f80;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 6px 20px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+
+.navButtons { display: flex; gap: 12px; }
+.navButtons button { flex: 1; min-height: 48px; border-radius: 28px; font-size: 14px; margin-top: 10px; }
+
+/* ---------- LIST ---------- */
+.listItem {
+  background: rgba(255,255,255,0.75);
+  border-radius: 20px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255,255,255,0.3);
+  box-shadow: 0 12px 30px rgba(50,30,120,0.12), inset 0 1px 1px rgba(255,255,255,0.7);
+  transition: all 0.2s ease;
+}
+.listItem:active { transform: scale(0.98); }
+.listItem .text { flex: 1; }
+.smallBtn { width: auto; padding: 8px 12px; font-size: 13px; border-radius: 10px; margin-left: 6px; }
+
+/* ---------- INPUT ---------- */
+input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 10px;
+  font-size: 15px;
+  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
+}
+
+/* ---------- VIEW CONTROL ---------- */
+.view { display: none; transform: translateZ(0); }
+.active { display: block; }
+
+/* ---------- MODAL ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10,8,20,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal-backdrop.show { display: flex; }
+.modal {
+  width: 90%;
+  max-width: 420px;
+  background: #fff;
+  color: #111;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 18px 50px rgba(14,9,40,0.4);
+}
+.modal h3 { margin: 0 0 8px 0; }
+.modal .row { margin-bottom: 8px; }
+
+/* ---------- QUESTION CARD ---------- */
+.questionCard {
+  margin-top: 20px;
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  font-size: clamp(16px,4vw,24px);
+  line-height: 1.4;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  text-align: left;
+  min-height: 200px;
+  box-shadow: 0 18px 40px rgba(51,41,112,0.08);
+}
+
+.questionField, .answerField {
+  width: 100%;
+  font-size: 18px;
+  line-height: 1.5;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  resize: none;
+}
+.questionField { min-height: 80px; margin-bottom: 12px; }
+.answerField { min-height: 160px; margin-bottom: 20px; }
+
+/* ---------- FLASHCARD TEXTAREA ---------- */
+.flashcardField {
+  width: 100%;
+  min-height: 64px;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  margin-bottom: 10px;
+  font-size: 15px;
+  resize: vertical;
+  box-shadow: 0 8px 16px rgba(17,12,30,0.03);
+}
+
+/* ---------- GRAMMAR ---------- */
+#addGrammar textarea {
+  width: 100%;
+  height: 80px;
+  font-size: 14px;
+  border-radius: 12px;
+  border: none;
+  padding: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+  resize: none;
+}
+#addGrammar { max-width: 420px; margin: auto; }
+
+/* ---------- START SCREEN ---------- */
+#startScreen {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(180deg, #8f7bff, #c9c2ff);
+  z-index: 9999;
+  color: white;
+  text-align: center;
+}
+.startContent p { opacity: 0.8; font-size: 15px; letter-spacing: 0.5px; }
+.tapText { margin-top: 20px; opacity: 0.8; font-size: 14px; }
+.logo { font-size: 20px; max-width: 90px; }
+.logoFish { width: 100px; animation: float 2s ease-in-out infinite; }
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.tap { margin-top: 20px; opacity: 0.6; font-size: 14px; }
+
+/* ---------- MENU TILES ---------- */
+.menuTitle {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  color: #1b1635;
+  letter-spacing: 3px;
+  opacity: 0.7;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+.bigTile {
+  height: 120px;
+  width: 75%;
+  margin: auto;
+  border-radius: 26px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.65), rgba(255,255,255,0.35));
+  backdrop-filter: blur(16px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  box-shadow: 0 20px 60px rgba(50,30,120,0.25), inset 0 2px 2px rgba(255,255,255,0.8);
+  transition: all 0.2s ease;
+}
+.bigTile:active { transform: translateY(4px) scale(0.97); }
+.bigTile span {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1b1635;
+  letter-spacing: 2px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+.tileIcon { width: 64px; height: 64px; flex-shrink: 0; display: block; }
+
+/* ---------- ACTION BUTTONS ---------- */
+.actionBtn {
+  width: 42px;
+  height: 42px;
+  color: #2d1f80;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+.actionBtn:active { transform: scale(0.9); }
+.actionBtn svg { width: 20px; height: 20px; }
+
+/* ---------- BOTTOM PLAYER ---------- */
+.bottomPlayer {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  width: calc(100% - 36px);
+  max-width: 380px;
+  height: 78px;
+  border-radius: 30px;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(255,255,255,0.25);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.15), inset 0 1px 1px rgba(255,255,255,0.45);
+  z-index: 99999;
+}
+
+.playerBtn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255,255,255,0.22);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: 0.18s;
+}
+.playerBtn svg { width: 26px; height: 26px; }
+.playerBtn:active { transform: scale(0.9); }
+
+/* ---------- AUDIO BUTTONS ---------- */
+.audioButtons {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+.audioButtons button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg,#7b5cff,#9f7bff);
+  color: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  cursor: pointer;
+}
+.audioItem { display: flex; flex-direction: column; align-items: center; font-size: 22px; cursor: pointer; }
+.audioItem span { font-size: 11px; opacity: 0.6; }
+
+/* ---------- IMAGE UPLOAD ---------- */
+#imageUpload { display: none; }
+.uploadBtn {
+  display: block;
+  text-align: center;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.25);
+  backdrop-filter: blur(6px);
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d1f80;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+#imageResults {
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 8px;
+  margin: 10px 0;
+}
+#imageResults img { width: 100%; border-radius: 10px; cursor: pointer; }
+#imageResults img:hover { transform: scale(1.05); }
+#cardImage { width: 100%; max-height: auto; object-fit: cover; border-radius: 16px; margin-bottom: 10px; }
+
+/* ---------- WHITESPACE PRESERVATION ---------- */
+#cardText, #questionCardText, #grammarCardText, .listItem .text { white-space: pre-wrap; }
+#cardText { font-size: 26px; font-weight: 700; letter-spacing: 1px; }
+
+/* ---------- REVIEW BUTTONS ---------- */
+#reviewButtons button { margin-top: 8px; }
+
+/* ---------- SPEAK ---------- */
+.speak { cursor: pointer; font-size: 26px; }
+.record, .play { cursor: pointer; font-size: 24px; }
+
+.studyOnly { display: none; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 420px) {
+  .card { padding: 36px 14px; font-size: 22px; }
+  .header { font-size: 18px; }
 }
 </style>
 </head>
 <body>
+
 <div id="startScreen">
   <div class="startContent">
     <div class="logo"><img src="fishki-logo.png" class="logoFish" alt="Fishki"></div>
     <h1>Fishki</h1>
     <p>Train your brain daily</p>
-    <div class="tapText">Let’s go</div>
+    <div class="tapText">Tap to start</div>
   </div>
 </div>
 
 <div class="app">
+  <!-- TOP NAV BAR -->
   <div class="topButtons">
     <button id="btnBack" class="iconBtn" aria-label="Back">
       <svg viewBox="0 0 24 24" fill="none"><path d="M14 6L8 12L14 18" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -295,182 +517,175 @@ background-repeat: no-repeat;
     <button id="btnHome" class="iconBtn" aria-label="Home">
       <svg viewBox="0 0 24 24" fill="none"><path d="M3 10L12 3L21 10V20C21 20.6 20.6 21 20 21H4C3.4 21 3 20.6 3 20V10Z" stroke="#2d1f80" stroke-width="2"/><path d="M9 21V12H15V21" stroke="#2d1f80" stroke-width="2"/></svg>
     </button>
-    <button id="btnList" class="iconBtn" aria-label="List">
+    <button id="btnList" class="iconBtn" aria-label="List" style="display:none">
       <svg viewBox="0 0 24 24" fill="none"><path d="M9 6H20M9 12H20M9 18H20" stroke="#2d1f80" stroke-width="2"/><circle cx="4" cy="6" r="1.5" fill="#2d1f80"/><circle cx="4" cy="12" r="1.5" fill="#2d1f80"/><circle cx="4" cy="18" r="1.5" fill="#2d1f80"/></svg>
     </button>
-    <button id="btnAdd" class="iconBtn" aria-label="Add">
+    <button id="btnAdd" class="iconBtn" aria-label="Add" style="display:none">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 5V19M5 12H19" stroke="#2d1f80" stroke-width="2.5" stroke-linecap="round"/></svg>
     </button>
-    <button id="btnAll" class="modeBtn studyOnly" onclick="setMode('ALL')">ALL</button>
-    <button id="btnSrs" class="modeBtn studyOnly" onclick="setMode('SRS')">SRS</button>
+    <button id="btnAll" class="modeBtn studyOnly" style="display:none">ALL</button>
+    <button id="btnSrs" class="modeBtn studyOnly" style="display:none">SRS</button>
   </div>
 
-  <div id="scrollArea">
-    <div id="home" class="view active">
-      <div class="menuTitle">MENU</div>
-      <div class="tiles">
-        <div class="bigTile" onclick="openAll()">
-          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/><rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/></svg>
-          <span>FLASHCARDS</span>
-        </div>
-        <div class="bigTile" onclick="openQuestions()">
-          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M9 9C9 7.5 10.2 6.5 12 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.2 10.8 13.3 11.3C12.5 11.8 12 12.3 12 13.5" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#2d1f80"/></svg>
-          <span>QUESTION</span>
-        </div>
-        <div class="bigTile" onclick="openGrammar()">
-          <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M4 6H10V18H4Z" stroke="#2d1f80" stroke-width="2"/><path d="M14 6H20V18H14Z" stroke="#2d1f80" stroke-width="2"/><path d="M10 6C10 6 12 7 14 6" stroke="#2d1f80" stroke-width="2"/></svg>
-          <span>GRAMMAR</span>
-        </div>
+  <!-- ===== VIEWS ===== -->
+  <div id="home" class="view active">
+    <div class="menuTitle">MENU</div>
+    <div class="tiles">
+      <div class="bigTile" onclick="openAll()">
+        <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/><rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/></svg>
+        <span>FLASHCARDS</span>
+      </div>
+      <div class="bigTile" onclick="openQuestions()">
+        <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M9 9C9 7.5 10.2 6.5 12 6.5C13.8 6.5 15 7.5 15 9C15 10.2 14.2 10.8 13.3 11.3C12.5 11.8 12 12.3 12 13.5" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1" fill="#2d1f80"/></svg>
+        <span>QUESTION</span>
+      </div>
+      <div class="bigTile" onclick="openGrammar()">
+        <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><path d="M4 6H10V18H4Z" stroke="#2d1f80" stroke-width="2"/><path d="M14 6H20V18H14Z" stroke="#2d1f80" stroke-width="2"/><path d="M10 6C10 6 12 7 14 6" stroke="#2d1f80" stroke-width="2"/></svg>
+        <span>GRAMMAR</span>
       </div>
     </div>
+  </div>
 
-   <div id="homeStudy" class="view">
-
+  <!-- FLASHCARD STUDY -->
+  <div id="homeStudy" class="view">
     <div class="stats">
-        <div class="stat">📚 <strong id="counter">0</strong></div>
-        <div class="stat">🔥 <strong id="streakUI">0</strong></div>
-        <div class="stat">📊 <span id="progress-mini">—</span></div>
+      <div class="stat">📚 <strong id="counter">0</strong></div>
+      <div class="stat">🔥 <strong id="streakUI">0</strong></div>
+      <div class="stat">📊 <span id="progress-mini">—</span></div>
     </div>
-
     <div class="card" id="flashcard">
-        <img id="cardImage" alt="card image">
-        <span id="cardText">Add flashcard</span>
+      <img id="cardImage" alt="card image" style="display:none">
+      <span id="cardText">Add flashcard</span>
     </div>
-
     <div id="reviewButtons">
-        <button onclick="reviewCard(0)">❌ I don't remember</button>
-        <button onclick="reviewCard(1)">🙂 Average</button>
-        <button onclick="reviewCard(2)">✅ Easy</button>
+      <button onclick="reviewCard(0)">❌ I don't remember</button>
+      <button onclick="reviewCard(1)">🙂 Average</button>
+      <button onclick="reviewCard(2)">✅ Easy</button>
     </div>
-
     <div class="bottomPlayer">
-        <button class="playerBtn" onclick="playRecording()">
-            <svg viewBox="0 0 24 24" fill="#2d1f80">
-                <path d="M8 5L19 12L8 19V5Z"/>
-            </svg>
-        </button>
-
-        <button class="playerBtn" onclick="speakCurrentCard()">
-            <svg viewBox="0 0 24 24" fill="none">
-                <path d="M5 9V15H9L14 20V4L9 9H5Z"
-                      stroke="#2d1f80"
-                      stroke-width="2"
-                      stroke-linejoin="round"/>
-                <path d="M16 9C17.5 10.5 17.5 13.5 16 15"
-                      stroke="#2d1f80"
-                      stroke-width="2"
-                      stroke-linecap="round"/>
-                <path d="M18.5 7C21 9.5 21 14.5 18.5 17"
-                      stroke="#2d1f80"
-                      stroke-width="2"
-                      stroke-linecap="round"/>
-            </svg>
-        </button>
-    </div>
-
-</div>
-    <div id="questions" class="view">
-      <h3>Folders</h3>
-      <div id="questionFolders"></div>
-      <button class="primary" onclick="openFolderPopup()">➕ New folder</button>
-      <div class="topActionRow">
-        <button class="secondary" onclick="exportQuestions()">⬇ Export</button>
-        <button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
-      </div>
-    </div>
-
-    <div id="questionFolder" class="view">
-      <h3>Questions</h3>
-      <div id="questionList"></div>
-    </div>
-
-    <div id="questionCards" class="view">
-      <div class="stats">
-        <div class="stat">❓ <strong id="questionCounter">0</strong></div>
-        <div class="stat">📊 <span id="questionProgress">—</span></div>
-      </div>
-      <div class="questionCard" id="questionCardText"></div>
-    </div>
-
-    <div id="addQuestion" class="view">
-      <h3>New question</h3>
-      <label>Question</label>
-      <textarea class="questionField" id="questionInput" placeholder="Np. What did you do last weekend?"></textarea>
-      <label>Answer</label>
-      <textarea class="answerField" id="answerInput" placeholder="Your answer"></textarea>
-      <button class="primary" onclick="saveQuestion()">Save</button>
-      <button class="secondary" onclick="setView('questionFolder', false)">Back</button>
-    </div>
-
-    <div id="grammarList" class="view">
-      <h3>Grammar</h3>
-      <div id="grammarItems"></div>
-      <div class="topActionRow" style="margin-top:15px">
-        <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
-        <button onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
-      </div>
-    </div>
-
-    <div id="grammarStudy" class="view">
-      <div class="stats">
-        <div class="stat">📖 <strong id="grammarCounter">0</strong></div>
-        <div class="stat">📊 <span id="grammarProgress">—</span></div>
-      </div>
-      <div class="questionCard" id="grammarCardText"></div>
-    </div>
-
-    <div id="addGrammar" class="view">
-      <h3>New grammar</h3>
-      <input id="gTitle" placeholder="Topic np. Passive Voice" />
-      <textarea id="gExplanation" placeholder="📖 Explanation"></textarea>
-      <textarea id="gStructure" placeholder="📐 Structure"></textarea>
-      <textarea id="gUsage" placeholder="🧠 Usage"></textarea>
-      <textarea id="gExamples" placeholder="💬 Examples"></textarea>
-      <textarea id="gPractice" placeholder="✏️ Practice"></textarea>
-      <textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
-      <button class="primary" onclick="saveGrammar()">Save</button>
-    </div>
-
-    <div id="list" class="view">
-      <h3>Vocabulary List</h3>
-      <div style="margin:8px 0 12px"><input id="searchBox" placeholder="Search..." oninput="renderList()" /></div>
-      <div id="wordsList"></div>
-      <div class="topActionRow">
-        <button class="secondary" onclick="toggleSort()">Sort A→Z</button>
-        <button class="secondary" onclick="exportBackup()">⬇ Export</button>
-        <button onclick="document.getElementById('importFile').click()">⬆ Import</button>
-      </div>
-    </div>
-
-    <div id="add" class="view">
-      <h3>Add flashcard</h3>
-     <textarea id="frontInput" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
-<textarea id="backInput" class="flashcardField" placeholder="Translation" rows="2"></textarea>
-      <input type="file" id="imageUpload" accept="image/*" />
-      <label for="imageUpload" class="uploadBtn">📷 Add photo</label>
-      <div id="imageResults"></div>
-      <div class="audioButtons">
-        <div class="audioItem" onclick="startRecording()">🎤<span>Record</span></div>
-        <div class="audioItem" onclick="playRecording()">▶️<span>Play</span></div>
-      </div>
-      <div id="recordUI" style="display:none;text-align:center;margin-top:10px">
-        <div style="font-size:22px">🎤 Recording...</div>
-        <div style="font-size:28px;color:red">● REC</div>
-        <div id="recordTimer">0</div>
-      </div>
-      <button class="primary" onclick="addCard()">Add flashcard</button>
-      <div style="text-align:center;font-size:11px;opacity:.5;margin-top:30px;padding-bottom:20px;">Photos by Unsplash</div>
+      <button class="playerBtn" onclick="playCurrentCardRecording()">
+        <svg viewBox="0 0 24 24" fill="#2d1f80"><path d="M8 5L19 12L8 19V5Z"/></svg>
+      </button>
+      <button class="playerBtn" onclick="speakCurrentCard()">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 9V15H9L14 20V4L9 9H5Z" stroke="#2d1f80" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M16 9C17.5 10.5 17.5 13.5 16 15" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
+          <path d="M18.5 7C21 9.5 21 14.5 18.5 17" stroke="#2d1f80" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
   </div>
-</div>
 
-<!-- MODALS -->
+  <!-- QUESTION FOLDERS -->
+  <div id="questions" class="view">
+    <h3>Folders</h3>
+    <div id="questionFolders"></div>
+    <button class="primary" onclick="openFolderPopup()">➕ New folder</button>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="secondary" onclick="exportQuestions()">⬇ Export</button>
+      <button class="secondary" onclick="document.getElementById('importQuestions').click()">⬆ Import</button>
+    </div>
+  </div>
+
+  <!-- QUESTION FOLDER CONTENT -->
+  <div id="questionFolder" class="view">
+    <h3>Questions</h3>
+    <div id="questionList"></div>
+  </div>
+
+  <!-- QUESTION STUDY CARDS -->
+  <div id="questionCards" class="view">
+    <div class="stats">
+      <div class="stat">❓ <strong id="questionCounter">0</strong></div>
+      <div class="stat">📊 <span id="questionProgress">—</span></div>
+    </div>
+    <div class="questionCard" id="questionCardText"></div>
+  </div>
+
+  <!-- ADD QUESTION -->
+  <div id="addQuestion" class="view">
+    <h3>New question</h3>
+    <label>Question</label>
+    <textarea class="questionField" id="questionInput" placeholder="e.g. What did you do last weekend?"></textarea>
+    <label>Answer</label>
+    <textarea class="answerField" id="answerInput" placeholder="Your answer"></textarea>
+    <button class="primary" onclick="saveQuestion()">Save</button>
+    <button class="secondary" onclick="setView('questionFolder', false)">Back</button>
+  </div>
+
+  <!-- GRAMMAR LIST -->
+  <div id="grammarList" class="view">
+    <h3>Grammar</h3>
+    <div id="grammarItems"></div>
+    <div style="display:flex;gap:8px;margin-top:15px">
+      <button class="secondary" onclick="exportGrammar()">⬇ Export</button>
+      <button class="secondary" onclick="document.getElementById('importGrammar').click()">⬆ Import</button>
+    </div>
+  </div>
+
+  <!-- GRAMMAR STUDY -->
+  <div id="grammarStudy" class="view">
+    <div class="stats">
+      <div class="stat">📖 <strong id="grammarCounter">0</strong></div>
+      <div class="stat">📊 <span id="grammarProgress">—</span></div>
+    </div>
+    <div class="questionCard" id="grammarCardText"></div>
+  </div>
+
+  <!-- ADD GRAMMAR -->
+  <div id="addGrammar" class="view">
+    <h3>New grammar</h3>
+    <input id="gTitle" placeholder="Topic e.g. Passive Voice" />
+    <textarea id="gExplanation" placeholder="📖 Explanation"></textarea>
+    <textarea id="gStructure" placeholder="📐 Structure"></textarea>
+    <textarea id="gUsage" placeholder="🧠 Usage"></textarea>
+    <textarea id="gExamples" placeholder="💬 Examples"></textarea>
+    <textarea id="gPractice" placeholder="✏️ Practice"></textarea>
+    <textarea id="gMistakes" placeholder="⚠ Common mistakes"></textarea>
+    <button class="primary" onclick="saveGrammar()">Save</button>
+  </div>
+
+  <!-- VOCABULARY LIST -->
+  <div id="list" class="view">
+    <h3>Vocabulary List</h3>
+    <div style="margin:8px 0 12px"><input id="searchBox" placeholder="Search..." oninput="renderList()" /></div>
+    <div id="wordsList"></div>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button class="secondary" onclick="toggleSort()">Sort A→Z</button>
+      <button class="secondary" onclick="exportBackup()">⬇ Export</button>
+      <button class="secondary" onclick="document.getElementById('importFile').click()">⬆ Import</button>
+    </div>
+  </div>
+
+  <!-- ADD FLASHCARD -->
+  <div id="add" class="view">
+    <h3>Add flashcard</h3>
+    <textarea id="frontInput" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
+    <textarea id="backInput" class="flashcardField" placeholder="Translation" rows="2"></textarea>
+    <input type="file" id="imageUpload" accept="image/*" />
+    <label for="imageUpload" class="uploadBtn">📷 Add photo</label>
+    <div id="imageResults"></div>
+    <div class="audioButtons">
+      <div class="audioItem" onclick="startRecording()">🎤<span>Record</span></div>
+      <div class="audioItem" onclick="playRecording()">▶️<span>Play</span></div>
+    </div>
+    <div id="recordUI" style="display:none;text-align:center;margin-top:10px">
+      <div style="font-size:22px">🎤 Recording...</div>
+      <div style="font-size:28px;color:red">● REC</div>
+      <div id="recordTimer">0</div>
+    </div>
+    <button class="primary" onclick="addCard()">Add flashcard</button>
+    <div style="text-align:center;font-size:11px;opacity:.5;margin-top:30px;padding-bottom:20px;">Photos by Unsplash</div>
+  </div>
+</div><!-- /.app -->
+
+<!-- ===== MODALS ===== -->
 <div id="modal" class="modal-backdrop">
   <div class="modal">
     <h3>Edit word</h3>
     <textarea id="editFront" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
-<textarea id="editBack" class="flashcardField" placeholder="Translation" rows="2"></textarea>
-    <div class="bottomActionRow">
+    <textarea id="editBack" class="flashcardField" placeholder="Translation" rows="2"></textarea>
+    <div style="display:flex;gap:8px;margin-top:10px">
       <button class="secondary" onclick="closeModal()">Cancel</button>
       <button class="primary" onclick="saveModal()">Save</button>
     </div>
@@ -487,8 +702,8 @@ background-repeat: no-repeat;
 <div id="folderPopup" class="modal-backdrop">
   <div class="modal">
     <h3>Name folder</h3>
-    <input id="folderNameInput" placeholder="Np. Interview" />
-    <div class="bottomActionRow">
+    <input id="folderNameInput" placeholder="e.g. Interview" />
+    <div style="display:flex;gap:8px;margin-top:10px">
       <button class="secondary" onclick="closeFolderPopup()">Cancel</button>
       <button class="primary" onclick="saveFolder()">Save</button>
     </div>
@@ -498,2226 +713,1248 @@ background-repeat: no-repeat;
 <div id="confirmPopup" class="modal-backdrop">
   <div class="modal">
     <h3 id="confirmText">Are you sure?</h3>
-    <div class="bottomActionRow">
+    <div style="display:flex;gap:8px;margin-top:10px">
       <button class="secondary" onclick="closeConfirm()">Cancel</button>
       <button class="primary" id="confirmOk">OK</button>
     </div>
   </div>
 </div>
 
+<!-- HIDDEN FILE INPUTS -->
 <input type="file" id="importFile" accept=".json" style="display:none" />
 <input type="file" id="importQuestions" accept=".json" style="display:none" />
 <input type="file" id="importGrammar" accept=".json" style="display:none" />
 
 <script>
-let db
-let cards = []
-let currentIndex = 0
-let showingAnswer = false
-let sortAZ = true
-let studyMode = "SRS"
+/* ======================================================
+   STATE
+====================================================== */
+let db;
+let cards = [];
+let currentIndex = 0;
+let showingAnswer = false;
+let sortAZ = true;
+let studyMode = "SRS";
 
+let viewHistory = [];
+let imageURL = null;
+let streak = parseInt(localStorage.getItem("streak")) || 0;
+let lastStudy = localStorage.getItem("lastStudy") || "";
+let currentFolderId = null;
 
-let viewHistory = []
-let imageURL = null
-let streak = parseInt(localStorage.getItem("streak")) || 0
-let lastStudy = localStorage.getItem("lastStudy") || ""
-	let currentFolderId = null
-let grammarCards = []
-let grammarIndex = 0
-let grammarAnswer = false
-let grammarStep = 0
-let editingGrammarId = null
-
-
+let grammarCards = [];
+let grammarIndex = 0;
+let grammarAnswer = false;
+let grammarStep = 0;
+let editingGrammarId = null;
 
 let uploadedImage = null;
 let selectedImage = null;
+let unsplashImages = [];
 
-
-
-
+// FIX: declared at top level so startRecording() can access them
+let mediaRecorder = null;
+let audioChunks = [];
 let recordedAudioBase64 = null;
-
-let recordSeconds = 0;
-let recordInterval = null;
-let autoStopTimeout = null;
-let recordedFilePath = null;
 let isRecording = false;
 
-const request = indexedDB.open("FlashcardsDB",4)
+// FIX: allCardsLoaded — used by prevCard/nextCard; always true for IndexedDB (all loaded at once)
+let allCardsLoaded = true;
 
+let dueCards = [];
+let questionCards = [];
+let questionIndex = 0;
+let questionAnswerVisible = false;
+let editingQuestionId = null;
+let editingIndex = null;
 
-const viewLevels = {
+/* ======================================================
+   INDEXEDDB INIT
+====================================================== */
+const dbRequest = indexedDB.open("FlashcardsDB", 4);
 
-home: 0,
+dbRequest.onupgradeneeded = function(event) {
+  db = event.target.result;
+  if (!db.objectStoreNames.contains("cards")) {
+    const store = db.createObjectStore("cards", { keyPath: "id", autoIncrement: true });
+    store.createIndex("nextReview", "nextReview", { unique: false });
+  }
+  if (!db.objectStoreNames.contains("questionFolders")) {
+    db.createObjectStore("questionFolders", { keyPath: "id", autoIncrement: true });
+  }
+  if (!db.objectStoreNames.contains("questions")) {
+    db.createObjectStore("questions", { keyPath: "id", autoIncrement: true });
+  }
+  if (!db.objectStoreNames.contains("grammar")) {
+    db.createObjectStore("grammar", { keyPath: "id", autoIncrement: true });
+  }
+};
 
-homeStudy: 1,
-questions: 1,
-grammarStudy: 1,
-
-list: 2,
-add: 2,
-
-questionFolder: 2,
-questionCards: 2,
-addQuestion: 2,
-
-grammarList: 2,
-addGrammar: 2
-
-}
-	
-request.onupgradeneeded = function(event){
-
-db = event.target.result
-
-if(!db.objectStoreNames.contains("cards")){
-const store = db.createObjectStore("cards",{keyPath:"id",autoIncrement:true})
-store.createIndex("nextReview","nextReview",{unique:false})
-}
-
-if(!db.objectStoreNames.contains("questionFolders")){
-db.createObjectStore("questionFolders",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("questions")){
-db.createObjectStore("questions",{keyPath:"id",autoIncrement:true})
-}
-
-if(!db.objectStoreNames.contains("grammar")){
-db.createObjectStore("grammar",{keyPath:"id",autoIncrement:true})
-}
-
-}
-
-request.onsuccess = function(event){
-  db = event.target.result
-
+dbRequest.onsuccess = function(event) {
+  db = event.target.result;
   loadCardsFromDB(() => {
-
-    // 🔥 TU DODAJ
-    cards.forEach(c => {
-      if(c.hidden === undefined) c.hidden = false;
-    });
-
+    cards.forEach(c => { if (c.hidden === undefined) c.hidden = false; });
     renderCard();
-  })
-}
-
-/* ===============================
-TOUCH SYSTEM (SWIPE + TAP)
-================================ */
-
-let startX = 0
-let startY = 0
-let endX = 0
-let endY = 0
-
-window.addEventListener("load", () => {
-
-const swipeArea = document.querySelector(".app")
-if(!swipeArea) return
-
-swipeArea.addEventListener("touchstart", e => {
-
-if(e.target.tagName === "BUTTON" || e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return
-
-startX = e.touches[0].clientX
-startY = e.touches[0].clientY
-
-})
-
-swipeArea.addEventListener("touchend", e => {
-
-if(e.target.closest("button") || e.target.closest("input") || e.target.closest("textarea")) return
-
-endX = e.changedTouches[0].clientX
-endY = e.changedTouches[0].clientY
-
-handleGesture()
-
-})
-
-})
-
-function handleGesture(){
-
-if(
-!document.getElementById("homeStudy").classList.contains("active") &&
-!document.getElementById("questionCards").classList.contains("active") &&
-!document.getElementById("grammarStudy").classList.contains("active")
-) return
-
-const diffX = endX - startX
-const diffY = endY - startY
-
-/* TAP */
-
-if(Math.abs(diffX) < 30 && Math.abs(diffY) < 80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-showAnswer()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionAnswerVisible = !questionAnswerVisible
-renderQuestionCard()
-}
-
-if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarStep++
-
-if(grammarStep > 6){
-  grammarStep = 0
-  grammarIndex = (grammarIndex + 1) % grammarCards.length
-}
-
-renderGrammarCard()
-}
-
-return
-}
-
-/* SWIPE */
-
-if(Math.abs(diffX) > Math.abs(diffY)){
-
-if(diffX > 80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-prevCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-if(document.getElementById("grammarStudy").classList.contains("active")){
-grammarIndex = (grammarIndex - 1 + grammarCards.length) % grammarCards.length
-grammarAnswer = false
-grammarStep = 0; // 🔥 KLUCZ
-renderGrammarCard()
-}
-return
-}
-
-if(diffX < -80){
-
-if(document.getElementById("homeStudy").classList.contains("active")){
-nextCard()
-}
-
-if(document.getElementById("questionCards").classList.contains("active")){
-questionIndex = (questionIndex + 1) % questionCards.length
-questionAnswerVisible = false
-renderQuestionCard()
-}
-if(document.getElementById("grammarStudy").classList.contains("active")){
-  grammarIndex = (grammarIndex + 1) % grammarCards.length
-  grammarAnswer = false
-  grammarStep = 0; // 🔥 KLUCZ
-  renderGrammarCard()
-}
-return
-}
-
-}
-
-}
-/* ===============================
-   mood
-================================ */
-function resetTransientUI() {
-  document.querySelectorAll(".modal-backdrop.show").forEach(el => el.classList.remove("show"));
-
-  closePopup();
-  closeConfirm();
-  closeModal();
-  closeFolderPopup();
-
-  const grammarBtn = document.querySelector("#addGrammar .primary");
-  if (grammarBtn) {
-    grammarBtn.disabled = false;
-    grammarBtn.innerText = "Save";
-  }
-
-  const questionBtn = document.querySelector("#addQuestion .primary");
-  if (questionBtn) {
-    questionBtn.disabled = false;
-    questionBtn.innerText = "Save";
-  }
-
-  const flashBtn = document.querySelector("#add .primary");
-  if (flashBtn) {
-    flashBtn.disabled = false;
-    flashBtn.innerText = "Add flashcard";
-  }
-}
-
-function restoreAfterResume() {
-  resetTransientUI();
-
-  if (!db) return;
-
-  loadCardsFromDB(() => {
-    cards.forEach(c => {
-      if (c.hidden === undefined) c.hidden = false;
-    });
-    refreshUI();
   });
+};
 
-  loadGrammarFromDB();
+dbRequest.onerror = function() {
+  console.error("IndexedDB error:", dbRequest.error);
+};
 
-  if (currentFolderId !== null) {
-    renderQuestionList();
-  }
-}
-
-document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") {
-    restoreAfterResume();
-  }
-});
-
-window.addEventListener("focus", restoreAfterResume);
-window.addEventListener("pageshow", restoreAfterResume);
-document.addEventListener("resume", restoreAfterResume);
-
-
-
-
-	
-function setMode(mode){
-
-studyMode = mode
-
-currentIndex = 0
-
-setView("homeStudy")
-
-}
-/* ===============================
-RECORDING
-================================ */
-
-
-/* ===============================
+/* ======================================================
    LOAD FROM DB
-================================ */
-
-function loadCardsFromDB(callback){
-  const transaction = db.transaction("cards","readonly");
+====================================================== */
+function loadCardsFromDB(callback) {
+  const transaction = db.transaction("cards", "readonly");
   const store = transaction.objectStore("cards");
-
   const req = store.getAll();
-
-  req.onsuccess = function(){
+  req.onsuccess = function() {
     cards = req.result || [];
-    if(callback) callback();
+    allCardsLoaded = true; // FIX: always true, all cards loaded at once
+    if (callback) callback();
   };
 }
 
-/* ===============================
-   NAVIGATION
-================================ */
+/* ======================================================
+   VIEW LEVEL MAP
+====================================================== */
+const viewLevels = {
+  home: 0,
+  homeStudy: 1,
+  questions: 1,
+  grammarStudy: 1,
+  list: 2,
+  add: 2,
+  questionFolder: 2,
+  questionCards: 2,
+  addQuestion: 2,
+  grammarList: 2,
+  addGrammar: 2
+};
 
-function goHome(){
-viewHistory = []
-setView("home", false)
+/* ======================================================
+   NAVIGATION
+====================================================== */
+function goHome() {
+  viewHistory = [];
+  setView("home", false);
 }
 
-function goToList(){
-
-  loadLimit = Number.MAX_SAFE_INTEGER;
-
+function goToList() {
   loadCardsFromDB(() => {
-
     setView("list");
     renderList();
-
   });
-
 }
-function goToAdd(){ setView("add") }
 
-// ------ STABILNY goBack (z debounce i sanity-checkami) ------
+function goToAdd() { setView("add"); }
+function goToAddQuestion() { setView("addQuestion"); }
+
 let _backLocked = false;
+function goBack() {
+  if (_backLocked) return;
+  _backLocked = true;
+  setTimeout(() => _backLocked = false, 300);
 
-function goBack(){
+  // Clean history
+  while (viewHistory.length > 0) {
+    const last = viewHistory[viewHistory.length - 1];
+    if (!last || !document.getElementById(last)) {
+      viewHistory.pop();
+      continue;
+    }
+    break;
+  }
 
-if(_backLocked) return;
-_backLocked = true;
-setTimeout(()=> _backLocked = false, 300);
+  if (viewHistory.length === 0) {
+    setView("home", false);
+    return;
+  }
 
-const current = document.querySelector(".view.active");
-
-/* CLEAN HISTORIA */
-while(viewHistory.length > 0){
-const last = viewHistory[viewHistory.length - 1];
-
-if(!last || last === (current && current.id) || !document.getElementById(last)){
-viewHistory.pop();
-continue;
-}
-break;
-}
-
-if(viewHistory.length === 0){
-setView("home", false);
-return;
-}
-
-const prev = viewHistory.pop();
-setView(prev, false);
-
-}
-	function goToAddQuestion(){
-setView("addQuestion")
+  const prev = viewHistory.pop();
+  setView(prev, false);
 }
 
+/* ======================================================
+   SET VIEW
+====================================================== */
+function setView(view, saveHistory = true) {
+  const top = document.querySelector(".topButtons");
+  const btnHome = document.getElementById("btnHome");
+  const btnBack = document.getElementById("btnBack");
+  const btnList = document.getElementById("btnList");
+  const btnAdd = document.getElementById("btnAdd");
+  const btnAll = document.getElementById("btnAll");
+  const btnSrs = document.getElementById("btnSrs");
 
+  // --- HOME (special case) ---
+  if (view === "home") {
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById("home").classList.add("active");
+    top.style.display = "none";
+    viewHistory = [];
+    refreshUI();
+    return;
+  }
 
-function setView(view, saveHistory = true){
-
-const top = document.querySelector(".topButtons")
-const btnHome = document.getElementById("btnHome")
-const btnBack = document.getElementById("btnBack")
-
-if(view === "home"){
-
-document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"))
-document.getElementById("home").classList.add("active")
-
-top.style.display = "none"
-
-// 🔥 RESET BUTTONÓW
-const btnList = document.getElementById("btnList")
-const btnAdd = document.getElementById("btnAdd")
-const btnAll = document.getElementById("btnAll")
-const btnSrs = document.getElementById("btnSrs")
-
-btnList.onclick = null
-btnAdd.onclick = null
-btnAll.onclick = null
-btnSrs.onclick = null
-btnHome.style.display = "none"
-btnBack.style.display = "none"
-viewHistory = []
-refreshUI();
-return
-}
-	
+  // --- Save history ---
   const current = document.querySelector(".view.active");
-
-  /* HISTORIA */
-  if(saveHistory && current && current.id !== view){
+  if (saveHistory && current && current.id !== view) {
     const currentLevel = viewLevels[current.id] ?? 0;
     const newLevel = viewLevels[view] ?? 0;
-
-    // zapisujemy tylko gdy wchodzimy "głębiej" (np. level1 -> level2)
-    if(newLevel > currentLevel){
-      // unikamy duplikatów na szczycie
-      if(viewHistory[viewHistory.length - 1] !== current.id){
+    if (newLevel > currentLevel) {
+      if (viewHistory[viewHistory.length - 1] !== current.id) {
         viewHistory.push(current.id);
       }
     }
   }
+  if (viewHistory.length > 30) viewHistory.splice(0, viewHistory.length - 30);
 
-  // przytnij historię
-  if(viewHistory.length > 30){
-    viewHistory.splice(0, viewHistory.length - 30);
-  }
-
-  /* ZMIANA WIDOKU */
-  document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
+  // --- Switch view ---
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   const el = document.getElementById(view);
-  if(!el){
-    console.warn("setView: nie znaleziono widoku", view);
-    return;
-  }
+  if (!el) { console.warn("setView: view not found:", view); return; }
   el.classList.add("active");
 
-  // ... reszta Twojej logiki topButtons pozostaje bez zmian ...
+  // --- Reset all nav buttons ---
+  top.style.display = "none";
+  [btnHome, btnBack, btnList, btnAdd, btnAll, btnSrs].forEach(b => {
+    if (b) { b.style.display = "none"; b.onclick = null; }
+  });
 
+  // --- FLASHCARD VIEWS ---
+  if (["homeStudy", "list", "add"].includes(view)) {
+    top.style.display = "flex";
+    btnHome.style.display = "flex";
+    btnList.style.display = "flex";
+    btnAdd.style.display = "flex";
+    btnAll.style.display = "flex";
+    btnSrs.style.display = "flex";
+    btnBack.style.display = "flex";
 
-/* ZMIANA WIDOKU */
-
-
-
-
-const btnList = document.getElementById("btnList")
-const btnAdd = document.getElementById("btnAdd")
-const btnAll = document.getElementById("btnAll")
-const btnSrs = document.getElementById("btnSrs")
-
-/* RESET */
-
-btnList.style.display = "none"
-btnAdd.style.display = "none"
-btnAll.style.display = "none"
-btnSrs.style.display = "none"
-btnHome.style.display = "none"
-btnBack.style.display = "none"
-
-btnList.onclick = null
-btnAdd.onclick = null
-btnAll.onclick = null
-btnSrs.onclick = null
-
-
-
-/* FISZKI */
-
-if(view === "homeStudy" || view === "list" || view === "add"){
-
-top.style.display = "flex"
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnSrs.style.display = "flex"
-btnHome.style.display = "flex"
-
-btnList.onclick = goToList
-btnAdd.onclick = goToAdd
-btnAll.onclick = () => setMode("ALL")
-btnSrs.onclick = () => setMode("SRS")
-
-}
-
-/* QUESTIONS */
-
-/* QUESTION */
-
-if(view === "questions" || view === "questionCards" || view === "addQuestion"|| view === "questionFolder" ){
-
-top.style.display = "flex"
-btnHome.style.display = "flex"
-btnBack.style.display = "flex"
-btnSrs.style.display = "none"
-
-}
-
-
-/* QUESTION CARDS */
-
-if(view === "questionCards" || view === "addQuestion" || view === "questionFolder" ){
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnHome.style.display = "flex"
-btnBack.style.display = "flex"
-btnList.onclick = function(){
-renderQuestionList()
-setView("questionFolder")
-}
-
-btnAdd.onclick = goToAddQuestion
-
-btnAll.onclick = openQuestionCards
-
-}
-
-/* GRAMMAR */
-
-if(
-  view === "grammarList" ||
-  view === "grammarStudy" ||
-  view === "addGrammar"
-){
-
-top.style.display = "flex"
-
-btnList.style.display = "flex"
-btnAdd.style.display = "flex"
-btnAll.style.display = "flex"
-btnHome.style.display = "flex"
-btnList.onclick = ()=>setView("grammarList")
-btnAdd.onclick = ()=>setView("addGrammar")
-btnAll.onclick = () => {
-  grammarIndex = 0
-  grammarStep = 0
-  grammarAnswer = false
-  setView("grammarStudy")
-  renderGrammarCard()
-      }
-    }
-refreshUI();
+    btnHome.onclick = goHome;
+    btnBack.onclick = goBack;
+    btnList.onclick = goToList;
+    btnAdd.onclick = goToAdd;
+    // FIX: assign onclick directly (not inline) to avoid stale closures
+    btnAll.onclick = () => setMode("ALL");
+    btnSrs.onclick = () => setMode("SRS");
   }
 
+  // --- QUESTION VIEWS ---
+  if (["questions", "questionCards", "addQuestion", "questionFolder"].includes(view)) {
+    top.style.display = "flex";
+    btnHome.style.display = "flex";
+    btnBack.style.display = "flex";
+    btnHome.onclick = goHome;
+    btnBack.onclick = goBack;
+  }
+  if (["questionCards", "addQuestion", "questionFolder"].includes(view)) {
+    btnList.style.display = "flex";
+    btnAdd.style.display = "flex";
+    btnAll.style.display = "flex";
+    btnList.onclick = () => { renderQuestionList(); setView("questionFolder"); };
+    btnAdd.onclick = goToAddQuestion;
+    btnAll.onclick = openQuestionCards;
+  }
 
+  // --- GRAMMAR VIEWS ---
+  if (["grammarList", "grammarStudy", "addGrammar"].includes(view)) {
+    top.style.display = "flex";
+    btnHome.style.display = "flex";
+    btnBack.style.display = "flex";
+    btnList.style.display = "flex";
+    btnAdd.style.display = "flex";
+    btnAll.style.display = "flex";
+    btnHome.onclick = goHome;
+    btnBack.onclick = goBack;
+    btnList.onclick = () => setView("grammarList");
+    btnAdd.onclick = () => setView("addGrammar");
+    btnAll.onclick = () => {
+      grammarIndex = 0;
+      grammarStep = 0;
+      grammarAnswer = false;
+      setView("grammarStudy");
+      renderGrammarCard();
+    };
+  }
 
+  refreshUI();
+}
 
-/* ===============================
+/* ======================================================
+   MODE
+====================================================== */
+// FIX: setMode sets studyMode and navigates once (no double setView)
+function setMode(mode) {
+  studyMode = mode;
+  currentIndex = 0;
+  showingAnswer = false;
+  setView("homeStudy");
+}
+
+function openAll() {
+  studyMode = "ALL";
+  currentIndex = 0;
+  showingAnswer = false;
+  setView("homeStudy");
+}
+
+/* ======================================================
    RENDER CARD
-================================ */
-const cardEl = document.getElementById("cardText")
-let dueCards = [];
-function renderCard(){
+====================================================== */
+function renderCard() {
+  const cardEl = document.getElementById("cardText");
 
-  // filtrujemy fiszki do powtórki
-if(studyMode === "ALL"){
-  dueCards = cards.filter(c => !c.hidden);
-}else{
-  dueCards = [];
-  const now = Date.now();
-
-  for(let i = 0; i < cards.length; i++){
-    const c = cards[i];
-    if(!c.hidden && (!c.nextReview || c.nextReview <= now)){
-      dueCards.push(c);
-    }
-  }
-}
-
-  // jeśli brak wszystkich fiszek
-  if(cards.length === 0){
-currentIndex = 0;
-
-cardEl.innerText = "➕ Add flashcard";
-
-document.getElementById("counter").innerText = 0;
-document.getElementById("progress-mini").innerText = "—";
-
-document.getElementById("cardImage").style.display = "none";
-
-return;
-}
-
-  // jeśli brak fiszek do powtórki
- if(dueCards.length === 0){
-
-currentIndex = 0;
-
-cardEl.innerText = studyMode === "ALL"
-? "➕ Add flashcard"
-: "🎉 Lack of flashcards for review";
-
-document.getElementById("progress-mini").innerText = "0 / 0";
-
-document.getElementById("cardImage").style.display = "none";
-
-return;
-}
-
-  // zabezpieczenie indexu
-  if(currentIndex >= dueCards.length){
-    currentIndex = 0;
+  if (studyMode === "ALL") {
+    dueCards = cards.filter(c => !c.hidden);
+  } else {
+    const now = Date.now();
+    dueCards = cards.filter(c => !c.hidden && (!c.nextReview || c.nextReview <= now));
   }
 
-  const card = dueCards[currentIndex];
-
-  // tekst fiszki
-  cardEl.innerText = showingAnswer ? card.back : card.front;
-
-  // licznik
- updateCounter()
-
-  // progres
-  document.getElementById("progress-mini").innerText =
-    (currentIndex + 1) + " / " + dueCards.length;
-
-  // obrazek
   const img = document.getElementById("cardImage");
 
-  if(card.image){
+  if (cards.length === 0) {
+    currentIndex = 0;
+    cardEl.innerText = "➕ Add flashcard";
+    document.getElementById("counter").innerText = 0;
+    document.getElementById("progress-mini").innerText = "—";
+    img.style.display = "none";
+    document.getElementById("reviewButtons").style.display = "none";
+    return;
+  }
+
+  if (dueCards.length === 0) {
+    currentIndex = 0;
+    cardEl.innerText = studyMode === "ALL" ? "➕ Add flashcard" : "🎉 No cards due for review";
+    document.getElementById("progress-mini").innerText = "0 / 0";
+    img.style.display = "none";
+    document.getElementById("reviewButtons").style.display = "none";
+    return;
+  }
+
+  if (currentIndex >= dueCards.length) currentIndex = 0;
+
+  const card = dueCards[currentIndex];
+  cardEl.innerText = showingAnswer ? card.back : card.front;
+
+  updateCounter();
+  document.getElementById("progress-mini").innerText = (currentIndex + 1) + " / " + dueCards.length;
+
+  if (card.image) {
     img.src = card.image;
     img.style.display = "block";
   } else {
     img.style.display = "none";
   }
-const reviewUI = document.getElementById("reviewButtons")
-const hideBox = document.getElementById("hideBox");
-if(hideBox){
-  hideBox.style.display = studyMode === "ALL" && dueCards.length > 0 ? "block" : "none";
-}
-if(studyMode === "ALL"){
-reviewUI.style.display = "none"
-}
-else{
-reviewUI.style.display = "block"
-}
+
+  document.getElementById("reviewButtons").style.display = (studyMode === "ALL") ? "none" : "block";
 }
 
-function reviewCard(score){
-	updateStreak()
-  const card = dueCards[currentIndex];
-  const intervals = [1, 3, 7, 14, 30]; // dni
-  if(score === 0){
-    card.level = 0; // reset do nauki
-  } else {
-    card.level = Math.min(card.level + 1, intervals.length - 1);
-  }
-  card.nextReview = Date.now() + intervals[card.level] * 24*60*60*1000;
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(card);
-  transaction.oncomplete = () => {
-    nextCard();
-  };
+/* ======================================================
+   SHOW ANSWER / NAVIGATE
+====================================================== */
+function showAnswer() {
+  if (cards.length === 0) return;
+  showingAnswer = !showingAnswer;
+  renderCard();
 }
 
-
-function prevCard(){
-
-if(dueCards.length === 0) return
-
-if(currentIndex === 0 && !allCardsLoaded){
-loadLimit += 50
-loadCardsFromDB(() => {
-  currentIndex = dueCards.length - 1
-  refreshUI();
-})
-return
+function prevCard() {
+  if (dueCards.length === 0) return;
+  currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length;
+  showingAnswer = false;
+  renderCard();
 }
 
-currentIndex = (currentIndex - 1 + dueCards.length) % dueCards.length
-showingAnswer = false
-renderCard()
-
-}
-function nextCard(){
-  if(dueCards.length === 0) return;
-
-  const targetIndex = currentIndex + 1;
-
-  if(currentIndex === dueCards.length - 1 && !allCardsLoaded){
-    loadLimit += 50;
-    loadCardsFromDB(() => {
-      showingAnswer = false;
-      currentIndex = targetIndex;
-      renderCard();
-    });
-    return;
-  }
-
+function nextCard() {
+  if (dueCards.length === 0) return;
   currentIndex = (currentIndex + 1) % dueCards.length;
   showingAnswer = false;
   renderCard();
 }
 
-/* ===============================
-   STUDY
-================================ */
-
-function showAnswer(){
-
-if(cards.length===0) return
-
-// toggle
-showingAnswer = !showingAnswer
-
-renderCard()
-
-}
-
-
-
-/* ===============================
-   ADD CARD
-================================ */
-
-function addCard(){
-
-if(isRecording){
-  showPopup("Stop recording first ❌")
-  return
-}
-
-const front = document.getElementById("frontInput").value.replace(/\r\n/g, "\n").trim()
-const back = document.getElementById("backInput").value.replace(/\r\n/g, "\n").trim()
-
-if(!front || !back){
-  showPopup("Please fill in the fields")
-  return
-}
-
-const newCard = {
-  front: front,
-  back: back,
-  audio: recordedAudioBase64 || recordedFilePath || null,
- image: selectedImage,
-  level: 0,
-  nextReview: Date.now(),
-  hidden: false
-}
-const transaction = db.transaction("cards","readwrite")
-const store = transaction.objectStore("cards")
-
-store.add(newCard)
-
-transaction.oncomplete = function(){
-
-  document.getElementById("frontInput").value=""
-  document.getElementById("backInput").value=""
-  document.getElementById("imageResults").innerHTML=""
-
-  uploadedImage = null;
-selectedImage = null;
-unsplashImages = [];
-
-  loadCardsFromDB(() => refreshUI());
-
-  recordedFilePath = null;
-  recordedAudioBase64 = null; // 🔥 KLUCZ
-}
-}
-
-
-async function compressImage(file, quality = 0.9){
-  const imageBitmap = await createImageBitmap(file);
-  const canvas = document.createElement('canvas');
-
-  const maxWidth = 1600;
-  let width = imageBitmap.width;
-  let height = imageBitmap.height;
-
-  if(width > maxWidth){
-    height = height * (maxWidth / width);
-    width = maxWidth;
+/* ======================================================
+   REVIEW (SRS)
+====================================================== */
+function reviewCard(score) {
+  updateStreak();
+  const card = dueCards[currentIndex];
+  if (!card) return;
+  const intervals = [1, 3, 7, 14, 30];
+  if (score === 0) {
+    card.level = 0;
+  } else {
+    card.level = Math.min((card.level || 0) + 1, intervals.length - 1);
   }
+  card.nextReview = Date.now() + intervals[card.level] * 24 * 60 * 60 * 1000;
+  const tx = db.transaction("cards", "readwrite");
+  tx.objectStore("cards").put(card);
+  tx.oncomplete = () => nextCard();
+}
 
-  canvas.width = width;
-  canvas.height = height;
+/* ======================================================
+   ADD CARD
+====================================================== */
+function addCard() {
+  if (isRecording) { showPopup("Stop recording first ❌"); return; }
+  const front = document.getElementById("frontInput").value.replace(/\r\n/g, "\n").trim();
+  const back = document.getElementById("backInput").value.replace(/\r\n/g, "\n").trim();
+  if (!front || !back) { showPopup("Please fill in the fields"); return; }
 
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(imageBitmap, 0, 0, width, height);
+  const newCard = {
+    front, back,
+    audio: recordedAudioBase64 || null,
+    image: selectedImage || null,
+    level: 0,
+    nextReview: Date.now(),
+    hidden: false
+  };
 
-  const outputType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+  const tx = db.transaction("cards", "readwrite");
+  tx.objectStore("cards").add(newCard);
+  tx.oncomplete = function() {
+    document.getElementById("frontInput").value = "";
+    document.getElementById("backInput").value = "";
+    document.getElementById("imageResults").innerHTML = "";
+    uploadedImage = null;
+    selectedImage = null;
+    unsplashImages = [];
+    recordedAudioBase64 = null;
+    loadCardsFromDB(() => refreshUI());
+  };
+}
 
-  const blob = await new Promise(resolve =>
-    canvas.toBlob(resolve, outputType, outputType === 'image/jpeg' ? quality : undefined)
-  );
-
-  return new Promise(res => {
-    const reader = new FileReader();
-    reader.onloadend = () => res(reader.result);
-    reader.readAsDataURL(blob);
+/* ======================================================
+   DELETE CARD
+====================================================== */
+function deleteCard(index) {
+  showConfirm("Delete this card?", () => {
+    const id = cards[index].id;
+    const tx = db.transaction("cards", "readwrite");
+    tx.objectStore("cards").delete(id);
+    tx.oncomplete = function() {
+      if (currentIndex >= cards.length - 1) currentIndex = 0;
+      loadCardsFromDB(() => { renderList(); refreshUI(); });
+    };
   });
 }
 
-	document.getElementById("imageUpload").addEventListener("change", async function(e){
+/* ======================================================
+   TOGGLE HIDDEN
+====================================================== */
+function toggleHidden(id) {
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+  card.hidden = !card.hidden;
+  const tx = db.transaction("cards", "readwrite");
+  tx.objectStore("cards").put(card);
+  tx.oncomplete = () => loadCardsFromDB(() => { renderList(); renderCard(); });
+}
 
-    const file = e.target.files[0];
-    if(!file) return;
+/* ======================================================
+   EDIT CARD
+====================================================== */
+function editCard(index) {
+  editingIndex = index;
+  document.getElementById("editFront").value = cards[index].front;
+  document.getElementById("editBack").value = cards[index].back;
+  document.getElementById("modal").classList.add("show");
+}
 
-    try{
+function saveModal() {
+  const newFront = document.getElementById("editFront").value.trim();
+  const newBack = document.getElementById("editBack").value.trim();
+  if (!newFront || !newBack) { showPopup("Fill in all fields"); return; }
+  const original = cards[editingIndex];
+  const updatedCard = {
+    id: original.id, front: newFront, back: newBack,
+    audio: original.audio, image: original.image,
+    level: original.level, nextReview: original.nextReview,
+    hidden: original.hidden || false
+  };
+  const tx = db.transaction("cards", "readwrite");
+  tx.objectStore("cards").put(updatedCard);
+  tx.oncomplete = function() {
+    if (currentIndex >= cards.length) currentIndex = 0;
+    loadCardsFromDB(() => { renderList(); refreshUI(); });
+    closeModal();
+  };
+}
 
-        uploadedImage = await compressImage(file);
+function closeModal() { document.getElementById("modal").classList.remove("show"); }
 
-        selectedImage = uploadedImage;
+/* ======================================================
+   LIST
+====================================================== */
+function escapeHtml(str = "") {
+  return String(str).replace(/[&<>"']/g, s => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[s]);
+}
+function nl2br(str = "") { return escapeHtml(str).replace(/\n/g, "<br>"); }
 
-        renderImages();
+function renderList() {
+  const list = document.getElementById("wordsList");
+  const search = document.getElementById("searchBox").value.trim().toLowerCase();
+  list.innerHTML = "";
+  let arr = [...cards];
+  if (search) arr = arr.filter(c => c.front.toLowerCase().includes(search) || c.back.toLowerCase().includes(search));
+  if (sortAZ) arr.sort((a, b) => a.front.localeCompare(b.front, "pl"));
 
-    }catch(err){
+  arr.forEach(card => {
+    const realIndex = cards.findIndex(c => c.id === card.id);
+    const div = document.createElement("div");
+    div.className = "listItem";
+    div.innerHTML = `
+      <div class="text"><b>${nl2br(card.front)}</b> – ${nl2br(card.back)} ${card.hidden ? "🙈" : ""}</div>
+      <div style="display:flex;gap:8px">
+        <button class="actionBtn" onclick="editCard(${realIndex})">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg>
+        </button>
+        <button class="actionBtn" onclick="deleteCard(${realIndex})">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg>
+        </button>
+        <button class="actionBtn" onclick="toggleHidden(${card.id})">
+          <svg viewBox="0 0 24 24" fill="none">
+            ${card.hidden
+              ? '<path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/>'
+              : '<path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/>'}
+          </svg>
+        </button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
 
-        console.error(err);
-        showPopup("Image error");
+function toggleSort() { sortAZ = !sortAZ; renderList(); }
 
-    }
+/* ======================================================
+   IMAGES
+====================================================== */
+async function compressImage(file, quality = 0.9) {
+  const imageBitmap = await createImageBitmap(file);
+  const canvas = document.createElement("canvas");
+  const maxWidth = 1600;
+  let { width, height } = imageBitmap;
+  if (width > maxWidth) { height = height * (maxWidth / width); width = maxWidth; }
+  canvas.width = width; canvas.height = height;
+  canvas.getContext("2d").drawImage(imageBitmap, 0, 0, width, height);
+  const outputType = file.type === "image/png" ? "image/png" : "image/jpeg";
+  const blob = await new Promise(res => canvas.toBlob(res, outputType, outputType === "image/jpeg" ? quality : undefined));
+  return new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result); r.readAsDataURL(blob); });
+}
 
+document.getElementById("imageUpload").addEventListener("change", async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    uploadedImage = await compressImage(file);
+    selectedImage = uploadedImage;
+    renderImages();
+  } catch (err) {
+    console.error(err);
+    showPopup("Image error");
+  }
 });
-let unsplashImages = [];
-
-
-
 
 let searchTimer;
-
 document.getElementById("frontInput").addEventListener("input", () => {
   clearTimeout(searchTimer);
   searchTimer = setTimeout(searchImages, 500);
 });
 
 async function searchImages() {
-
-  const word = document
-    .getElementById("frontInput")
-    .value
-    .trim()
-    .split(" ")[0];
-
+  const word = document.getElementById("frontInput").value.trim().split(" ")[0];
   const container = document.getElementById("imageResults");
-
-  // czyścimy wyniki
   container.innerHTML = "";
-
-  if (word.length < 2) {
-    unsplashImages = [];
-    renderImages();
-    return;
-  }
-
+  if (word.length < 2) { unsplashImages = []; renderImages(); return; }
   try {
-
-    const url =
-      "https://api.unsplash.com/search/photos?query=" +
-      encodeURIComponent(word) +
-      "&per_page=3&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w";
-
+    const url = "https://api.unsplash.com/search/photos?query=" + encodeURIComponent(word) + "&per_page=3&client_id=OEb7Rnzbk16GOQ4M4z3089WGIquXpS8PvWoQH4zpY8w";
     const res = await fetch(url);
-
-    if (!res.ok) {
-      console.error("Unsplash:", res.status);
-      unsplashImages = [];
-      renderImages();
-      return;
-    }
-
+    if (!res.ok) { unsplashImages = []; renderImages(); return; }
     const data = await res.json();
-
     unsplashImages = data.results || [];
-
     renderImages();
-
   } catch (err) {
-
     console.error("Image search error:", err);
-
     unsplashImages = [];
     renderImages();
-
   }
 }
 
+function renderImages() {
+  const container = document.getElementById("imageResults");
+  container.innerHTML = "";
+  if (uploadedImage) {
+    const title = document.createElement("div");
+    title.innerHTML = "<b>📷 Your photo</b>";
+    title.style.gridColumn = "1 / -1";
+    container.appendChild(title);
+    const img = document.createElement("img");
+    img.src = uploadedImage;
+    if (selectedImage === uploadedImage) img.style.border = "3px solid #7b5cff";
+    img.onclick = () => { selectedImage = uploadedImage; renderImages(); };
+    container.appendChild(img);
+  }
+  if (unsplashImages.length) {
+    const title = document.createElement("div");
+    title.innerHTML = "<b>Suggested images</b>";
+    title.style.gridColumn = "1 / -1";
+    title.style.marginTop = "10px";
+    container.appendChild(title);
+    unsplashImages.forEach(photo => {
+      const img = document.createElement("img");
+      img.src = photo.urls.small;
+      if (selectedImage === photo.urls.regular) img.style.border = "3px solid #7b5cff";
+      img.onclick = () => { selectedImage = photo.urls.regular; renderImages(); };
+      container.appendChild(img);
+    });
+  }
+}
 
+/* ======================================================
+   AUDIO RECORDING
+====================================================== */
+function speakWord(text) {
+  if (!text) return;
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "en-US";
+    utterance.rate = 0.9;
+    window.speechSynthesis.speak(utterance);
+  } else {
+    showPopup("TTS not supported");
+  }
+}
 
-	
-/* ===============================
-   DELETE
-================================ */
-function deleteCard(index){
+function speakCurrentCard() {
+  if (!dueCards || dueCards.length === 0) { showPopup("No flashcards"); return; }
+  const card = dueCards[currentIndex];
+  if (!card || !card.front) { showPopup("No flashcard text"); return; }
+  speakWord(card.front);
+}
 
-  showConfirm("Delete this card?", () => {
-
-    const id = cards[index].id;
-
-    const transaction = db.transaction("cards","readwrite");
-    transaction.objectStore("cards").delete(id);
-
-    transaction.oncomplete = function(){
-
-      if(currentIndex >= cards.length){
-        currentIndex = 0;
-      }
-
-      loadCardsFromDB(() => {
-        renderList();
-        refreshUI();
-      });
-
+async function startRecording() {
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    showPopup("Your browser does not support audio recording");
+    return;
+  }
+  if (isRecording) { showPopup("Recording already in progress"); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // FIX: use module-level variables
+    mediaRecorder = new MediaRecorder(stream);
+    audioChunks = [];
+    isRecording = true;
+    let seconds = 0;
+    document.getElementById("recordUI").style.display = "block";
+    const timer = setInterval(() => {
+      seconds++;
+      document.getElementById("recordTimer").innerText = seconds + " s";
+    }, 1000);
+    mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
+    mediaRecorder.onstop = () => {
+      clearInterval(timer);
+      isRecording = false;
+      document.getElementById("recordUI").style.display = "none";
+      const blob = new Blob(audioChunks, { type: "audio/webm" });
+      if (blob.size === 0) { showPopup("Recording is empty"); return; }
+      const reader = new FileReader();
+      reader.onloadend = () => { recordedAudioBase64 = reader.result; showPopup("Recording saved 🎤"); };
+      reader.readAsDataURL(blob);
+      stream.getTracks().forEach(t => t.stop());
     };
-
-  }); // 🔥 zamyka showConfirm
-
-} 
-
-
-/* ===============================
-   LIST
-================================ */
-function escapeHtml(str = "") {
-  return String(str).replace(/[&<>"']/g, s => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "\"": "&quot;",
-    "'": "&#39;"
-  })[s]);
-}
-
-function nl2br(str = "") {
-  return escapeHtml(str).replace(/\n/g, "<br>");
-}
-function renderList(){
-  const list = document.getElementById("wordsList");
-
-  const search = document
-    .getElementById("searchBox")
-    .value
-    .trim()
-    .toLowerCase();
-
-  list.innerHTML = "";
-
-  let arr = [...cards];
-
-  if(search){
-    arr = arr.filter(card =>
-      card.front.toLowerCase().includes(search) ||
-      card.back.toLowerCase().includes(search)
-    );
+    mediaRecorder.start();
+    // Auto-stop after 30s
+    setTimeout(() => {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+    }, 30000);
+  } catch (err) {
+    isRecording = false;
+    document.getElementById("recordUI").style.display = "none";
+    showPopup(err.name === "NotAllowedError" ? "Microphone access denied" : "Cannot start recording");
   }
-
-  if(sortAZ){
-    arr.sort((a,b)=>a.front.localeCompare(b.front,"pl"));
-  }
-
-
-
-  arr.forEach((card)=>{
-    const div = document.createElement("div");
-    div.className = "listItem";
-
-    div.innerHTML = `
-      <div class="text">
-        <b>${nl2br(card.front)}</b> - ${nl2br(card.back)} ${card.hidden ? '🙈' : ''}
-      </div>
-
-      <div style="display:flex; gap:8px">
-
-        <button class="actionBtn" onclick="editCard(${cards.findIndex(c=>c.id===card.id)})">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-            <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-          </svg>
-        </button>
-
-        <button class="actionBtn delete" onclick="deleteCard(${cards.findIndex(c=>c.id===card.id)})">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-            <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-            <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-          </svg>
-        </button>
-
-        <button class="actionBtn" onclick="toggleHidden(${card.id})">
-          <svg viewBox="0 0 24 24" fill="none">
-            ${
-              card.hidden
-                ? '<path d="M3 3L21 21" stroke="#2d1f80" stroke-width="2"/>'
-                : '<path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="#2d1f80" stroke-width="2"/>'
-            }
-          </svg>
-        </button>
-
-      </div>
-    `;
-
-    list.appendChild(div);
-  });
 }
 
-function toggleSort(){
-
-sortAZ=!sortAZ
-
-renderList()
-
-}
-
-
-	function openAll(){
-
-setMode("ALL")
-
-setView("homeStudy")
-
-}
-
-/* ===============================
-   EDIT
-================================ */
-
-let editingIndex = null
-
-function editCard(index){
-
-editingIndex = index
-
-document.getElementById("editFront").value = cards[index].front
-document.getElementById("editBack").value = cards[index].back
-
-document.getElementById("modal").classList.add("show")}
-
-function saveModal(){
-  const newFront = document.getElementById("editFront").value.trim();
-  const newBack = document.getElementById("editBack").value.trim();
-  if(!newFront || !newBack){
-    showPopup("Fill in the field");
+function playRecording() {
+  if (recordedAudioBase64) {
+    const audio = new Audio(recordedAudioBase64);
+    audio.play().catch(() => showPopup("Cannot play recording"));
     return;
   }
-  const id = cards[editingIndex].id;
-  // pobieramy oryginalne dane karty
-  const original = cards[editingIndex];
-  // zapisujemy wszystkie pola, nie tracąc audio/obrazów
-  const updatedCard = {
-    id: id,
-    front: newFront,
-    back: newBack,
-    audio: original.audio,
-    image: original.image,
-    level: original.level,
-    nextReview: original.nextReview
-  };
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(updatedCard);
-  transaction.oncomplete = function(){
-    // po zapisie ponownie załaduj listę i zresetuj indeks
-    if(currentIndex >= cards.length) currentIndex = 0;
-   loadCardsFromDB(() => {
-    renderList();
-    refreshUI();
-  });
-  closeModal();
-};
+  if (!dueCards || dueCards.length === 0) { showPopup("No flashcards"); return; }
+  const card = dueCards[currentIndex];
+  if (!card) { showPopup("No flashcard"); return; }
+  if (card.audio) { new Audio(card.audio).play().catch(() => showPopup("Cannot play recording")); return; }
+  showPopup("This flashcard has no recording");
 }
-function closeModal(){
-  document.getElementById("modal").classList.remove("show")
+
+function playCurrentCardRecording() {
+  if (!dueCards || dueCards.length === 0) { showPopup("No flashcards"); return; }
+  const card = dueCards[currentIndex];
+  if (!card || !card.audio) { showPopup("This flashcard has no audio recording"); return; }
+  new Audio(card.audio).play().catch(err => { console.error(err); showPopup("Cannot play recording"); });
 }
-/* ===============================
-   GRAMA
-================================ */
+
+/* ======================================================
+   STREAK & COUNTER
+====================================================== */
+function updateStreak() {
+  const today = new Date().toDateString();
+  if (lastStudy !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    streak = (lastStudy === yesterday) ? streak + 1 : 1;
+    lastStudy = today;
+    localStorage.setItem("streak", streak);
+    localStorage.setItem("lastStudy", today);
+  }
+  updateCounter();
+}
+
+function updateCounter() {
+  document.getElementById("counter").innerText = cards.length;
+  document.getElementById("streakUI").innerText = streak;
+}
+
+/* ======================================================
+   GRAMMAR
+====================================================== */
+function openGrammar() {
+  setView("grammarList");
+  loadGrammarFromDB();
+}
+
 function loadGrammarFromDB(callback) {
-  if (!db) {
-    showPopup("DB not ready");
-    return;
-  }
-
+  if (!db) { showPopup("DB not ready"); return; }
   const tx = db.transaction("grammar", "readonly");
-  const store = tx.objectStore("grammar");
-  const req = store.getAll();
-
-  req.onsuccess = function () {
+  const req = tx.objectStore("grammar").getAll();
+  req.onsuccess = function() {
     grammarCards = req.result || [];
-
-    if (grammarCards.length === 0) {
-      grammarIndex = 0;
-    } else if (grammarIndex >= grammarCards.length) {
-      grammarIndex = 0;
-    }
-
+    if (grammarCards.length === 0) grammarIndex = 0;
+    else if (grammarIndex >= grammarCards.length) grammarIndex = 0;
     renderGrammar();
-
     if (document.getElementById("grammarStudy")?.classList.contains("active")) {
       grammarStep = 0;
       renderGrammarCard();
     }
-
-    if (typeof callback === "function") {
-      callback(grammarCards);
-    }
-updateGrammarStats()
-  };
-
-  req.onerror = function () {
-    console.error("Grammar load error:", req.error);
-    showPopup("Failed to load grammar");
+    updateGrammarStats();
+    if (typeof callback === "function") callback(grammarCards);
   };
 }
 
-function openGrammar(){
-
-setView("grammarList")
-
-loadGrammarFromDB()
-
+function renderGrammar() {
+  const container = document.getElementById("grammarItems");
+  container.innerHTML = "";
+  grammarCards.forEach(g => {
+    const div = document.createElement("div");
+    div.className = "listItem";
+    div.innerHTML = `
+      <div class="text"><b>${escapeHtml(g.title)}</b></div>
+      <div style="display:flex;gap:8px">
+        <button class="actionBtn" onclick="studyGrammar(${g.id})">
+          <svg viewBox="0 0 24 24" fill="#2d1f80"><path d="M8 5L19 12L8 19V5Z"/></svg>
+        </button>
+        <button class="actionBtn" onclick="editGrammar(${g.id})">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg>
+        </button>
+        <button class="actionBtn" onclick="deleteGrammar(${g.id})">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg>
+        </button>
+      </div>`;
+    container.appendChild(div);
+  });
 }
-function renderGrammar(){
 
-const container = document.getElementById("grammarItems")
-
-container.innerHTML = ""
-
-grammarCards.forEach(g=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${g.title}</b></div>
-<div style="display:flex; gap:8px">
- <button class="actionBtn" onclick="studyGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" fill="#2d1f80">
-      <path d="M8 5L19 12L8 19V5Z"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn" onclick="editGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-
-  <button class="actionBtn" onclick="deleteGrammar(${g.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-</div>
-`
-
-container.appendChild(div)
-
-})
-
+function studyGrammar(id) {
+  grammarIndex = grammarCards.findIndex(g => g.id === id);
+  grammarAnswer = false;
+  grammarStep = 0;
+  setView("grammarStudy");
+  renderGrammarCard();
 }
-function studyGrammar(id){
 
-grammarIndex = grammarCards.findIndex(g=>g.id===id)
-
-grammarAnswer = false
-
-grammarStep = 0
-setView("grammarStudy")
-renderGrammarCard()
-}
-function updateGrammarStats(){
+function updateGrammarStats() {
   const total = grammarCards.length;
   const current = total === 0 ? 0 : grammarIndex + 1;
-
   document.getElementById("grammarCounter").innerText = total;
-  document.getElementById("grammarProgress").innerText =
-    total === 0 ? "—" : current + " / " + total;
+  document.getElementById("grammarProgress").innerText = total === 0 ? "—" : current + " / " + total;
 }
 
-function renderGrammarCard(){
-if(grammarCards.length === 0){
-document.getElementById("grammarCardText").innerHTML =
-"➕ Add first"
-return
-}
-
-const g = grammarCards[grammarIndex]
-const el = document.getElementById("grammarCardText")
-
-const steps = [
-  {label:"📖 Explanation", value:g.explanation},
-  {label:"📐 Structure", value:g.structure},
-  {label:"🧠 Usage", value:g.usage},
-  {label:"💬 Examples", value:g.examples},
-  {label:"✏️ Practice", value:g.practice},
-  {label:"⚠ Mistakes", value:g.mistakes}
-]
-
-if(grammarStep === 0){
-el.innerHTML = `<h2>${g.title}</h2><p style="opacity:0.05">Tap to start</p>`
-return
-}
-
-const step = steps[grammarStep - 1]
-
-el.innerHTML = `
-<div style="text-align:left;font-size:16px">
-<b>${step.label}</b><br><br>
-${step.value || "<i>No date</i>"}
-</div>
-`
-
-updateGrammarStats();
-}
-
-
-
-function deleteGrammar(id){
-
-  showConfirm("Delete this topic?", () => {
-
-    const t = db.transaction("grammar", "readwrite");
-    t.objectStore("grammar").delete(id);
-
-    t.oncomplete = function(){
-      loadGrammarFromDB();
-    };
-
-  });
-
-}
-
-
-function saveGrammar(){
-
-  if(!db){
-    showPopup("Loading...")
-    return
+function renderGrammarCard() {
+  const el = document.getElementById("grammarCardText");
+  if (grammarCards.length === 0) { el.innerHTML = "➕ Add first"; return; }
+  const g = grammarCards[grammarIndex];
+  const steps = [
+    { label: "📖 Explanation", value: g.explanation },
+    { label: "📐 Structure", value: g.structure },
+    { label: "🧠 Usage", value: g.usage },
+    { label: "💬 Examples", value: g.examples },
+    { label: "✏️ Practice", value: g.practice },
+    { label: "⚠ Mistakes", value: g.mistakes }
+  ];
+  if (grammarStep === 0) {
+    el.innerHTML = `<h2>${escapeHtml(g.title)}</h2><p style="opacity:0.5">Tap to start</p>`;
+    updateGrammarStats();
+    return;
   }
+  const step = steps[grammarStep - 1];
+  el.innerHTML = `<div style="text-align:left;font-size:16px"><b>${step.label}</b><br><br>${escapeHtml(step.value || "") || "<i>No data</i>"}</div>`;
+  updateGrammarStats();
+}
 
-  const btn = document.querySelector("#addGrammar .primary")
-
-  const finish = () => {
-    btn.disabled = false
-    btn.innerText = "Save"
-  }
-
-  btn.disabled = true
-  btn.innerText = "Saving..."
-
-  const title = document.getElementById("gTitle").value.trim()
-
-  if(!title){
-    showPopup("Enter a topic")
-    finish()
-    return
-  }
-
+function saveGrammar() {
+  if (!db) { showPopup("Loading..."); return; }
+  const btn = document.querySelector("#addGrammar .primary");
+  btn.disabled = true;
+  btn.innerText = "Saving...";
+  const finish = () => { btn.disabled = false; btn.innerText = "Save"; };
+  const title = document.getElementById("gTitle").value.trim();
+  if (!title) { showPopup("Enter a topic"); finish(); return; }
   const data = {
-    title: title,
+    title,
     explanation: document.getElementById("gExplanation").value,
     structure: document.getElementById("gStructure").value,
     usage: document.getElementById("gUsage").value,
     examples: document.getElementById("gExamples").value,
     practice: document.getElementById("gPractice").value,
     mistakes: document.getElementById("gMistakes").value
-  }
-
-  const t = db.transaction("grammar","readwrite")
-  const store = t.objectStore("grammar")
-
-  let req
-
-  if(editingGrammarId){
-    data.id = editingGrammarId
-    req = store.put(data)
-  }else{
-    req = store.add(data)
-  }
-
-  req.onerror = function(){
-    console.error("Błąd zapisu:", req.error)
-    showPopup("Failed to save")
-    finish()
-  }
-
-  t.onerror = function(){
-    console.error("Transaction error:", t.error)
-    showPopup("Failed to save")
-    finish()
-  }
-
-  t.onabort = function(){
-    console.error("Transaction aborted:", t.error)
-    showPopup("Failed to save")
-    finish()
-  }
-
-  t.oncomplete = function(){
-    document.getElementById("gTitle").value=""
-    document.getElementById("gExplanation").value=""
-    document.getElementById("gStructure").value=""
-    document.getElementById("gUsage").value=""
-    document.getElementById("gExamples").value=""
-    document.getElementById("gPractice").value=""
-    document.getElementById("gMistakes").value=""
-
-    loadGrammarFromDB(() => {
-      setView("grammarList");
-      refreshUI();
-    })
-
-    finish()
-    editingGrammarId = null
-  }
-}
-
-
-
-/* ===============================
-   Nowe
-================================ */
-function renderImages(){
-
-    const container = document.getElementById("imageResults");
-    container.innerHTML = "";
-
-    // Własne zdjęcie
-    if(uploadedImage){
-
-        const title = document.createElement("div");
-        title.innerHTML = "<b>📷 Your photo</b>";
-        title.style.gridColumn = "1 / -1";
-
-        container.appendChild(title);
-
-        const img = document.createElement("img");
-        img.src = uploadedImage;
-
-        if(selectedImage === uploadedImage){
-            img.style.border = "3px solid #7b5cff";
-        }
-
-        img.onclick = function(){
-
-            selectedImage = uploadedImage;
-            renderImages();
-
-        }
-
-        container.appendChild(img);
-
-    }
-
-    // Zdjęcia z Unsplasha
-    if(unsplashImages.length){
-
-        const title = document.createElement("div");
-        title.innerHTML = "<b>Suggested images</b>";
-        title.style.gridColumn = "1 / -1";
-        title.style.marginTop = "10px";
-
-        container.appendChild(title);
-
-        unsplashImages.forEach(photo=>{
-
-            const img = document.createElement("img");
-            img.src = photo.urls.small;
-
-            if(selectedImage === photo.urls.regular){
-                img.style.border = "3px solid #7b5cff";
-            }
-
-            img.onclick = function(){
-
-                selectedImage = photo.urls.regular;
-                renderImages();
-
-            }
-
-            container.appendChild(img);
-
-        });
-
-    }
-
-}
-/* ===============================
-   RECORD AUDIO
-================================ */
-function getTTSPlugin() {
-  return window.TTS || window.plugins?.tts || null;
-}
-
-function fallbackSpeakWord(text) {
-  if (!("speechSynthesis" in window)) {
-    showPopup("NoN - TTS");
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "en-US";
-  utterance.rate = 0.9;
-  utterance.onerror = (e) => {
-    console.error("speechSynthesis error:", e);
-    showPopup("TTS doesn't work");
   };
-
-  window.speechSynthesis.speak(utterance);
+  const t = db.transaction("grammar", "readwrite");
+  const store = t.objectStore("grammar");
+  if (editingGrammarId) { data.id = editingGrammarId; store.put(data); }
+  else { store.add(data); }
+  t.onerror = () => { showPopup("Failed to save"); finish(); };
+  t.oncomplete = function() {
+    ["gTitle","gExplanation","gStructure","gUsage","gExamples","gPractice","gMistakes"]
+      .forEach(id => document.getElementById(id).value = "");
+    editingGrammarId = null;
+    loadGrammarFromDB(() => { setView("grammarList"); refreshUI(); });
+    finish();
+  };
 }
 
-function speakWord(text) {
-  if (!text) return;
-
-  const plugin = getTTSPlugin();
-
-  if (plugin && typeof plugin.speak === "function") {
-    plugin.speak(
-      { text, locale: "en-US", rate: 0.9 },
-      () => console.log("TTS OK"),
-      (err) => {
-        console.error("TTS plugin error:", err);
-        fallbackSpeakWord(text);
-      }
-    );
-    return;
-  }
-
-  fallbackSpeakWord(text);
+function editGrammar(id) {
+  editingGrammarId = id;
+  const tx = db.transaction("grammar", "readonly");
+  const req = tx.objectStore("grammar").get(id);
+  req.onsuccess = function() {
+    const g = req.result;
+    document.getElementById("gTitle").value = g.title;
+    document.getElementById("gExplanation").value = g.explanation || "";
+    document.getElementById("gStructure").value = g.structure || "";
+    document.getElementById("gUsage").value = g.usage || "";
+    document.getElementById("gExamples").value = g.examples || "";
+    document.getElementById("gPractice").value = g.practice || "";
+    document.getElementById("gMistakes").value = g.mistakes || "";
+    setView("addGrammar");
+  };
 }
 
-
-
-
-
-
-
-function captureAudioNative(limit = 1) {
-  return new Promise((resolve, reject) => {
-    navigator.device.capture.captureAudio(resolve, reject, { limit });
+function deleteGrammar(id) {
+  showConfirm("Delete this topic?", () => {
+    const t = db.transaction("grammar", "readwrite");
+    t.objectStore("grammar").delete(id);
+    t.oncomplete = () => loadGrammarFromDB();
   });
 }
 
-function readMediaFileAsDataURL(mediaFile) {
-  return new Promise((resolve, reject) => {
-    if (!window.resolveLocalFileSystemURL) {
-      reject(new Error("resolveLocalFileSystemURL unavailable"));
-      return;
-    }
-
-    const path = mediaFile.fullPath || mediaFile.localURL || mediaFile.name;
-
-    window.resolveLocalFileSystemURL(
-      path,
-      (entry) => {
-        entry.file(
-          (file) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-          },
-          reject
-        );
-      },
-      reject
-    );
-  });
-}
-
-async function startRecordingNative() {
-  try {
-    isRecording = true;
-    document.getElementById("recordUI").style.display = "block";
-
-    const mediaFiles = await captureAudioNative(1);
-
-    document.getElementById("recordUI").style.display = "none";
-    isRecording = false;
-
-    if (!mediaFiles || !mediaFiles[0]) {
-      showPopup("The file was not recorded");
-      return;
-    }
-
-    const dataUrl = await readMediaFileAsDataURL(mediaFiles[0]);
-    recordedAudioBase64 = dataUrl;
-    recordedFilePath = dataUrl;
-
-    showPopup("Recording saved 🎤");
-  } catch (err) {
-    document.getElementById("recordUI").style.display = "none";
-    isRecording = false;
-    console.error("Native recording error:", err);
-    showPopup("No access to the microphone or a recording error");
-  }
-}
-
-async function startRecording(){
-  if(!navigator.mediaDevices || !window.MediaRecorder){ showPopup('Twoja przeglądarka nie obsługuje nagrywania audio'); return; }
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRecorder = new MediaRecorder(stream);
-    audioChunks = [];
-    let seconds = 0;
-    document.getElementById('recordUI').style.display = 'block';
-    const timer = setInterval(()=>{ seconds++; document.getElementById('recordTimer').innerText = seconds + ' s'; }, 1000);
-    mediaRecorder.ondataavailable = ev => audioChunks.push(ev.data);
-    mediaRecorder.onstop = ()=>{
-      clearInterval(timer);
-      document.getElementById('recordUI').style.display = 'none';
-      const blob = new Blob(audioChunks, {type:'audio/mp4'});
-      if(blob.size === 0){ showPopup('Nagranie jest puste'); return; }
-      const reader = new FileReader();
-      reader.onloadend = ()=>{ recordedAudioBase64 = reader.result; showPopup('Nagranie zapisane 🎤'); };
-      reader.readAsDataURL(blob);
-      stream.getTracks().forEach(track => track.stop());
-    };
-    mediaRecorder.start();
-    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); }, 3000);
-  }catch(err){ showPopup(err.name === 'NotAllowedError' ? 'Nie udzielono dostępu do mikrofonu' : 'Nie można uruchomić nagrywania'); }
-}
-function playRecording(){
-  if(recordedAudioBase64){ const audio = new Audio(recordedAudioBase64); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
-  if(!dueCards || dueCards.length === 0){ showPopup('Brak fiszek'); return; }
-  const card = dueCards[currentIndex]; if(!card){ showPopup('Błąd odczytu fiszki'); return; }
-  if(card.audio){ const audio = new Audio(card.audio); audio.play().catch(()=>showPopup('Nie można odtworzyć nagrania')); return; }
-  showPopup('Ta fiszka nie ma nagrania');
-}
-
-function playCurrentCardRecording() {
-  if (!dueCards || dueCards.length === 0) {
-    showPopup("No flashcards");
-    return;
-  }
-
-  const card = dueCards[currentIndex];
-  if (!card || !card.audio) {
-    showPopup("This flashcard does not have an audio recording");
-    return;
-  }
-
-  const audio = new Audio(card.audio);
-  audio.play().catch(err => {
-    console.error(err);
-    showPopup("The recording cannot be played");
-  });
-}
-
-
-
-/* ===============================
-   EDIT GRAMMA
-================================ */
-
-
-
-function editGrammar(id){
-
-editingGrammarId = id
-
-const t = db.transaction("grammar","readonly")
-const store = t.objectStore("grammar")
-const req = store.get(id)
-
-req.onsuccess = function(){
-
-const g = req.result
-
-document.getElementById("gTitle").value = g.title
-document.getElementById("gExplanation").value = g.explanation
-document.getElementById("gStructure").value = g.structure
-document.getElementById("gUsage").value = g.usage
-document.getElementById("gExamples").value = g.examples
-document.getElementById("gPractice").value = g.practice
-document.getElementById("gMistakes").value = g.mistakes
-
-setView("addGrammar")
-
-}
-
-}
-/* ===============================
-   PLAY AUDIO
-================================ */
-
-
-
-
-
-
-	function updateStreak(){
-
-const today = new Date().toDateString()
-
-if(lastStudy !== today){
-
-const yesterday = new Date(Date.now() - 86400000).toDateString()
-
-if(lastStudy === yesterday){
-streak++
-}else{
-streak = 1
-}
-
-lastStudy = today
-
-localStorage.setItem("streak",streak)
-localStorage.setItem("lastStudy",today)
-
-}
-
-updateCounter()
-
-}
-	function updateCounter(){
-document.getElementById("counter").innerText = cards.length 
-document.getElementById("streakUI").innerText = streak
-}
-
-	function openQuestions(){
-
-setView("questions")
-
-renderFolders()
-
-}
-
-	function renderFolders(){
-
-const container = document.getElementById("questionFolders")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questionFolders","readonly")
-const store = transaction.objectStore("questionFolders")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const folders = req.result
-
-folders.forEach(folder=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text">
-<b>${folder.name}</b>
-<span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span>
-</div>
-
-<div>
- <button class="actionBtn" onclick="deleteFolder(${folder.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-</div>
-
-`
-
-div.onclick = () => openFolder(folder.id)
-
-container.appendChild(div)
-
-})
-
-/* LICZNIK PYTAŃ */
-
-const qTransaction = db.transaction("questions","readonly")
-const qStore = qTransaction.objectStore("questions")
-const qReq = qStore.getAll()
-
-qReq.onsuccess = function(){
-
-const allQuestions = qReq.result
-
-folders.forEach(folder=>{
-
-const count = allQuestions.filter(q => q.folderId === folder.id).length
-
-const el = document.getElementById("count-"+folder.id)
-
-if(el){
-el.innerText = " (" + count + ")"
-}
-
-})
-
-}
-
-}
-
-}
-
-	function addFolder(){
-
-const name = prompt("Name folder")
-
-if(!name) return
-
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = renderFolders
-
-}
-
-	function openFolder(id){
-
-if(document.getElementById("confirmPopup").classList.contains("show")) return
-
-  currentFolderId = id
-  openQuestionCards()
-
-}
-function renderQuestionList(){
-
-const container = document.getElementById("questionList")
-
-container.innerHTML = ""
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-const questions = req.result.filter(q => q.folderId === currentFolderId)
-
-questions.forEach(q=>{
-
-const div = document.createElement("div")
-
-div.className = "listItem"
-
-div.innerHTML = `
-<div class="text"><b>${q.question}</b></div>
-
-<div style="display:flex; gap:8px">
-
-<button class="actionBtn" onclick="editQuestion(${q.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 20H20" stroke="#f4b400" stroke-width="2"/>
-      <path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/>
-    </svg>
-  </button>
-<button class="actionBtn" onclick="deleteQuestion(${q.id})">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/>
-      <path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/>
-    </svg>
-  </button>
-
-</div>
-`
-
-container.appendChild(div)
-
-})
-
-}
-
-}
-
-	function openQuestionCards(){
-
-setView("questionCards")
-
-const transaction = db.transaction("questions","readonly")
-const store = transaction.objectStore("questions")
-const req = store.getAll()
-
-req.onsuccess = function(){
-
-questionCards = req.result.filter(q => q.folderId === currentFolderId)
-
-questionIndex = 0
-questionAnswerVisible = false
-
-renderQuestionCard()
-
-}
-
-}
-
-	function saveQuestion(){
-
-const question = document.getElementById("questionInput").value.trim()
-const answer = document.getElementById("answerInput").value.trim()
-
-if(!question || !answer){
-showPopup("Fill in the fields")
-return
-}
-
-const transaction = db.transaction("questions","readwrite")
-
-const store = transaction.objectStore("questions")
-
-if(editingQuestionId){
-
-store.put({
-id: editingQuestionId,
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-editingQuestionId = null
-
-}else{
-
-store.add({
-folderId: currentFolderId,
-question: question,
-answer: answer
-})
-
-}
-
-transaction.oncomplete = () => {
-
-document.getElementById("questionInput").value=""
-document.getElementById("answerInput").value=""
-
-renderQuestionList()
-
-// 🔥 reload kart
-refreshUI();
-}
-
-}
-	let questionCards = []
-let questionIndex = 0
-let questionAnswerVisible = false
-
-function renderQuestionCard(){
-
-if(questionCards.length === 0){
-document.getElementById("questionCardText").innerHTML =
-"➕ Add first question"
-return
-}
-
-const card = questionCards[questionIndex]
-
-const el = document.getElementById("questionCardText")
-
-el.innerHTML = questionAnswerVisible
-? `<b style="margin-bottom:10px">💬 Answer</b><div>${card.answer}</div>`
-: `<b style="margin-bottom:10px">❓ Question</b><div>${card.question}</div>`
-
-
-updateQuestionStats();
-}
-
-
-
-	function deleteQuestion(id){
-
-  showConfirm("Delete this question?", () => {
-
-    const transaction = db.transaction("questions", "readwrite");
-    const store = transaction.objectStore("questions");
-
-    store.delete(id);
-
-    transaction.oncomplete = () => {
-      renderQuestionList();
-    
- refreshUI();
-      
-    };
-
-  });
-
-}
-
-	let editingQuestionId = null
-
-	function editQuestion(id){
-
-editingQuestionId = id
-
-const transaction = db.transaction("questions","readonly")
-
-const store = transaction.objectStore("questions")
-
-const req = store.get(id)
-
-req.onsuccess = function(){
-
-const q = req.result
-
-document.getElementById("questionInput").value = q.question
-document.getElementById("answerInput").value = q.answer
-
-setView("addQuestion")
-
-}
-
-}
-
-
-	function openFolderPopup(){
-document.getElementById("folderNameInput").value=""
-document.getElementById("folderPopup").classList.add("show")
-}
-
-function closeFolderPopup(){
-document.getElementById("folderPopup").classList.remove("show")
-}
-
-function saveFolder(){
-
-const name = document.getElementById("folderNameInput").value.trim()
-
-if(!name){
-showPopup("Enter the folder name")
-return
-}
-
-const transaction = db.transaction("questionFolders","readwrite")
-
-const store = transaction.objectStore("questionFolders")
-
-store.add({name:name})
-
-transaction.oncomplete = function(){
-
-renderFolders()
-
-closeFolderPopup()
-
-}
-
-}
-
-
-
-
-
-	function deleteFolder(id){
-
-  showConfirm("Delete folder and all questions?", () => {
-
-    const t = db.transaction(["questionFolders","questions"], "readwrite")
-
-    const folderStore = t.objectStore("questionFolders")
-    const questionStore = t.objectStore("questions")
-
-    folderStore.delete(id)
-
-    const req = questionStore.getAll()
-
-    req.onsuccess = function () {
-      req.result.forEach(q => {
-        if(q.folderId === id){
-          questionStore.delete(q.id)
-        }
-      })
-    }
-
-    t.oncomplete = function () {
-
-      currentFolderId = null
-
-      // 🔥 HARD RESET UI
-      viewHistory = []
-
-      setView("questions", false)
-
-      renderFolders()
-
-    }
-
-  })
-
-}
-  
-/* ===============================
-   od tąd
-================================ */
-
-function getFilesystem() {
-  const fs = window.Capacitor?.Plugins?.Filesystem;
-  if (!fs) throw new Error("Filesystem plugin unavailable");
-  return fs;
-}
-
-function txDone(tx) {
-  return new Promise((resolve, reject) => {
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error || new Error("Transaction error"));
-    tx.onabort = () => reject(tx.error || new Error("Transaction aborted"));
-  });
-}
-
-async function writeJsonFile(filename, data) {
-  try {
-    const Filesystem = getFilesystem();
-
-    await Filesystem.writeFile({
-      path: filename,
-      data: JSON.stringify(data, null, 2),
-      directory: Directory.Data,
-      encoding: "utf8"
-    });
-
-    showPopup("Save: " + filename);
-  } catch (e) {
-    console.error(e);
-    showPopup("writing error");
-  }
-}
-
-async function readJsonFile(filename) {
-  const Filesystem = getFilesystem();
-
-  const result = await Filesystem.readFile({
-    path: filename,
-    directory: Directory.Data,
-    encoding: "utf8"
-  });
-
-  return JSON.parse(result.data);
-}
-
-
-document.getElementById("startScreen").addEventListener("click",function(){
-
-this.style.display = "none"
-
-// ukryj górny pasek na starcie
-
-
-})
-	if (window.navigator.standalone) {
-console.log("PWA mode")
-} else {
-console.log("Safari mode")
-}
-/* ===============================
-   speakCurrentCard
-================================ */
-function speakCurrentCard() {
-  if (!dueCards || dueCards.length === 0) {
-    showPopup("No flashcards");
-    return;
-  }
-
-  const card = dueCards[currentIndex];
-  if (!card || !card.front) {
-    showPopup("No flashcards");
-    return;
-  }
-
-  speakWord(card.front);
-}
-
-/* ===============================
+/* ======================================================
    QUESTIONS
-================================ */
-
-
-/* ===============================
-   GRAMMAR
-================================ */
-
-
-	
-function showConfirm(text, callback){
-  document.getElementById("confirmText").innerText = text
-  document.getElementById("confirmPopup").classList.add("show")
-
-  document.getElementById("confirmOk").onclick = () => {
-    closeConfirm()
-    callback()
-  }
+====================================================== */
+function openQuestions() {
+  setView("questions");
+  renderFolders();
 }
 
-function closeConfirm(){
-  document.getElementById("confirmPopup").classList.remove("show")
-}	
-
-function showPopup(text){
-  const popup = document.getElementById("popup")
-  const popupText = document.getElementById("popupText")
-
-  if(!popup || !popupText){
-    alert(text) // fallback
-    return
-  }
-
-  popupText.innerText = text
-  popup.classList.add("show")
+function renderFolders() {
+  const container = document.getElementById("questionFolders");
+  container.innerHTML = "";
+  const tx = db.transaction("questionFolders", "readonly");
+  const req = tx.objectStore("questionFolders").getAll();
+  req.onsuccess = function() {
+    const folders = req.result || [];
+    folders.forEach(folder => {
+      const div = document.createElement("div");
+      div.className = "listItem";
+      div.innerHTML = `
+        <div class="text"><b>${escapeHtml(folder.name)}</b> <span style="opacity:0.6;font-size:12px" id="count-${folder.id}"></span></div>
+        <button class="actionBtn" onclick="event.stopPropagation();deleteFolder(${folder.id})">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg>
+        </button>`;
+      div.onclick = () => openFolder(folder.id);
+      container.appendChild(div);
+    });
+    // Count questions per folder
+    const qTx = db.transaction("questions", "readonly");
+    const qReq = qTx.objectStore("questions").getAll();
+    qReq.onsuccess = function() {
+      const allQ = qReq.result || [];
+      folders.forEach(f => {
+        const el = document.getElementById("count-" + f.id);
+        if (el) el.innerText = " (" + allQ.filter(q => q.folderId === f.id).length + ")";
+      });
+    };
+  };
 }
 
-function closePopup(){
-  const popup = document.getElementById("popup")
-  if(popup){
-    popup.classList.remove("show")
-  }
+function openFolderPopup() {
+  document.getElementById("folderNameInput").value = "";
+  document.getElementById("folderPopup").classList.add("show");
 }
-function updateQuestionStats(){
+function closeFolderPopup() { document.getElementById("folderPopup").classList.remove("show"); }
+
+function saveFolder() {
+  const name = document.getElementById("folderNameInput").value.trim();
+  if (!name) { showPopup("Enter the folder name"); return; }
+  const tx = db.transaction("questionFolders", "readwrite");
+  tx.objectStore("questionFolders").add({ name });
+  tx.oncomplete = () => { renderFolders(); closeFolderPopup(); };
+}
+
+function openFolder(id) {
+  if (document.getElementById("confirmPopup").classList.contains("show")) return;
+  currentFolderId = id;
+  openQuestionCards();
+}
+
+function deleteFolder(id) {
+  showConfirm("Delete folder and all questions?", () => {
+    const t = db.transaction(["questionFolders","questions"], "readwrite");
+    t.objectStore("questionFolders").delete(id);
+    const req = t.objectStore("questions").getAll();
+    req.onsuccess = function() {
+      req.result.forEach(q => { if (q.folderId === id) t.objectStore("questions").delete(q.id); });
+    };
+    t.oncomplete = function() {
+      currentFolderId = null;
+      viewHistory = [];
+      setView("questions", false);
+      renderFolders();
+    };
+  });
+}
+
+function renderQuestionList() {
+  const container = document.getElementById("questionList");
+  container.innerHTML = "";
+  const tx = db.transaction("questions", "readonly");
+  const req = tx.objectStore("questions").getAll();
+  req.onsuccess = function() {
+    const questions = (req.result || []).filter(q => q.folderId === currentFolderId);
+    questions.forEach(q => {
+      const div = document.createElement("div");
+      div.className = "listItem";
+      div.innerHTML = `
+        <div class="text"><b>${escapeHtml(q.question)}</b></div>
+        <div style="display:flex;gap:8px">
+          <button class="actionBtn" onclick="editQuestion(${q.id})">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 20H20" stroke="#f4b400" stroke-width="2"/><path d="M14 4L20 10L8 22H2V16L14 4Z" stroke="#f4b400" stroke-width="2"/></svg>
+          </button>
+          <button class="actionBtn" onclick="deleteQuestion(${q.id})">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 6H21" stroke="#ff4d6d" stroke-width="2"/><path d="M8 6V4H16V6" stroke="#ff4d6d" stroke-width="2"/><path d="M19 6L18 20H6L5 6" stroke="#ff4d6d" stroke-width="2"/></svg>
+          </button>
+        </div>`;
+      container.appendChild(div);
+    });
+  };
+}
+
+function openQuestionCards() {
+  setView("questionCards");
+  const tx = db.transaction("questions", "readonly");
+  const req = tx.objectStore("questions").getAll();
+  req.onsuccess = function() {
+    questionCards = (req.result || []).filter(q => q.folderId === currentFolderId);
+    questionIndex = 0;
+    questionAnswerVisible = false;
+    renderQuestionCard();
+  };
+}
+
+function renderQuestionCard() {
+  const el = document.getElementById("questionCardText");
+  if (questionCards.length === 0) { el.innerHTML = "➕ Add first question"; return; }
+  const card = questionCards[questionIndex];
+  el.innerHTML = questionAnswerVisible
+    ? `<b style="margin-bottom:10px">💬 Answer</b><div>${escapeHtml(card.answer)}</div>`
+    : `<b style="margin-bottom:10px">❓ Question</b><div>${escapeHtml(card.question)}</div>`;
+  updateQuestionStats();
+}
+
+function saveQuestion() {
+  const question = document.getElementById("questionInput").value.trim();
+  const answer = document.getElementById("answerInput").value.trim();
+  if (!question || !answer) { showPopup("Fill in all fields"); return; }
+  const tx = db.transaction("questions", "readwrite");
+  const store = tx.objectStore("questions");
+  if (editingQuestionId) {
+    store.put({ id: editingQuestionId, folderId: currentFolderId, question, answer });
+    editingQuestionId = null;
+  } else {
+    store.add({ folderId: currentFolderId, question, answer });
+  }
+  tx.oncomplete = () => {
+    document.getElementById("questionInput").value = "";
+    document.getElementById("answerInput").value = "";
+    renderQuestionList();
+    refreshUI();
+  };
+}
+
+function deleteQuestion(id) {
+  showConfirm("Delete this question?", () => {
+    const tx = db.transaction("questions", "readwrite");
+    tx.objectStore("questions").delete(id);
+    tx.oncomplete = () => { renderQuestionList(); refreshUI(); };
+  });
+}
+
+function editQuestion(id) {
+  editingQuestionId = id;
+  const tx = db.transaction("questions", "readonly");
+  const req = tx.objectStore("questions").get(id);
+  req.onsuccess = function() {
+    const q = req.result;
+    document.getElementById("questionInput").value = q.question;
+    document.getElementById("answerInput").value = q.answer;
+    setView("addQuestion");
+  };
+}
+
+function updateQuestionStats() {
   const total = questionCards.length;
   const current = total === 0 ? 0 : questionIndex + 1;
-
   document.getElementById("questionCounter").innerText = total;
-  document.getElementById("questionProgress").innerText =
-    total === 0 ? "—" : current + " / " + total;
+  document.getElementById("questionProgress").innerText = total === 0 ? "—" : current + " / " + total;
 }
 
+/* ======================================================
+   TOUCH GESTURES
+====================================================== */
+let startX = 0, startY = 0, endX = 0, endY = 0;
+
+window.addEventListener("load", () => {
+  const swipeArea = document.querySelector(".app");
+  if (!swipeArea) return;
+  swipeArea.addEventListener("touchstart", e => {
+    if (["BUTTON","INPUT","TEXTAREA"].includes(e.target.tagName)) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+  });
+  swipeArea.addEventListener("touchend", e => {
+    if (e.target.closest("button,input,textarea")) return;
+    endX = e.changedTouches[0].clientX;
+    endY = e.changedTouches[0].clientY;
+    handleGesture();
+  });
+});
+
+function handleGesture() {
+  const inFlashcard = document.getElementById("homeStudy").classList.contains("active");
+  const inQuestion = document.getElementById("questionCards").classList.contains("active");
+  const inGrammar = document.getElementById("grammarStudy").classList.contains("active");
+  if (!inFlashcard && !inQuestion && !inGrammar) return;
+
+  const diffX = endX - startX;
+  const diffY = endY - startY;
+
+  // TAP
+  if (Math.abs(diffX) < 30 && Math.abs(diffY) < 80) {
+    if (inFlashcard) showAnswer();
+    if (inQuestion) { questionAnswerVisible = !questionAnswerVisible; renderQuestionCard(); }
+    if (inGrammar) {
+      grammarStep++;
+      if (grammarStep > 6) { grammarStep = 0; grammarIndex = (grammarIndex + 1) % grammarCards.length; }
+      renderGrammarCard();
+    }
+    return;
+  }
+
+  // SWIPE
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    if (diffX > 80) {
+      if (inFlashcard) prevCard();
+      if (inQuestion) { questionIndex = (questionIndex - 1 + questionCards.length) % questionCards.length; questionAnswerVisible = false; renderQuestionCard(); }
+      if (inGrammar) { grammarIndex = (grammarIndex - 1 + grammarCards.length) % grammarCards.length; grammarAnswer = false; grammarStep = 0; renderGrammarCard(); }
+    } else if (diffX < -80) {
+      if (inFlashcard) nextCard();
+      if (inQuestion) { questionIndex = (questionIndex + 1) % questionCards.length; questionAnswerVisible = false; renderQuestionCard(); }
+      if (inGrammar) { grammarIndex = (grammarIndex + 1) % grammarCards.length; grammarAnswer = false; grammarStep = 0; renderGrammarCard(); }
+    }
+  }
+}
+
+/* ======================================================
+   MODALS / POPUPS
+====================================================== */
+function showPopup(text) {
+  const popup = document.getElementById("popup");
+  const popupText = document.getElementById("popupText");
+  if (!popup || !popupText) { alert(text); return; }
+  popupText.innerText = text;
+  popup.classList.add("show");
+}
+function closePopup() { document.getElementById("popup")?.classList.remove("show"); }
+
+function showConfirm(text, callback) {
+  document.getElementById("confirmText").innerText = text;
+  document.getElementById("confirmPopup").classList.add("show");
+  document.getElementById("confirmOk").onclick = () => { closeConfirm(); callback(); };
+}
+function closeConfirm() { document.getElementById("confirmPopup").classList.remove("show"); }
+
+/* ======================================================
+   REFRESH UI
+====================================================== */
 function refreshUI() {
   renderCard();
   updateCounter();
   updateQuestionStats();
   updateGrammarStats();
 }
-</script>
 
-<script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js")
-    .then(() => console.log("Service Worker zarejestrowany"))
-    .catch(err => console.log("Błąd SW:", err));
+/* ======================================================
+   RESUME / VISIBILITY CHANGE
+====================================================== */
+function resetTransientUI() {
+  document.querySelectorAll(".modal-backdrop.show").forEach(el => el.classList.remove("show"));
 }
 
-
-document.addEventListener("DOMContentLoaded", () => {
-
-  const btnHome = document.getElementById("btnHome")
-  const btnBack = document.getElementById("btnBack")
-
-  btnHome.addEventListener("click", goHome)
-  btnBack.addEventListener("click", goBack)
-
-})
-
-
-
-
-
-	// EXPORT IMPORT 
-   function exportBackup(){ const blob = new Blob([JSON.stringify(cards)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fiszki-backup.json'; a.click(); }
-document.getElementById('importFile').addEventListener('change', function(e){ const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = function(ev){ let imported; try{ imported = JSON.parse(ev.target.result); }catch{ showPopup('Błędny plik backup'); return; } const tx = db.transaction('cards','readwrite'); const store = tx.objectStore('cards'); store.clear(); imported.forEach(card=>{ delete card.id; if(card.level === undefined) card.level = 0; if(!card.nextReview) card.nextReview = Date.now(); store.add(card); }); tx.oncomplete = function(){ currentIndex = 0; loadCardsFromDB(()=>{ renderCard(); renderList(); }); showPopup('Import OK'); }; }; reader.readAsText(file); });
-
-
-
-
-	function exportGrammar(){ const req = db.transaction('grammar','readonly').objectStore('grammar').getAll(); req.onsuccess = ()=>{ const blob = new Blob([JSON.stringify(req.result)], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='grammar-backup.json'; a.click(); }; }
-document.getElementById('importGrammar').addEventListener('change', function(e){ const file=e.target.files[0]; if(!file) return; importGrammar(file); });
-function importGrammar(file){ const reader=new FileReader(); reader.onload=e=>{ let data; try{ data = JSON.parse(e.target.result); }catch{ showPopup('Błędny plik'); return; } const t = db.transaction('grammar','readwrite'); const store = t.objectStore('grammar'); store.clear(); t.oncomplete = ()=>{ const t2 = db.transaction('grammar','readwrite'); const store2 = t2.objectStore('grammar'); data.forEach(g=>{ delete g.id; store2.add(g); }); t2.oncomplete = ()=>{ loadGrammarFromDB(); showPopup('Import zakończony'); }; }; }; reader.readAsText(file); }
-
-
-
-	function exportQuestions(){
-  const t1 = db.transaction('questionFolders','readonly').objectStore('questionFolders').getAll();
-  const t2 = db.transaction('questions','readonly').objectStore('questions').getAll();
-  Promise.all([new Promise(res=>t1.onsuccess=()=>res(t1.result||[])), new Promise(res=>t2.onsuccess=()=>res(t2.result||[]))]).then(([folders,questions])=>{ const blob = new Blob([JSON.stringify({folders,questions})], {type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='questions-backup.json'; a.click(); });
+function restoreAfterResume() {
+  resetTransientUI();
+  if (!db) return;
+  loadCardsFromDB(() => {
+    cards.forEach(c => { if (c.hidden === undefined) c.hidden = false; });
+    refreshUI();
+  });
+  loadGrammarFromDB();
+  if (currentFolderId !== null) renderQuestionList();
 }
-function importQuestions(file){
-  const reader = new FileReader(); reader.onload = e=>{
-    let data; try{ data = JSON.parse(e.target.result); }catch{ showPopup('Błędny plik'); return; }
-    const t1 = db.transaction('questionFolders','readwrite'); t1.objectStore('questionFolders').clear();
-    const t2 = db.transaction('questions','readwrite'); t2.objectStore('questions').clear();
-    t2.oncomplete = ()=>{
+
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") restoreAfterResume(); });
+window.addEventListener("focus", restoreAfterResume);
+
+/* ======================================================
+   EXPORT / IMPORT
+====================================================== */
+function exportBackup() {
+  const blob = new Blob([JSON.stringify(cards)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "fiszki-backup.json";
+  a.click();
+}
+
+document.getElementById("importFile").addEventListener("change", function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    let imported;
+    try { imported = JSON.parse(ev.target.result); } catch { showPopup("Invalid backup file"); return; }
+    const tx = db.transaction("cards", "readwrite");
+    const store = tx.objectStore("cards");
+    store.clear();
+    imported.forEach(card => {
+      delete card.id;
+      if (card.level === undefined) card.level = 0;
+      if (!card.nextReview) card.nextReview = Date.now();
+      store.add(card);
+    });
+    tx.oncomplete = () => {
+      currentIndex = 0;
+      loadCardsFromDB(() => { renderCard(); renderList(); });
+      showPopup("Import successful");
+    };
+  };
+  reader.readAsText(file);
+});
+
+function exportGrammar() {
+  const req = db.transaction("grammar", "readonly").objectStore("grammar").getAll();
+  req.onsuccess = () => {
+    const blob = new Blob([JSON.stringify(req.result)], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "grammar-backup.json"; a.click();
+  };
+}
+
+document.getElementById("importGrammar").addEventListener("change", function(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    let data; try { data = JSON.parse(ev.target.result); } catch { showPopup("Invalid file"); return; }
+    const t = db.transaction("grammar", "readwrite");
+    t.objectStore("grammar").clear();
+    t.oncomplete = () => {
+      const t2 = db.transaction("grammar", "readwrite");
+      const store2 = t2.objectStore("grammar");
+      data.forEach(g => { delete g.id; store2.add(g); });
+      t2.oncomplete = () => { loadGrammarFromDB(); showPopup("Import successful"); };
+    };
+  };
+  reader.readAsText(file);
+});
+
+function exportQuestions() {
+  const r1 = db.transaction("questionFolders", "readonly").objectStore("questionFolders").getAll();
+  const r2 = db.transaction("questions", "readonly").objectStore("questions").getAll();
+  Promise.all([
+    new Promise(res => r1.onsuccess = () => res(r1.result || [])),
+    new Promise(res => r2.onsuccess = () => res(r2.result || []))
+  ]).then(([folders, questions]) => {
+    const blob = new Blob([JSON.stringify({ folders, questions })], { type: "application/json" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "questions-backup.json"; a.click();
+  });
+}
+
+function importQuestions(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    let data; try { data = JSON.parse(e.target.result); } catch { showPopup("Invalid file"); return; }
+    const t1 = db.transaction("questionFolders", "readwrite"); t1.objectStore("questionFolders").clear();
+    const t2 = db.transaction("questions", "readwrite"); t2.objectStore("questions").clear();
+    t2.oncomplete = () => {
       const folderMap = {};
-      const tf = db.transaction('questionFolders','readwrite'); const sf = tf.objectStore('questionFolders');
-      (data.folders || []).forEach(oldFolder=>{ const oldId = oldFolder.id; delete oldFolder.id; const req = sf.add(oldFolder); req.onsuccess = ()=>{ folderMap[oldId] = req.result; }; });
-      tf.oncomplete = ()=>{
-        const tq = db.transaction('questions','readwrite'); const sq = tq.objectStore('questions');
-        (data.questions || []).forEach(q=>{ delete q.id; q.folderId = folderMap[q.folderId]; sq.add(q); });
-        tq.oncomplete = ()=>{ currentFolderId = null; questionCards = []; questionIndex = 0; renderFolders(); setView('questions', false); showPopup('Import zakończony'); };
+      const tf = db.transaction("questionFolders", "readwrite");
+      const sf = tf.objectStore("questionFolders");
+      (data.folders || []).forEach(f => { const oid = f.id; delete f.id; const req = sf.add(f); req.onsuccess = () => { folderMap[oid] = req.result; }; });
+      tf.oncomplete = () => {
+        const tq = db.transaction("questions", "readwrite");
+        const sq = tq.objectStore("questions");
+        (data.questions || []).forEach(q => { delete q.id; q.folderId = folderMap[q.folderId]; sq.add(q); });
+        tq.oncomplete = () => { currentFolderId = null; questionCards = []; questionIndex = 0; renderFolders(); setView("questions", false); showPopup("Import successful"); };
       };
     };
   };
   reader.readAsText(file);
 }
-document.getElementById('importQuestions').addEventListener('change', function(e){ const file = e.target.files[0]; if(file) importQuestions(file); });
 
+document.getElementById("importQuestions").addEventListener("change", function(e) {
+  const file = e.target.files[0]; if (file) importQuestions(file);
+});
 
+/* ======================================================
+   DOMContentLoaded INIT
+====================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("btnHome").addEventListener("click", goHome);
+  document.getElementById("btnBack").addEventListener("click", goBack);
+});
 
+document.getElementById("startScreen").addEventListener("click", function() {
+  this.style.display = "none";
+});
 
-
-
-
-
-
-	function toggleHidden(id){
-  const card = cards.find(c => c.id === id);
-  if(!card) return;
-
-  card.hidden = !card.hidden;
-
-  const transaction = db.transaction("cards","readwrite");
-  transaction.objectStore("cards").put(card);
-
-  transaction.oncomplete = function(){
-    loadCardsFromDB(() => {
-      renderList();
-      renderCard();
-    });
-  };
+/* ======================================================
+   SERVICE WORKER
+====================================================== */
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js")
+    .then(() => console.log("Service Worker registered"))
+    .catch(err => console.log("SW error:", err));
 }
 </script>
-
-
 </body>
 </html>
-
