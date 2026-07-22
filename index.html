@@ -3,12 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-<link rel="manifest" href="/manifest.json" />
 <meta name="theme-color" content="#7b5cff" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Fiszki" />
-<link rel="apple-touch-icon" href="icon.png" />
 <title>Fiszki</title>
 <style>
 /* ---------- RESET / ROOT ---------- */
@@ -729,7 +727,7 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
 
 <div id="startScreen">
   <div class="startContent">
-    <div class="logo"><img src="fishki-logo.png" class="logoFish" alt="Fishki"></div>
+    <div class="logo" aria-label="Fishki"><svg class="logoFish" viewBox="0 0 100 100" role="img" aria-hidden="true"><defs><linearGradient id="logoGradient" x1="0" x2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#ded5ff"/></linearGradient></defs><path d="M49 18C33 18 21 30 21 46c0 17 13 30 30 30 12 0 22-7 27-17l-13-7c-3 6-8 10-15 10-9 0-16-7-16-16s7-16 16-16c7 0 12 4 15 10l13-7C72 25 62 18 49 18Z" fill="url(#logoGradient)"/><path d="M51 82c16 0 28-12 28-28 0-17-13-30-30-30-12 0-22 7-27 17l13 7c3-6 8-10 15-10 9 0 16 7 16 16s-7 16-16 16c-7 0-12-4-15-10l-13 7c6 10 16 15 29 15Z" fill="url(#logoGradient)"/></svg></div>
     <h1>Fishki</h1>
     <p>Train your brain daily</p>
     <div class="tapText">Tap to start</div>
@@ -813,7 +811,6 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
         <h3>Your folders</h3>
         <p class="viewHint">Create a set, add cards to it, then learn it your way.</p>
       </div>
-      <button class="settingsIcon" onclick="openSettings()" aria-label="Settings">⚙</button>
     </div>
     <div id="flashcardFoldersList"></div>
     <button class="primary" onclick="openFlashcardFolderPopup()">＋ New folder</button>
@@ -896,7 +893,6 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
         <h3 id="listTitle">All flashcards</h3>
         <p class="viewHint" id="listMeta"></p>
       </div>
-      <button class="settingsIcon" onclick="openSettings()" aria-label="Settings">⚙</button>
     </div>
     <div class="studyActions">
       <button class="primary" onclick="startFolderStudy('SRS')">Review due</button>
@@ -2246,7 +2242,7 @@ document.getElementById("startScreen").addEventListener("click", function() {
 /* ======================================================
    SERVICE WORKER
 ====================================================== */
-if ("serviceWorker" in navigator) {
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
   navigator.serviceWorker.register("sw.js")
     .then(() => console.log("Service Worker registered"))
     .catch(err => console.log("SW error:", err));
@@ -2424,7 +2420,7 @@ function renderCard() {
   if (card.image) { image.src = card.image; image.style.display = "block"; }
   else image.style.display = "none";
   document.getElementById("progress-mini").innerText = (currentIndex + 1) + " / " + source.length;
-  review.style.display = showingAnswer ? "grid" : "none";
+  review.style.display = studyMode === "SRS" && showingAnswer ? "grid" : "none";
   if (showingAnswer) updateReviewControls(card);
   updateCounter();
 }
@@ -2437,7 +2433,7 @@ function showAnswer() {
 
 function reviewCard(rating) {
   const card = dueCards[currentIndex];
-  if (!card || !showingAnswer) return;
+  if (!card || !showingAnswer || studyMode !== "SRS") return;
   updateStreak();
   scheduleCard(card, rating);
   const beforeLength = dueCards.length;
@@ -2522,7 +2518,6 @@ function startFolderStudy(mode) {
 }
 
 function setMode(mode) {
-  activeFlashcardFolderId = "ALL";
   startFolderStudy(mode);
 }
 
