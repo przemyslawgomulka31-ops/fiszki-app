@@ -733,6 +733,10 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
 .topButtons.homeOnly{left:auto;right:18px;width:auto;transform:none;padding:calc(env(safe-area-inset-top) + 10px) 0 0;background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}.topButtons.homeOnly .iconBtn{flex:0 0 40px;width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.76);box-shadow:0 7px 15px rgba(51,31,125,.15)}.topButtons.homeOnly .iconBtn svg{width:20px;height:20px}
 @media(max-width:420px){.topButtons.homeOnly{right:14px;padding-top:calc(env(safe-area-inset-top) + 8px)}.topButtons.homeOnly .iconBtn{flex-basis:37px;width:37px;height:37px;border-radius:12px}.topButtons.homeOnly .iconBtn svg{width:18px;height:18px}}
 </style>
+<style>
+/* Shared folder icon sizing for flashcards and questions. */
+.folderGlyph svg{width:21px;height:21px}
+</style>
 </head>
 <body>
 
@@ -1242,7 +1246,7 @@ function setView(view, saveHistory = true) {
     btnSrs.style.display = "none";
   }
 
-  if (view === "flashcardFolders") {
+  if (["flashcardFolders", "questions"].includes(view)) {
     btnBack.style.display = "none";
     top.classList.add("homeOnly");
   }
@@ -2768,6 +2772,34 @@ function bootstrapFlashcardSystem() {
 
 if (db) bootstrapFlashcardSystem();
 else dbRequest.addEventListener("success", bootstrapFlashcardSystem, { once: true });
+</script>
+<script>
+/* Question folders use the same visual structure as flashcard folders. */
+function renderFolders() {
+  const container = document.getElementById("questionFolders");
+  if (!container || !db) return;
+  container.innerHTML = "";
+  const folderRequest = db.transaction("questionFolders", "readonly").objectStore("questionFolders").getAll();
+  const questionRequest = db.transaction("questions", "readonly").objectStore("questions").getAll();
+  Promise.all([
+    new Promise(resolve => folderRequest.onsuccess = () => resolve(folderRequest.result || [])),
+    new Promise(resolve => questionRequest.onsuccess = () => resolve(questionRequest.result || []))
+  ]).then(([folders, questions]) => {
+    container.innerHTML = folders.length ? folders.map(folder => {
+      const count = questions.filter(question => question.folderId === folder.id).length;
+      return `<div class="flashFolderRow">
+        <button class="flashFolderCard" onclick="openFolder(${folder.id})">
+          <span class="folderGlyph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5C3 6.7 3.7 6 4.5 6H10L12 8H19.5C20.3 8 21 8.7 21 9.5V18.5C21 19.3 20.3 20 19.5 20H4.5C3.7 20 3 19.3 3 18.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+          <span><b>${escapeHtml(folder.name)}</b><small>${count} questions</small></span>
+          <span class="folderChevron">›</span>
+        </button>
+        <button class="folderDelete" onclick="event.stopPropagation();deleteFolder(${folder.id})" aria-label="Delete ${escapeHtml(folder.name)}">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>`;
+    }).join("") : `<div class="folderEmpty">Create your first question folder.</div>`;
+  });
+}
 </script>
 </body>
 </html>
