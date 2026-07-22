@@ -711,6 +711,19 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
 .bottomPlayer{width:calc(100% - 76px);max-width:354px;grid-template-columns:76px 76px;justify-content:space-between;gap:0}
 @media(max-width:420px){.bottomPlayer{width:calc(100% - 58px);grid-template-columns:68px 68px}}
 </style>
+<style>
+/* Folder and SRS interface */
+.viewHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:5px 0 16px}.viewHeading.compact{margin-bottom:12px}.viewHeading h3{margin:2px 0 4px}.eyebrow{margin:0;color:#6c54ce;font-size:10px;font-weight:800;letter-spacing:1.2px}.viewHint{margin:0;color:var(--muted);font-size:12px;line-height:1.45}.settingsIcon{width:38px;height:38px;flex:0 0 38px;margin:0;border-radius:12px;background:rgba(255,255,255,.78);color:#5131bd;font-size:18px;box-shadow:0 5px 12px rgba(52,30,125,.09)}
+.flashFolderCard{width:100%;min-height:70px;display:flex;align-items:center;gap:12px;margin:0 0 10px;padding:12px 13px;border-radius:17px;background:rgba(255,255,255,.88);color:#2b176d;border:1px solid rgba(255,255,255,.8);box-shadow:0 8px 18px rgba(55,33,132,.09);text-align:left}.flashFolderCard b{display:block;font-size:14px}.flashFolderCard small{display:block;margin-top:2px;color:#7466a7;font-size:11px}.folderGlyph{width:38px;height:38px;display:grid;place-items:center;border-radius:12px;background:#e9e2ff;color:#603ddd;font-size:19px}.systemFolder .folderGlyph{background:#5c3cda;color:#fff}.folderChevron{margin-left:auto;color:#8d7fbd;font-size:24px;font-weight:300}.folderEmpty{padding:17px 14px;margin-bottom:12px;border:1px dashed rgba(93,64,205,.35);border-radius:16px;background:rgba(255,255,255,.35);color:#665b89;font-size:13px;line-height:1.45}
+.studyActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 12px}.studyActions button{margin:0;min-height:44px;font-size:12px}.settingsCard{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;padding:15px;border-radius:17px;background:rgba(255,255,255,.84);border:1px solid rgba(255,255,255,.82);box-shadow:0 8px 18px rgba(55,33,132,.08)}.settingsCard b{color:#2b176d}.settingsCard span{color:#756a98;font-size:12px}.settingsCard div{display:flex;gap:8px;margin-top:6px}.settingsCard button{width:auto;flex:1;min-height:40px;margin:0;padding:9px 12px;font-size:12px}
+#revealAnswer{display:block;margin:0 0 8px;min-height:48px;border-radius:16px;font-size:13px}#reviewButtons{grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:8px}#reviewButtons button{min-height:52px;margin:0;padding:8px 3px;border-radius:14px;color:#fff;border:0;box-shadow:0 7px 13px rgba(48,30,121,.14);font-size:12px}#reviewButtons button b,#reviewButtons button small{display:block}#reviewButtons button small{margin-top:3px;opacity:.82;font-size:9px;font-weight:600}.again{background:#d85869!important}.hard{background:#e8a14c!important}.good{background:#39a87f!important}.easy{background:#6547df!important}.srsPill{display:inline-block;margin:7px 0 0 6px;padding:2px 6px;border-radius:8px;background:#eee9ff;color:#6043cf;font-size:9px;font-weight:700;vertical-align:middle}
+@media(max-width:420px){.flashFolderCard{min-height:64px}.folderGlyph{width:34px;height:34px}.settingsCard{padding:13px}.settingsIcon{width:34px;height:34px;flex-basis:34px}.studyActions button{font-size:11px}#reviewButtons button{min-height:48px;font-size:11px}}
+</style>
+<style>
+/* Mobile-first study controls and start-page settings access. */
+.homeSettings{width:100%;min-height:44px;margin:14px 0 0;padding:10px 14px;border-radius:15px;background:rgba(255,255,255,.38);border:1px solid rgba(255,255,255,.54);color:#382279;box-shadow:none;font-size:12px;font-weight:750}.homeSettings:active{background:rgba(255,255,255,.66)}
+#revealAnswer{display:none!important}
+</style>
 </head>
 <body>
 
@@ -746,7 +759,7 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
   <div id="home" class="view active">
     <div class="menuTitle">MENU</div>
     <div class="tiles">
-      <div class="bigTile" onclick="openAll()">
+      <div class="bigTile" onclick="openFlashcardFolders()">
         <svg viewBox="0 0 24 24" fill="none" class="tileIcon"><rect x="4" y="6" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2"/><rect x="6" y="4" width="14" height="10" rx="2" stroke="#2d1f80" stroke-width="2" opacity="0.6"/></svg>
         <span>FLASHCARDS</span>
       </div>
@@ -759,6 +772,7 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
         <span>GRAMMAR</span>
       </div>
     </div>
+    <button class="homeSettings" onclick="openSettings()">⚙ Settings, import & export</button>
   </div>
 
   <!-- FLASHCARD STUDY -->
@@ -789,6 +803,20 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
         </svg>
       </button>
     </div>
+  </div>
+
+  <!-- FLASHCARD FOLDERS: “All” is rendered by code as the permanent system folder. -->
+  <div id="flashcardFolders" class="view">
+    <div class="viewHeading">
+      <div>
+        <p class="eyebrow">FLASHCARDS</p>
+        <h3>Your folders</h3>
+        <p class="viewHint">Create a set, add cards to it, then learn it your way.</p>
+      </div>
+      <button class="settingsIcon" onclick="openSettings()" aria-label="Settings">⚙</button>
+    </div>
+    <div id="flashcardFoldersList"></div>
+    <button class="primary" onclick="openFlashcardFolderPopup()">＋ New folder</button>
   </div>
 
   <!-- QUESTION FOLDERS -->
@@ -862,7 +890,18 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
 
   <!-- VOCABULARY LIST -->
   <div id="list" class="view">
-    <h3>Vocabulary List</h3>
+    <div class="viewHeading compact">
+      <div>
+        <p class="eyebrow">FLASHCARDS</p>
+        <h3 id="listTitle">All flashcards</h3>
+        <p class="viewHint" id="listMeta"></p>
+      </div>
+      <button class="settingsIcon" onclick="openSettings()" aria-label="Settings">⚙</button>
+    </div>
+    <div class="studyActions">
+      <button class="primary" onclick="startFolderStudy('SRS')">Review due</button>
+      <button class="secondary" onclick="startFolderStudy('ALL')">Practice all</button>
+    </div>
     <div style="margin:8px 0 12px"><input id="searchBox" placeholder="Search..." oninput="renderList()" /></div>
     <div id="wordsList"></div>
     <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
@@ -872,9 +911,24 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
     </div>
   </div>
 
+  <!-- SETTINGS: all backup and import actions live here. -->
+  <div id="settings" class="view">
+    <div class="viewHeading compact">
+      <div>
+        <p class="eyebrow">SETTINGS</p>
+        <h3>Data & backups</h3>
+        <p class="viewHint">Export a safe copy or restore it here.</p>
+      </div>
+    </div>
+    <div class="settingsCard"><b>Flashcards</b><span>Folders, cards, media and SRS progress</span><div><button class="secondary" onclick="exportBackup()">Export</button><button class="secondary" onclick="document.getElementById('importFile').click()">Import</button></div></div>
+    <div class="settingsCard"><b>Questions</b><span>Question folders and answers</span><div><button class="secondary" onclick="exportQuestions()">Export</button><button class="secondary" onclick="document.getElementById('importQuestions').click()">Import</button></div></div>
+    <div class="settingsCard"><b>Grammar</b><span>Grammar topics and exercises</span><div><button class="secondary" onclick="exportGrammar()">Export</button><button class="secondary" onclick="document.getElementById('importGrammar').click()">Import</button></div></div>
+  </div>
+
   <!-- ADD FLASHCARD -->
   <div id="add" class="view">
-    <h3>Add flashcard</h3>
+    <h3 id="addCardTitle">Add flashcard</h3>
+    <p class="viewHint" id="addCardFolder"></p>
     <textarea id="frontInput" class="flashcardField" placeholder="The word in English" rows="2"></textarea>
     <textarea id="backInput" class="flashcardField" placeholder="Translation" rows="2"></textarea>
     <input type="file" id="imageUpload" accept="image/*" />
@@ -921,6 +975,17 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
     <div style="display:flex;gap:8px;margin-top:10px">
       <button class="secondary" onclick="closeFolderPopup()">Cancel</button>
       <button class="primary" onclick="saveFolder()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="flashcardFolderPopup" class="modal-backdrop">
+  <div class="modal">
+    <h3>New flashcard folder</h3>
+    <input id="flashcardFolderNameInput" placeholder="e.g. Travel" />
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="secondary" onclick="closeFlashcardFolderPopup()">Cancel</button>
+      <button class="primary" onclick="saveFlashcardFolder()">Create folder</button>
     </div>
   </div>
 </div>
@@ -986,7 +1051,7 @@ let editingIndex = null;
 /* ======================================================
    INDEXEDDB INIT
 ====================================================== */
-const dbRequest = indexedDB.open("FlashcardsDB", 4);
+const dbRequest = indexedDB.open("FlashcardsDB", 6);
 
 dbRequest.onupgradeneeded = function(event) {
   db = event.target.result;
@@ -1002,6 +1067,9 @@ dbRequest.onupgradeneeded = function(event) {
   }
   if (!db.objectStoreNames.contains("grammar")) {
     db.createObjectStore("grammar", { keyPath: "id", autoIncrement: true });
+  }
+  if (!db.objectStoreNames.contains("flashcardFolders")) {
+    db.createObjectStore("flashcardFolders", { keyPath: "id", autoIncrement: true });
   }
 };
 
@@ -1037,9 +1105,11 @@ function loadCardsFromDB(callback) {
 const viewLevels = {
   home: 0,
   homeStudy: 1,
+  flashcardFolders: 1,
   questions: 1,
   grammarStudy: 1,
   list: 2,
+  settings: 2,
   add: 2,
   questionFolder: 2,
   questionCards: 2,
@@ -1139,7 +1209,7 @@ function setView(view, saveHistory = true) {
   });
 
   // --- FLASHCARD VIEWS ---
-  if (["homeStudy", "list", "add"].includes(view)) {
+  if (["homeStudy", "list", "add", "flashcardFolders", "settings"].includes(view)) {
     top.style.display = "flex";
     btnHome.style.display = "flex";
     btnList.style.display = "flex";
@@ -1155,6 +1225,13 @@ function setView(view, saveHistory = true) {
     // FIX: assign onclick directly (not inline) to avoid stale closures
     btnAll.onclick = () => setMode("ALL");
     btnSrs.onclick = () => setMode("SRS");
+  }
+
+  if (["flashcardFolders", "settings"].includes(view)) {
+    btnList.style.display = "none";
+    btnAdd.style.display = "none";
+    btnAll.style.display = "none";
+    btnSrs.style.display = "none";
   }
 
   // --- QUESTION VIEWS ---
@@ -2063,6 +2140,10 @@ function exportBackup() {
 }
 
 document.getElementById("importFile").addEventListener("change", function(e) {
+  if (typeof importFlashcardBackup === "function") {
+    importFlashcardBackup(e.target.files[0]);
+    return;
+  }
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
@@ -2170,6 +2251,432 @@ if ("serviceWorker" in navigator) {
     .then(() => console.log("Service Worker registered"))
     .catch(err => console.log("SW error:", err));
 }
+</script>
+<script>
+/* ======================================================
+   FLASHCARD FOLDERS + SRS
+   Visual hierarchy is unchanged; this layer adds the learning system.
+====================================================== */
+let flashcardFolders = [];
+let activeFlashcardFolderId = "ALL";
+
+const MINUTE = 60 * 1000;
+const DAY = 24 * 60 * MINUTE;
+
+function normalizeSrs(card) {
+  if (!card.srs) {
+    const legacyLevel = Number(card.level) || 0;
+    const legacyIntervals = [0, 1, 3, 7, 14, 30];
+    card.srs = {
+      state: legacyLevel > 0 ? "review" : "new",
+      due: card.nextReview || Date.now(),
+      intervalDays: legacyIntervals[Math.min(legacyLevel, legacyIntervals.length - 1)],
+      ease: 2.5,
+      step: 0,
+      reps: 0,
+      lapses: 0,
+      lastReview: null
+    };
+  }
+  card.srs.ease = Math.max(1.3, Number(card.srs.ease) || 2.5);
+  card.srs.intervalDays = Math.max(0, Number(card.srs.intervalDays) || 0);
+  card.srs.due = Number(card.srs.due) || Date.now();
+  card.nextReview = card.srs.due;
+  return card.srs;
+}
+
+function cardsInActiveFolder(includeHidden = false) {
+  return cards.filter(card => {
+    const inFolder = activeFlashcardFolderId === "ALL" || card.folderId === activeFlashcardFolderId;
+    return inFolder && (includeHidden || !card.hidden);
+  });
+}
+
+function dueInActiveFolder() {
+  const now = Date.now();
+  return cardsInActiveFolder().filter(card => normalizeSrs(card).due <= now)
+    .sort((a, b) => normalizeSrs(a).due - normalizeSrs(b).due);
+}
+
+function activeFolderName() {
+  if (activeFlashcardFolderId === "ALL") return "All flashcards";
+  return flashcardFolders.find(folder => folder.id === activeFlashcardFolderId)?.name || "Folder";
+}
+
+function scheduleCard(card, rating) {
+  const now = Date.now();
+  const srs = normalizeSrs(card);
+  const reviewInterval = Math.max(1, srs.intervalDays || 1);
+  srs.reps += 1;
+  srs.lastReview = now;
+
+  if (srs.state === "new" || srs.state === "learning") {
+    if (rating === "again") {
+      srs.state = "learning";
+      srs.step = 0;
+      srs.due = now + MINUTE;
+    } else if (rating === "hard") {
+      srs.state = "learning";
+      srs.step = Math.max(0, srs.step || 0);
+      srs.due = now + 6 * MINUTE;
+    } else if (rating === "good" && (srs.step || 0) === 0) {
+      srs.state = "learning";
+      srs.step = 1;
+      srs.due = now + 10 * MINUTE;
+    } else {
+      srs.state = "review";
+      srs.step = 0;
+      srs.intervalDays = rating === "easy" ? 4 : 1;
+      srs.due = now + srs.intervalDays * DAY;
+    }
+  } else if (srs.state === "relearning") {
+    if (rating === "again") {
+      srs.due = now + 10 * MINUTE;
+    } else if (rating === "hard") {
+      srs.due = now + 15 * MINUTE;
+    } else {
+      srs.state = "review";
+      srs.intervalDays = Math.max(1, rating === "easy" ? Math.round(reviewInterval * 1.3) : reviewInterval);
+      srs.due = now + srs.intervalDays * DAY;
+    }
+  } else {
+    if (rating === "again") {
+      srs.lapses += 1;
+      srs.ease = Math.max(1.3, srs.ease - 0.2);
+      srs.intervalDays = Math.max(1, Math.round(reviewInterval * 0.5));
+      srs.state = "relearning";
+      srs.step = 0;
+      srs.due = now + 10 * MINUTE;
+    } else {
+      if (rating === "hard") srs.ease = Math.max(1.3, srs.ease - 0.15);
+      if (rating === "easy") srs.ease = Math.min(3.5, srs.ease + 0.15);
+      const multiplier = rating === "hard" ? 1.2 : rating === "easy" ? srs.ease * 1.3 : srs.ease;
+      srs.intervalDays = Math.max(reviewInterval + 1, Math.round(reviewInterval * multiplier));
+      srs.state = "review";
+      srs.due = now + srs.intervalDays * DAY;
+    }
+  }
+
+  card.level = Math.min(5, Math.round(Math.log2(Math.max(1, srs.intervalDays + 1))));
+  card.nextReview = srs.due;
+}
+
+function intervalText(ms) {
+  if (ms < DAY) return Math.max(1, Math.round(ms / MINUTE)) + " min";
+  return Math.max(1, Math.round(ms / DAY)) + (Math.round(ms / DAY) === 1 ? " day" : " days");
+}
+
+function ratingIntervals(card) {
+  const srs = normalizeSrs(card);
+  if (srs.state === "new" || srs.state === "learning") {
+    return { again: "1 min", hard: "6 min", good: (srs.step || 0) === 0 ? "10 min" : "1 day", easy: "4 days" };
+  }
+  if (srs.state === "relearning") return { again: "10 min", hard: "15 min", good: intervalText((srs.intervalDays || 1) * DAY), easy: intervalText((srs.intervalDays || 1) * 1.3 * DAY) };
+  const current = Math.max(1, srs.intervalDays || 1);
+  return {
+    again: "10 min",
+    hard: intervalText(Math.max(current + 1, Math.round(current * 1.2)) * DAY),
+    good: intervalText(Math.max(current + 1, Math.round(current * srs.ease)) * DAY),
+    easy: intervalText(Math.max(current + 2, Math.round(current * srs.ease * 1.3)) * DAY)
+  };
+}
+
+function setupReviewControls() {
+  const review = document.getElementById("reviewButtons");
+  if (!review) return;
+  review.innerHTML = `
+    <button class="again" onclick="reviewCard('again')"><b>Again</b><small></small></button>
+    <button class="hard" onclick="reviewCard('hard')"><b>Hard</b><small></small></button>
+    <button class="good" onclick="reviewCard('good')"><b>Good</b><small></small></button>
+    <button class="easy" onclick="reviewCard('easy')"><b>Easy</b><small></small></button>`;
+  document.getElementById("revealAnswer")?.remove();
+}
+
+function updateReviewControls(card) {
+  const labels = ratingIntervals(card);
+  ["again", "hard", "good", "easy"].forEach(name => {
+    const button = document.querySelector("#reviewButtons ." + name);
+    if (button) button.querySelector("small").textContent = labels[name];
+  });
+}
+
+function renderCard() {
+  setupReviewControls();
+  const cardEl = document.getElementById("cardText");
+  const image = document.getElementById("cardImage");
+  const review = document.getElementById("reviewButtons");
+  const source = studyMode === "ALL" ? cardsInActiveFolder() : dueInActiveFolder();
+  dueCards = source;
+
+  if (source.length === 0) {
+    currentIndex = 0;
+    cardEl.innerText = cardsInActiveFolder().length === 0 ? "Add your first flashcard" : "All caught up for now";
+    image.style.display = "none";
+    review.style.display = "none";
+    document.getElementById("progress-mini").innerText = "0 / 0";
+    updateCounter();
+    return;
+  }
+
+  if (currentIndex >= source.length) currentIndex = 0;
+  const card = source[currentIndex];
+  cardEl.innerText = showingAnswer ? card.back : card.front;
+  if (card.image) { image.src = card.image; image.style.display = "block"; }
+  else image.style.display = "none";
+  document.getElementById("progress-mini").innerText = (currentIndex + 1) + " / " + source.length;
+  review.style.display = showingAnswer ? "grid" : "none";
+  if (showingAnswer) updateReviewControls(card);
+  updateCounter();
+}
+
+function showAnswer() {
+  if (!dueCards.length || showingAnswer) return;
+  showingAnswer = true;
+  renderCard();
+}
+
+function reviewCard(rating) {
+  const card = dueCards[currentIndex];
+  if (!card || !showingAnswer) return;
+  updateStreak();
+  scheduleCard(card, rating);
+  const beforeLength = dueCards.length;
+  if (studyMode === "ALL") currentIndex = (currentIndex + 1) % beforeLength;
+  else currentIndex = 0;
+  showingAnswer = false;
+  const transaction = db.transaction("cards", "readwrite");
+  transaction.objectStore("cards").put(card);
+  transaction.oncomplete = () => loadCardsFromDB(() => { renderCard(); renderList(); });
+}
+
+function updateCounter() {
+  const total = cardsInActiveFolder().length;
+  document.getElementById("counter").innerText = total;
+  document.getElementById("streakUI").innerText = streak;
+}
+
+function refreshUI() {
+  renderCard();
+  updateCounter();
+  updateQuestionStats();
+  updateGrammarStats();
+}
+
+function loadFlashcardFolders(callback) {
+  if (!db || !db.objectStoreNames.contains("flashcardFolders")) return;
+  const request = db.transaction("flashcardFolders", "readonly").objectStore("flashcardFolders").getAll();
+  request.onsuccess = () => {
+    flashcardFolders = (request.result || []).sort((a, b) => a.name.localeCompare(b.name, "pl"));
+    if (document.getElementById("flashcardFolders")?.classList.contains("active")) renderFlashcardFolders();
+    if (typeof callback === "function") callback(flashcardFolders);
+  };
+}
+
+function renderFlashcardFolders() {
+  const container = document.getElementById("flashcardFoldersList");
+  if (!container) return;
+  const allCount = cards.filter(card => !card.hidden).length;
+  const allDue = cards.filter(card => !card.hidden && normalizeSrs(card).due <= Date.now()).length;
+  const systemFolder = `
+    <button class="flashFolderCard systemFolder" onclick="openFlashcardFolder('ALL')">
+      <span class="folderGlyph">▤</span>
+      <span><b>All</b><small>${allCount} cards · ${allDue} due</small></span>
+      <span class="folderChevron">›</span>
+    </button>`;
+  const folderCards = flashcardFolders.map(folder => {
+    const folderCards = cards.filter(card => card.folderId === folder.id && !card.hidden);
+    const due = folderCards.filter(card => normalizeSrs(card).due <= Date.now()).length;
+    return `<button class="flashFolderCard" onclick="openFlashcardFolder(${folder.id})">
+      <span class="folderGlyph">▰</span>
+      <span><b>${escapeHtml(folder.name)}</b><small>${folderCards.length} cards · ${due} due</small></span>
+      <span class="folderChevron">›</span>
+    </button>`;
+  }).join("");
+  container.innerHTML = systemFolder + (folderCards || `<div class="folderEmpty">Create your first folder, for example <b>Travel</b>.</div>`);
+}
+
+function openFlashcardFolders() {
+  activeFlashcardFolderId = "ALL";
+  loadCardsFromDB(() => {
+    loadFlashcardFolders(() => {
+      setView("flashcardFolders");
+      renderFlashcardFolders();
+    });
+  });
+}
+
+function openFlashcardFolder(id) {
+  activeFlashcardFolderId = id;
+  loadCardsFromDB(() => {
+    setView("list");
+    renderList();
+  });
+}
+
+function startFolderStudy(mode) {
+  studyMode = mode;
+  currentIndex = 0;
+  showingAnswer = false;
+  setView("homeStudy");
+  renderCard();
+}
+
+function setMode(mode) {
+  activeFlashcardFolderId = "ALL";
+  startFolderStudy(mode);
+}
+
+function goToList() { openFlashcardFolders(); }
+function openAll() { openFlashcardFolders(); }
+
+function goToAdd() {
+  if (activeFlashcardFolderId === "ALL") {
+    showPopup("Open a folder first, then add a flashcard to it.");
+    openFlashcardFolders();
+    return;
+  }
+  const folderName = activeFolderName();
+  document.getElementById("addCardTitle").innerText = "Add flashcard";
+  document.getElementById("addCardFolder").innerText = "Adding to: " + folderName;
+  setView("add");
+}
+
+function addCard() {
+  if (activeFlashcardFolderId === "ALL") { showPopup("Choose a folder before adding a card."); return; }
+  if (isRecording) { showPopup("Stop recording first."); return; }
+  const front = document.getElementById("frontInput").value.replace(/\r\n/g, "\n").trim();
+  const back = document.getElementById("backInput").value.replace(/\r\n/g, "\n").trim();
+  if (!front || !back) { showPopup("Please fill in both sides of the flashcard."); return; }
+  const card = {
+    front, back, folderId: activeFlashcardFolderId,
+    audio: recordedAudioBase64 || null, image: selectedImage || null,
+    hidden: false, level: 0, nextReview: Date.now(),
+    srs: { state: "new", due: Date.now(), intervalDays: 0, ease: 2.5, step: 0, reps: 0, lapses: 0, lastReview: null }
+  };
+  const transaction = db.transaction("cards", "readwrite");
+  transaction.objectStore("cards").add(card);
+  transaction.oncomplete = () => {
+    document.getElementById("frontInput").value = "";
+    document.getElementById("backInput").value = "";
+    document.getElementById("imageResults").innerHTML = "";
+    uploadedImage = selectedImage = recordedAudioBase64 = null;
+    unsplashImages = [];
+    loadCardsFromDB(() => { renderList(); renderFlashcardFolders(); showPopup("Flashcard added to " + activeFolderName()); });
+  };
+}
+
+function saveModal() {
+  const front = document.getElementById("editFront").value.trim();
+  const back = document.getElementById("editBack").value.trim();
+  if (!front || !back) { showPopup("Fill in both sides of the flashcard."); return; }
+  const updated = { ...cards[editingIndex], front, back };
+  const transaction = db.transaction("cards", "readwrite");
+  transaction.objectStore("cards").put(updated);
+  transaction.oncomplete = () => { loadCardsFromDB(() => { renderList(); renderCard(); }); closeModal(); };
+}
+
+function renderList() {
+  const list = document.getElementById("wordsList");
+  const searchBox = document.getElementById("searchBox");
+  if (!list || !searchBox) return;
+  const search = searchBox.value.trim().toLowerCase();
+  let result = cardsInActiveFolder(true);
+  if (search) result = result.filter(card => card.front.toLowerCase().includes(search) || card.back.toLowerCase().includes(search));
+  if (sortAZ) result.sort((a, b) => a.front.localeCompare(b.front, "pl"));
+  document.getElementById("listTitle").innerText = activeFolderName();
+  const due = cardsInActiveFolder().filter(card => normalizeSrs(card).due <= Date.now()).length;
+  document.getElementById("listMeta").innerText = result.length + " cards · " + due + " due now";
+  list.innerHTML = result.length ? result.map(card => {
+    const index = cards.findIndex(item => item.id === card.id);
+    const srs = normalizeSrs(card);
+    const status = card.hidden ? "Hidden" : srs.state === "new" ? "New" : srs.state === "learning" || srs.state === "relearning" ? "Learning" : "Review";
+    const hideLabel = card.hidden ? "Show card" : "Hide card";
+    return `<div class="listItem"><div class="text"><b>${nl2br(card.front)}</b><br><span>${nl2br(card.back)}</span><small class="srsPill">${status}</small></div><div style="display:flex;gap:8px"><button class="actionBtn" onclick="editCard(${index})" aria-label="Edit">✎</button><button class="actionBtn" onclick="toggleHidden(${card.id})" aria-label="${hideLabel}">${card.hidden ? "◉" : "⊘"}</button><button class="actionBtn" onclick="deleteCard(${index})" aria-label="Delete">⌫</button></div></div>`;
+  }).join("") : `<div class="folderEmpty">No cards here yet. Use the + button above to add one.</div>`;
+}
+
+function openFlashcardFolderPopup() {
+  document.getElementById("flashcardFolderNameInput").value = "";
+  document.getElementById("flashcardFolderPopup").classList.add("show");
+  document.getElementById("flashcardFolderNameInput").focus();
+}
+function closeFlashcardFolderPopup() { document.getElementById("flashcardFolderPopup").classList.remove("show"); }
+function saveFlashcardFolder() {
+  const name = document.getElementById("flashcardFolderNameInput").value.trim();
+  if (!name) { showPopup("Enter a folder name."); return; }
+  if (flashcardFolders.some(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase())) { showPopup("This folder already exists."); return; }
+  const request = db.transaction("flashcardFolders", "readwrite").objectStore("flashcardFolders").add({ name, createdAt: Date.now() });
+  request.onsuccess = () => { activeFlashcardFolderId = request.result; closeFlashcardFolderPopup(); loadFlashcardFolders(() => openFlashcardFolder(activeFlashcardFolderId)); };
+}
+
+function openSettings() { setView("settings"); }
+
+function exportBackup() {
+  const request = db.transaction("flashcardFolders", "readonly").objectStore("flashcardFolders").getAll();
+  request.onsuccess = () => {
+    const data = { version: 2, exportedAt: new Date().toISOString(), folders: request.result || [], cards };
+    const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "fiszki-flashcards-backup.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  };
+}
+
+function importFlashcardBackup(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = event => {
+    let imported;
+    try { imported = JSON.parse(event.target.result); } catch { showPopup("This is not a valid flashcard backup."); return; }
+    const importedCards = Array.isArray(imported) ? imported : (imported.cards || []);
+    const importedFolders = Array.isArray(imported) ? [] : (imported.folders || []);
+    if (!Array.isArray(importedCards)) { showPopup("This backup contains no flashcards."); return; }
+    showConfirm("Replace the current flashcards and folders with this backup?", () => restoreFlashcardBackup(importedFolders, importedCards));
+  };
+  reader.readAsText(file);
+}
+
+function restoreFlashcardBackup(importedFolders, importedCards) {
+  const idMap = {};
+  const clearTransaction = db.transaction(["cards", "flashcardFolders"], "readwrite");
+  clearTransaction.objectStore("cards").clear();
+  clearTransaction.objectStore("flashcardFolders").clear();
+  clearTransaction.oncomplete = () => {
+    const folderTransaction = db.transaction("flashcardFolders", "readwrite");
+    const folderStore = folderTransaction.objectStore("flashcardFolders");
+    importedFolders.forEach(folder => {
+      const oldId = folder.id;
+      const request = folderStore.add({ name: folder.name || "Untitled folder", createdAt: folder.createdAt || Date.now() });
+      request.onsuccess = () => { idMap[oldId] = request.result; };
+    });
+    folderTransaction.oncomplete = () => {
+      const cardTransaction = db.transaction("cards", "readwrite");
+      const cardStore = cardTransaction.objectStore("cards");
+      importedCards.forEach(source => {
+        const card = { ...source };
+        delete card.id;
+        card.folderId = idMap[source.folderId] || null;
+        normalizeSrs(card);
+        cardStore.add(card);
+      });
+      cardTransaction.oncomplete = () => {
+        activeFlashcardFolderId = "ALL";
+        loadCardsFromDB(() => loadFlashcardFolders(() => { renderFlashcardFolders(); showPopup("Flashcard backup restored."); }));
+      };
+    };
+  };
+}
+
+function bootstrapFlashcardSystem() {
+  setupReviewControls();
+  document.querySelectorAll("#questions button[onclick*='exportQuestions'], #questions button[onclick*='importQuestions'], #grammarList button[onclick*='exportGrammar'], #grammarList button[onclick*='importGrammar'], #list button[onclick*='exportBackup'], #list button[onclick*='importFile']").forEach(button => button.style.display = "none");
+  loadCardsFromDB(() => { loadFlashcardFolders(); renderCard(); });
+}
+
+if (db) bootstrapFlashcardSystem();
+else dbRequest.addEventListener("success", bootstrapFlashcardSystem, { once: true });
 </script>
 </body>
 </html>
