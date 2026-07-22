@@ -722,12 +722,23 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
 .homeSettings{width:100%;min-height:44px;margin:14px 0 0;padding:10px 14px;border-radius:15px;background:rgba(255,255,255,.38);border:1px solid rgba(255,255,255,.54);color:#382279;box-shadow:none;font-size:12px;font-weight:750}.homeSettings:active{background:rgba(255,255,255,.66)}
 #revealAnswer{display:none!important}
 </style>
+<style>
+/* Fish logo and clear folder/card controls. */
+.logo{max-width:120px!important;margin:0 auto}.logoFish{width:104px;height:78px;display:block}
+.flashFolderRow{position:relative;margin-bottom:10px}.flashFolderRow .flashFolderCard{margin-bottom:0;padding-right:57px}.folderDelete{position:absolute;top:50%;right:11px;transform:translateY(-50%);width:36px;height:36px;margin:0;padding:8px;border-radius:11px;background:rgba(253,239,242,.9);border:1px solid rgba(244,177,190,.52);color:#cf4e65;box-shadow:none}.folderDelete svg{width:18px;height:18px}.cardActions{display:flex;gap:7px;align-items:center}.actionBtn{padding:9px;color:#5d4a9f}.actionBtn svg{width:19px;height:19px}.deleteAction{color:#d54f65;background:#fff4f6;border-color:#f6d8df}.hideAction{color:#684bd0}.editAction{color:#df9b32}
+@media(max-width:420px){.folderDelete{right:9px;width:34px;height:34px}.flashFolderRow .flashFolderCard{padding-right:52px}.cardActions{gap:5px}.actionBtn{width:35px;height:35px;padding:8px}}
+</style>
+<style>
+/* Folder overview has one compact Home action, not a stretched toolbar. */
+.topButtons.homeOnly{left:auto;right:18px;width:auto;transform:none;padding:calc(env(safe-area-inset-top) + 10px) 0 0;background:transparent;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}.topButtons.homeOnly .iconBtn{flex:0 0 40px;width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.76);box-shadow:0 7px 15px rgba(51,31,125,.15)}.topButtons.homeOnly .iconBtn svg{width:20px;height:20px}
+@media(max-width:420px){.topButtons.homeOnly{right:14px;padding-top:calc(env(safe-area-inset-top) + 8px)}.topButtons.homeOnly .iconBtn{flex-basis:37px;width:37px;height:37px;border-radius:12px}.topButtons.homeOnly .iconBtn svg{width:18px;height:18px}}
+</style>
 </head>
 <body>
 
 <div id="startScreen">
   <div class="startContent">
-    <div class="logo" aria-label="Fishki"><svg class="logoFish" viewBox="0 0 100 100" role="img" aria-hidden="true"><defs><linearGradient id="logoGradient" x1="0" x2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#ded5ff"/></linearGradient></defs><path d="M49 18C33 18 21 30 21 46c0 17 13 30 30 30 12 0 22-7 27-17l-13-7c-3 6-8 10-15 10-9 0-16-7-16-16s7-16 16-16c7 0 12 4 15 10l13-7C72 25 62 18 49 18Z" fill="url(#logoGradient)"/><path d="M51 82c16 0 28-12 28-28 0-17-13-30-30-30-12 0-22 7-27 17l13 7c3-6 8-10 15-10 9 0 16 7 16 16s-7 16-16 16c-7 0-12-4-15-10l-13 7c6 10 16 15 29 15Z" fill="url(#logoGradient)"/></svg></div>
+    <div class="logo" aria-label="Fishki"><svg class="logoFish" viewBox="0 0 120 90" role="img" aria-label="Fishki fish"><defs><linearGradient id="fishGradient" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#dfd5ff"/></linearGradient></defs><path d="M85 17C68 7 42 12 28 29c-14 17-13 37 1 48 15 12 40 8 55-7l21 9-5-22c8-17 3-31-15-40Z" fill="url(#fishGradient)"/><path d="M83 17c8 10 10 26 3 42" fill="none" stroke="#b39cff" stroke-width="5" stroke-linecap="round"/><circle cx="42" cy="37" r="5" fill="#6848df"/><path d="M16 42 4 30l2 23 14-11Z" fill="#ffffff" opacity=".92"/></svg></div>
     <h1>Fishki</h1>
     <p>Train your brain daily</p>
     <div class="tapText">Tap to start</div>
@@ -1168,6 +1179,7 @@ function setView(view, saveHistory = true) {
   const btnAdd = document.getElementById("btnAdd");
   const btnAll = document.getElementById("btnAll");
   const btnSrs = document.getElementById("btnSrs");
+  top.classList.remove("homeOnly");
 
   // --- HOME (special case) ---
   if (view === "home") {
@@ -1228,6 +1240,11 @@ function setView(view, saveHistory = true) {
     btnAdd.style.display = "none";
     btnAll.style.display = "none";
     btnSrs.style.display = "none";
+  }
+
+  if (view === "flashcardFolders") {
+    btnBack.style.display = "none";
+    top.classList.add("homeOnly");
   }
 
   // --- QUESTION VIEWS ---
@@ -2662,6 +2679,85 @@ function restoreFlashcardBackup(importedFolders, importedCards) {
       };
     };
   };
+}
+
+function renderFlashcardFolders() {
+  const container = document.getElementById("flashcardFoldersList");
+  if (!container) return;
+  const allCards = cards.filter(card => !card.hidden);
+  const allDue = allCards.filter(card => normalizeSrs(card).due <= Date.now()).length;
+  const systemFolder = `
+    <button class="flashFolderCard systemFolder" onclick="openFlashcardFolder('ALL')">
+      <span class="folderGlyph">▤</span>
+      <span><b>All</b><small>${allCards.length} cards · ${allDue} due</small></span>
+      <span class="folderChevron">›</span>
+    </button>`;
+  const realFolders = flashcardFolders.map(folder => {
+    const folderCards = cards.filter(card => card.folderId === folder.id && !card.hidden);
+    const due = folderCards.filter(card => normalizeSrs(card).due <= Date.now()).length;
+    return `<div class="flashFolderRow">
+      <button class="flashFolderCard" onclick="openFlashcardFolder(${folder.id})">
+        <span class="folderGlyph">▰</span>
+        <span><b>${escapeHtml(folder.name)}</b><small>${folderCards.length} cards · ${due} due</small></span>
+        <span class="folderChevron">›</span>
+      </button>
+      <button class="folderDelete" onclick="event.stopPropagation();deleteFlashcardFolder(${folder.id})" aria-label="Delete ${escapeHtml(folder.name)}">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>`;
+  }).join("");
+  container.innerHTML = systemFolder + (realFolders || `<div class="folderEmpty">Create your first folder, for example <b>Travel</b>.</div>`);
+}
+
+function deleteFlashcardFolder(folderId) {
+  const folder = flashcardFolders.find(item => item.id === folderId);
+  if (!folder) return;
+  showConfirm(`Delete “${folder.name}”? Its flashcards will remain safely in All, without a folder.`, () => {
+    const transaction = db.transaction(["cards", "flashcardFolders"], "readwrite");
+    const cardStore = transaction.objectStore("cards");
+    const request = cardStore.getAll();
+    request.onsuccess = () => {
+      (request.result || []).forEach(card => {
+        if (card.folderId === folderId) {
+          card.folderId = null;
+          cardStore.put(card);
+        }
+      });
+      transaction.objectStore("flashcardFolders").delete(folderId);
+    };
+    transaction.oncomplete = () => {
+      activeFlashcardFolderId = "ALL";
+      loadCardsFromDB(() => loadFlashcardFolders(() => {
+        setView("flashcardFolders", false);
+        renderFlashcardFolders();
+        showPopup("Folder deleted. Its flashcards are still available in All.");
+      }));
+    };
+  });
+}
+
+function renderList() {
+  const list = document.getElementById("wordsList");
+  const searchBox = document.getElementById("searchBox");
+  if (!list || !searchBox) return;
+  const search = searchBox.value.trim().toLowerCase();
+  let result = cardsInActiveFolder(true);
+  if (search) result = result.filter(card => card.front.toLowerCase().includes(search) || card.back.toLowerCase().includes(search));
+  if (sortAZ) result.sort((a, b) => a.front.localeCompare(b.front, "pl"));
+  document.getElementById("listTitle").innerText = activeFolderName();
+  const due = cardsInActiveFolder().filter(card => normalizeSrs(card).due <= Date.now()).length;
+  document.getElementById("listMeta").innerText = result.length + " cards · " + due + " due now";
+  const editIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20H20M14 4L20 10L8 22H2V16L14 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const trashIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const eyeIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12C5 7 9 5 12 5C15 5 19 7 22 12C19 17 15 19 12 19C9 19 5 17 2 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>`;
+  const eyeOffIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 3L21 21M10.6 5.2A10.3 10.3 0 0 1 12 5C15 5 19 7 22 12A19.2 19.2 0 0 1 17.7 17M6.3 6.3A19.3 19.3 0 0 0 2 12C5 17 9 19 12 19C12.5 19 13 19 13.5 18.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9.8 9.8A3 3 0 0 0 14.2 14.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  list.innerHTML = result.length ? result.map(card => {
+    const index = cards.findIndex(item => item.id === card.id);
+    const srs = normalizeSrs(card);
+    const status = card.hidden ? "Hidden" : srs.state === "new" ? "New" : srs.state === "learning" || srs.state === "relearning" ? "Learning" : "Review";
+    const hideLabel = card.hidden ? "Show card" : "Hide card";
+    return `<div class="listItem"><div class="text"><b>${nl2br(card.front)}</b><br><span>${nl2br(card.back)}</span><small class="srsPill">${status}</small></div><div class="cardActions"><button class="actionBtn editAction" onclick="editCard(${index})" aria-label="Edit">${editIcon}</button><button class="actionBtn hideAction" onclick="toggleHidden(${card.id})" aria-label="${hideLabel}">${card.hidden ? eyeOffIcon : eyeIcon}</button><button class="actionBtn deleteAction" onclick="deleteCard(${index})" aria-label="Delete">${trashIcon}</button></div></div>`;
+  }).join("") : `<div class="folderEmpty">No cards here yet. Use the + button above to add one.</div>`;
 }
 
 function bootstrapFlashcardSystem() {
