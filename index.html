@@ -869,6 +869,18 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
   </div>
 
   <!-- GRAMMAR LIST -->
+  <div id="grammarFolders" class="view">
+    <div class="viewHeading">
+      <div>
+        <p class="eyebrow">GRAMMAR</p>
+        <h3>Grammar folders</h3>
+        <p class="viewHint">Organize grammar topics into your own learning sets.</p>
+      </div>
+    </div>
+    <div id="grammarFoldersList"></div>
+    <button class="primary" onclick="openGrammarFolderPopup()">＋ New folder</button>
+  </div>
+
   <div id="grammarList" class="view">
     <h3>Grammar</h3>
     <div id="grammarItems"></div>
@@ -1001,6 +1013,17 @@ h3{color:#28166d;font-size:21px;letter-spacing:-.3px}.listItem{padding:13px;bord
   </div>
 </div>
 
+<div id="grammarFolderPopup" class="modal-backdrop">
+  <div class="modal">
+    <h3>New grammar folder</h3>
+    <input id="grammarFolderNameInput" placeholder="e.g. Verb forms" />
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="secondary" onclick="closeGrammarFolderPopup()">Cancel</button>
+      <button class="primary" onclick="saveGrammarFolder()">Create folder</button>
+    </div>
+  </div>
+</div>
+
 <div id="confirmPopup" class="modal-backdrop">
   <div class="modal">
     <h3 id="confirmText">Are you sure?</h3>
@@ -1062,7 +1085,7 @@ let editingIndex = null;
 /* ======================================================
    INDEXEDDB INIT
 ====================================================== */
-const dbRequest = indexedDB.open("FlashcardsDB", 6);
+const dbRequest = indexedDB.open("FlashcardsDB", 7);
 
 dbRequest.onupgradeneeded = function(event) {
   db = event.target.result;
@@ -1081,6 +1104,9 @@ dbRequest.onupgradeneeded = function(event) {
   }
   if (!db.objectStoreNames.contains("flashcardFolders")) {
     db.createObjectStore("flashcardFolders", { keyPath: "id", autoIncrement: true });
+  }
+  if (!db.objectStoreNames.contains("grammarFolders")) {
+    db.createObjectStore("grammarFolders", { keyPath: "id", autoIncrement: true });
   }
 };
 
@@ -1117,6 +1143,7 @@ const viewLevels = {
   home: 0,
   homeStudy: 1,
   flashcardFolders: 1,
+  grammarFolders: 1,
   questions: 1,
   grammarStudy: 1,
   list: 2,
@@ -1246,9 +1273,15 @@ function setView(view, saveHistory = true) {
     btnSrs.style.display = "none";
   }
 
-  if (["flashcardFolders", "questions"].includes(view)) {
+  if (["flashcardFolders", "questions", "grammarFolders", "settings"].includes(view)) {
     btnBack.style.display = "none";
     top.classList.add("homeOnly");
+  }
+
+  if (view === "grammarFolders") {
+    top.style.display = "flex";
+    btnHome.style.display = "flex";
+    btnHome.onclick = goHome;
   }
 
   // --- QUESTION VIEWS ---
@@ -1287,6 +1320,12 @@ function setView(view, saveHistory = true) {
       setView("grammarStudy");
       renderGrammarCard();
     };
+  }
+
+  // Root folder views always expose only the compact Home action.
+  if (["flashcardFolders", "questions", "grammarFolders", "settings"].includes(view)) {
+    btnBack.style.display = "none";
+    top.classList.add("homeOnly");
   }
 
   refreshUI();
@@ -2195,6 +2234,10 @@ function exportGrammar() {
 
 document.getElementById("importGrammar").addEventListener("change", function(e) {
   const file = e.target.files[0]; if (!file) return;
+  if (typeof importGrammarBackup === "function") {
+    importGrammarBackup(file);
+    return;
+  }
   const reader = new FileReader();
   reader.onload = ev => {
     let data; try { data = JSON.parse(ev.target.result); } catch { showPopup("Invalid file"); return; }
@@ -2496,7 +2539,7 @@ function renderFlashcardFolders() {
   const allDue = cards.filter(card => !card.hidden && normalizeSrs(card).due <= Date.now()).length;
   const systemFolder = `
     <button class="flashFolderCard systemFolder" onclick="openFlashcardFolder('ALL')">
-      <span class="folderGlyph">▤</span>
+      <span class="folderGlyph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5C3 6.7 3.7 6 4.5 6H10L12 8H19.5C20.3 8 21 8.7 21 9.5V18.5C21 19.3 20.3 20 19.5 20H4.5C3.7 20 3 19.3 3 18.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
       <span><b>All</b><small>${allCount} cards · ${allDue} due</small></span>
       <span class="folderChevron">›</span>
     </button>`;
@@ -2692,7 +2735,7 @@ function renderFlashcardFolders() {
   const allDue = allCards.filter(card => normalizeSrs(card).due <= Date.now()).length;
   const systemFolder = `
     <button class="flashFolderCard systemFolder" onclick="openFlashcardFolder('ALL')">
-      <span class="folderGlyph">▤</span>
+      <span class="folderGlyph"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5C3 6.7 3.7 6 4.5 6H10L12 8H19.5C20.3 8 21 8.7 21 9.5V18.5C21 19.3 20.3 20 19.5 20H4.5C3.7 20 3 19.3 3 18.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
       <span><b>All</b><small>${allCards.length} cards · ${allDue} due</small></span>
       <span class="folderChevron">›</span>
     </button>`;
@@ -2799,6 +2842,302 @@ function renderFolders() {
       </div>`;
     }).join("") : `<div class="folderEmpty">Create your first question folder.</div>`;
   });
+}
+</script>
+<script>
+/* Grammar folders: All means only grammar imported without a folder. */
+let grammarFolders = [];
+let activeGrammarFolderId = "ALL";
+
+function loadGrammarFolders(callback) {
+  if (!db || !db.objectStoreNames.contains("grammarFolders")) return;
+  const request = db.transaction("grammarFolders", "readonly").objectStore("grammarFolders").getAll();
+  request.onsuccess = () => {
+    grammarFolders = (request.result || []).sort((a, b) => a.name.localeCompare(b.name, "pl"));
+    if (typeof callback === "function") callback(grammarFolders);
+  };
+}
+
+function getAllGrammar(callback) {
+  if (!db) return;
+  const request = db.transaction("grammar", "readonly").objectStore("grammar").getAll();
+  request.onsuccess = () => callback(request.result || []);
+}
+
+function grammarFolderName() {
+  if (activeGrammarFolderId === "ALL") return "All";
+  return grammarFolders.find(folder => folder.id === activeGrammarFolderId)?.name || "Grammar";
+}
+
+function openGrammar() { openGrammarFolders(); }
+
+function openGrammarFolders() {
+  activeGrammarFolderId = "ALL";
+  getAllGrammar(allGrammar => loadGrammarFolders(() => {
+    setView("grammarFolders");
+    renderGrammarFolders(allGrammar);
+  }));
+}
+
+function renderGrammarFolders(allGrammar) {
+  const container = document.getElementById("grammarFoldersList");
+  if (!container) return;
+  const unfiled = allGrammar.filter(card => !card.folderId);
+  const folderIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5C3 6.7 3.7 6 4.5 6H10L12 8H19.5C20.3 8 21 8.7 21 9.5V18.5C21 19.3 20.3 20 19.5 20H4.5C3.7 20 3 19.3 3 18.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+  const trashIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const system = `<button class="flashFolderCard systemFolder" onclick="openGrammarFolder('ALL')"><span class="folderGlyph">${folderIcon}</span><span><b>All</b><small>All exported cards (no folder) · ${unfiled.length} cards</small></span><span class="folderChevron">›</span></button>`;
+  const folders = grammarFolders.map(folder => {
+    const count = allGrammar.filter(card => card.folderId === folder.id).length;
+    return `<div class="flashFolderRow"><button class="flashFolderCard" onclick="openGrammarFolder(${folder.id})"><span class="folderGlyph">${folderIcon}</span><span><b>${escapeHtml(folder.name)}</b><small>${count} cards</small></span><span class="folderChevron">›</span></button><button class="folderDelete" onclick="event.stopPropagation();deleteGrammarFolder(${folder.id})" aria-label="Delete ${escapeHtml(folder.name)}">${trashIcon}</button></div>`;
+  }).join("");
+  container.innerHTML = system + (folders || `<div class="folderEmpty">Create a grammar folder, for example <b>Verb forms</b>.</div>`);
+}
+
+function openGrammarFolder(id) {
+  activeGrammarFolderId = id;
+  setView("grammarList");
+  loadGrammarFromDB();
+}
+
+function loadGrammarFromDB(callback) {
+  if (!db) { showPopup("Database is not ready."); return; }
+  getAllGrammar(allGrammar => {
+    grammarCards = activeGrammarFolderId === "ALL"
+      ? allGrammar.filter(card => !card.folderId)
+      : allGrammar.filter(card => card.folderId === activeGrammarFolderId);
+    if (grammarCards.length === 0) grammarIndex = 0;
+    else if (grammarIndex >= grammarCards.length) grammarIndex = 0;
+    renderGrammar();
+    if (document.getElementById("grammarStudy")?.classList.contains("active")) {
+      grammarStep = 0;
+      renderGrammarCard();
+    }
+    updateGrammarStats();
+    if (typeof callback === "function") callback(grammarCards);
+  });
+}
+
+function renderGrammar() {
+  const title = document.querySelector("#grammarList h3");
+  if (title) title.innerText = grammarFolderName();
+  const container = document.getElementById("grammarItems");
+  const playIcon = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5L19 12L8 19V5Z"/></svg>`;
+  const editIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20H20M14 4L20 10L8 22H2V16L14 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const trashIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  container.innerHTML = grammarCards.length ? grammarCards.map(grammar => `<div class="listItem"><div class="text"><b>${escapeHtml(grammar.title)}</b></div><div class="cardActions"><button class="actionBtn hideAction" onclick="studyGrammar(${grammar.id})" aria-label="Study">${playIcon}</button><button class="actionBtn editAction" onclick="editGrammar(${grammar.id})" aria-label="Edit">${editIcon}</button><button class="actionBtn deleteAction" onclick="deleteGrammar(${grammar.id})" aria-label="Delete">${trashIcon}</button></div></div>`).join("") : `<div class="folderEmpty">No grammar topics in this folder yet.</div>`;
+}
+
+function saveGrammar() {
+  if (!db) { showPopup("Database is not ready."); return; }
+  const title = document.getElementById("gTitle").value.trim();
+  if (!title) { showPopup("Enter a topic."); return; }
+  const data = {
+    title,
+    explanation: document.getElementById("gExplanation").value,
+    structure: document.getElementById("gStructure").value,
+    usage: document.getElementById("gUsage").value,
+    examples: document.getElementById("gExamples").value,
+    practice: document.getElementById("gPractice").value,
+    mistakes: document.getElementById("gMistakes").value,
+    folderId: activeGrammarFolderId === "ALL" ? null : activeGrammarFolderId
+  };
+  const transaction = db.transaction("grammar", "readwrite");
+  const store = transaction.objectStore("grammar");
+  if (editingGrammarId) { data.id = editingGrammarId; store.put(data); }
+  else store.add(data);
+  transaction.oncomplete = () => {
+    ["gTitle", "gExplanation", "gStructure", "gUsage", "gExamples", "gPractice", "gMistakes"].forEach(id => document.getElementById(id).value = "");
+    editingGrammarId = null;
+    setView("grammarList", false);
+    loadGrammarFromDB();
+  };
+}
+
+function editGrammar(id) {
+  getAllGrammar(allGrammar => {
+    const grammar = allGrammar.find(item => item.id === id);
+    if (!grammar) return;
+    editingGrammarId = id;
+    document.getElementById("gTitle").value = grammar.title || "";
+    document.getElementById("gExplanation").value = grammar.explanation || "";
+    document.getElementById("gStructure").value = grammar.structure || "";
+    document.getElementById("gUsage").value = grammar.usage || "";
+    document.getElementById("gExamples").value = grammar.examples || "";
+    document.getElementById("gPractice").value = grammar.practice || "";
+    document.getElementById("gMistakes").value = grammar.mistakes || "";
+    setView("addGrammar");
+  });
+}
+
+function openGrammarFolderPopup() {
+  document.getElementById("grammarFolderNameInput").value = "";
+  document.getElementById("grammarFolderPopup").classList.add("show");
+  document.getElementById("grammarFolderNameInput").focus();
+}
+function closeGrammarFolderPopup() { document.getElementById("grammarFolderPopup").classList.remove("show"); }
+function saveGrammarFolder() {
+  const name = document.getElementById("grammarFolderNameInput").value.trim();
+  if (!name) { showPopup("Enter a folder name."); return; }
+  if (grammarFolders.some(folder => folder.name.toLocaleLowerCase() === name.toLocaleLowerCase())) { showPopup("This folder already exists."); return; }
+  const request = db.transaction("grammarFolders", "readwrite").objectStore("grammarFolders").add({ name, createdAt: Date.now() });
+  request.onsuccess = () => {
+    closeGrammarFolderPopup();
+    activeGrammarFolderId = request.result;
+    loadGrammarFolders(() => openGrammarFolder(activeGrammarFolderId));
+  };
+}
+
+function deleteGrammarFolder(folderId) {
+  const folder = grammarFolders.find(item => item.id === folderId);
+  if (!folder) return;
+  showConfirm(`Delete “${folder.name}”? Topics will remain in All without a folder.`, () => {
+    const transaction = db.transaction(["grammar", "grammarFolders"], "readwrite");
+    const grammarStore = transaction.objectStore("grammar");
+    const request = grammarStore.getAll();
+    request.onsuccess = () => {
+      (request.result || []).forEach(topic => {
+        if (topic.folderId === folderId) { topic.folderId = null; grammarStore.put(topic); }
+      });
+      transaction.objectStore("grammarFolders").delete(folderId);
+    };
+    transaction.oncomplete = () => openGrammarFolders();
+  });
+}
+
+function exportGrammar() {
+  getAllGrammar(allGrammar => {
+    const request = db.transaction("grammarFolders", "readonly").objectStore("grammarFolders").getAll();
+    request.onsuccess = () => {
+      const blob = new Blob([JSON.stringify({ version: 2, folders: request.result || [], cards: allGrammar })], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "grammar-backup.json";
+      link.click();
+      URL.revokeObjectURL(link.href);
+    };
+  });
+}
+
+function importGrammarBackup(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = event => {
+    let data;
+    try { data = JSON.parse(event.target.result); } catch { showPopup("This is not a valid grammar backup."); return; }
+    const topics = Array.isArray(data) ? data : (data.cards || []);
+    const folders = Array.isArray(data) ? [] : (data.folders || []);
+    if (!Array.isArray(topics)) { showPopup("This backup contains no grammar topics."); return; }
+    showConfirm("Replace current grammar topics and folders with this backup?", () => restoreGrammarBackup(folders, topics));
+  };
+  reader.readAsText(file);
+}
+
+function restoreGrammarBackup(folders, topics) {
+  const idMap = {};
+  const clear = db.transaction(["grammar", "grammarFolders"], "readwrite");
+  clear.objectStore("grammar").clear();
+  clear.objectStore("grammarFolders").clear();
+  clear.oncomplete = () => {
+    const folderTx = db.transaction("grammarFolders", "readwrite");
+    const folderStore = folderTx.objectStore("grammarFolders");
+    folders.forEach(folder => {
+      const request = folderStore.add({ name: folder.name || "Untitled folder", createdAt: folder.createdAt || Date.now() });
+      request.onsuccess = () => { idMap[folder.id] = request.result; };
+    });
+    folderTx.oncomplete = () => {
+      const topicTx = db.transaction("grammar", "readwrite");
+      const topicStore = topicTx.objectStore("grammar");
+      topics.forEach(source => {
+        const topic = { ...source, folderId: idMap[source.folderId] || null };
+        delete topic.id;
+        topicStore.add(topic);
+      });
+      topicTx.oncomplete = () => openGrammarFolders();
+    };
+  };
+}
+</script>
+<script>
+/* Questions also have a virtual All folder. */
+let editingQuestionOriginalFolderId = null;
+
+function renderFolders() {
+  const container = document.getElementById("questionFolders");
+  if (!container || !db) return;
+  const folderRequest = db.transaction("questionFolders", "readonly").objectStore("questionFolders").getAll();
+  const questionRequest = db.transaction("questions", "readonly").objectStore("questions").getAll();
+  Promise.all([
+    new Promise(resolve => folderRequest.onsuccess = () => resolve(folderRequest.result || [])),
+    new Promise(resolve => questionRequest.onsuccess = () => resolve(questionRequest.result || []))
+  ]).then(([folders, questions]) => {
+    const folderIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5C3 6.7 3.7 6 4.5 6H10L12 8H19.5C20.3 8 21 8.7 21 9.5V18.5C21 19.3 20.3 20 19.5 20H4.5C3.7 20 3 19.3 3 18.5V7.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+    const trashIcon = `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7H20M9 7V4H15V7M7 7L8 20H16L17 7M10 11V17M14 11V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    const allFolder = `<button class="flashFolderCard systemFolder" onclick="openFolder('ALL')"><span class="folderGlyph">${folderIcon}</span><span><b>All</b><small>${questions.length} questions</small></span><span class="folderChevron">›</span></button>`;
+    const realFolders = folders.map(folder => {
+      const count = questions.filter(question => question.folderId === folder.id).length;
+      return `<div class="flashFolderRow"><button class="flashFolderCard" onclick="openFolder(${folder.id})"><span class="folderGlyph">${folderIcon}</span><span><b>${escapeHtml(folder.name)}</b><small>${count} questions</small></span><span class="folderChevron">›</span></button><button class="folderDelete" onclick="event.stopPropagation();deleteFolder(${folder.id})" aria-label="Delete ${escapeHtml(folder.name)}">${trashIcon}</button></div>`;
+    }).join("");
+    container.innerHTML = allFolder + (realFolders || `<div class="folderEmpty">Create your first question folder.</div>`);
+  });
+}
+
+function openQuestionCards() {
+  setView("questionCards");
+  const request = db.transaction("questions", "readonly").objectStore("questions").getAll();
+  request.onsuccess = () => {
+    questionCards = (request.result || []).filter(question => currentFolderId === "ALL" || question.folderId === currentFolderId);
+    questionIndex = 0;
+    questionAnswerVisible = false;
+    renderQuestionCard();
+  };
+}
+
+function renderQuestionList() {
+  const container = document.getElementById("questionList");
+  container.innerHTML = "";
+  const request = db.transaction("questions", "readonly").objectStore("questions").getAll();
+  request.onsuccess = () => {
+    const questions = (request.result || []).filter(question => currentFolderId === "ALL" || question.folderId === currentFolderId);
+    container.innerHTML = questions.length ? questions.map(question => `<div class="listItem"><div class="text"><b>${escapeHtml(question.question)}</b></div></div>`).join("") : `<div class="folderEmpty">No questions in this folder yet.</div>`;
+  };
+}
+
+function goToAddQuestion() {
+  if (currentFolderId === "ALL") { showPopup("Open a real folder before adding a question."); return; }
+  setView("addQuestion");
+}
+
+function saveQuestion() {
+  const question = document.getElementById("questionInput").value.trim();
+  const answer = document.getElementById("answerInput").value.trim();
+  if (!question || !answer) { showPopup("Fill in all fields."); return; }
+  const folderId = editingQuestionId ? editingQuestionOriginalFolderId : currentFolderId;
+  if (!folderId || folderId === "ALL") { showPopup("Choose a real folder first."); return; }
+  const transaction = db.transaction("questions", "readwrite");
+  const store = transaction.objectStore("questions");
+  if (editingQuestionId) store.put({ id: editingQuestionId, folderId, question, answer });
+  else store.add({ folderId, question, answer });
+  transaction.oncomplete = () => {
+    document.getElementById("questionInput").value = "";
+    document.getElementById("answerInput").value = "";
+    editingQuestionId = null;
+    editingQuestionOriginalFolderId = null;
+    renderQuestionList();
+    renderFolders();
+  };
+}
+
+function editQuestion(id) {
+  const request = db.transaction("questions", "readonly").objectStore("questions").get(id);
+  request.onsuccess = () => {
+    const question = request.result;
+    if (!question) return;
+    editingQuestionId = id;
+    editingQuestionOriginalFolderId = question.folderId;
+    document.getElementById("questionInput").value = question.question;
+    document.getElementById("answerInput").value = question.answer;
+    setView("addQuestion");
+  };
 }
 </script>
 </body>
